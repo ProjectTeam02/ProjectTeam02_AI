@@ -1,12 +1,58 @@
-from collections.abc import AsyncGenerator
+import secrets
+
+from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
+from app.db.postgres import get_session
+from app.db.repositories.conversation_repository import ConversationRepository
+from app.db.repositories.memory_repository import MemoryRepository
+from app.rag.generation.answer_generator import AnswerGenerator
+from app.rag.llamaindex.llm_factory import LLMFactory
+from app.rag.llamaindex.retriever import LlamaIndexRetriever
+from app.rag.memory.context_builder import ContextBuilder
+from app.rag.memory.history_manager import HistoryManager
+from app.rag.pipelines.multiturn_rag import MultiTurnRAG
+from app.rag.query.query_rewriter import QueryRewriter
+from app.rag.retrieval.retriever import Retriever
+from app.services.memory_service import MemoryService
+from app.services.tutor_service import TutorService
 
 
 def settings() -> Settings:
     return get_settings()
 
 
-async def get_current_user_id() -> AsyncGenerator[str, None]:
-    # TODO: replace with JWT validation.
-    yield "development-user"
+async def get_current_user_id(
+    x_internal_api_key: str | None = Header(default=None),
+    x_user_id: str | None = Header(default=None),
+    authorization: str | None = Header(default=None),
+) -> str:
+    configured_token = get_settings().internal_api_token
+    supplied_token = x_internal_api_key
+    if not supplied_token and authorization and authorization.lower().startswith("bearer "):
+        supplied_token = authorization[7:].strip()
+    if not configured_token or not supplied_token or not secrets.compare_digest(supplied_token, configured_token):
+        raise HTTPException(status_code=401, detail="valid internal authentication is required")
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="X-User-ID is required")
+    return x_user_id
+
+
+async def get_tutor_service(session=Depends(get_session)) -> TutorService:
+    settings_value = get_settings()
+    llm = LLMFactory(settings_value).create()
+    history = HistoryManager(
+        ConversationRepository(session), max_messages=settings_value.history_max_messages
+    )
+    pipeline = MultiTurnRAG(
+        history_manager=history,
+        query_rewriter=QueryRewriter(llm, settings_value.llm_timeout_seconds),
+        retriever=Retriever(LlamaIndexRetriever(settings=settings_value), settings_value.retrieval_top_k),
+        context_builder=ContextBuilder(settings_value.context_max_tokens),
+        answer_generator=AnswerGenerator(llm, settings_value),
+    )
+    return TutorService(pipeline)
+
+
+async def get_memory_service(session=Depends(get_session)) -> MemoryService:
+    return MemoryService(MemoryRepository(session))
