@@ -12,30 +12,37 @@ from pathlib import Path
 
 from app.db.postgres import session_factory
 from app.db.repositories.rag_repository import RAGDocumentRepository
-from app.rag.llamaindex.indexer import DocumentIndexer, IngestDocument
+from app.ingestion.document_loader import discover_documents, load_manifest
+from app.rag.llamaindex.indexer import DocumentIndexer
 
 
-def discover_documents(root: Path, source: str, version: str | None) -> list[IngestDocument]:
-    documents = []
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in {".txt", ".md"}:
-            continue
-        content = path.read_text(encoding="utf-8").strip()
-        if content:
-            documents.append(
-                IngestDocument(
-                    document_id=path.relative_to(root).as_posix(),
-                    title=path.stem,
-                    source=source,
-                    content=content,
-                    version=version,
-                )
-            )
-    return documents
-
-
-async def run(path: Path, source: str, version: str | None) -> int:
-    documents = discover_documents(path, source, version)
+async def run(
+    path: Path,
+    source: str,
+    version: str | None,
+    manifest: Path | None = None,
+    review_status: str = "draft",
+    source_id: str | None = None,
+    source_url: str | None = None,
+    license_name: str | None = None,
+    concept_id: str | None = None,
+    stage_id: str | None = None,
+) -> int:
+    documents = (
+        load_manifest(manifest)
+        if manifest
+        else discover_documents(
+            path,
+            source,
+            version,
+            review_status,
+            source_id,
+            source_url,
+            license_name,
+            concept_id,
+            stage_id,
+        )
+    )
     if not documents:
         print(f"No approved .txt/.md documents found under {path}")
         return 0
@@ -51,8 +58,28 @@ def main() -> None:
     parser.add_argument("--path", type=Path, default=Path("data"))
     parser.add_argument("--source", default="approved-learning-material")
     parser.add_argument("--version", default=None)
+    parser.add_argument("--manifest", type=Path, default=None)
+    parser.add_argument("--review-status", default="draft")
+    parser.add_argument("--source-id", default=None)
+    parser.add_argument("--source-url", default=None)
+    parser.add_argument("--license", dest="license_name", default=None)
+    parser.add_argument("--concept-id", default=None)
+    parser.add_argument("--stage-id", default=None)
     args = parser.parse_args()
-    asyncio.run(run(args.path, args.source, args.version))
+    asyncio.run(
+        run(
+            args.path,
+            args.source,
+            args.version,
+            manifest=args.manifest,
+            review_status=args.review_status,
+            source_id=args.source_id,
+            source_url=args.source_url,
+            license_name=args.license_name,
+            concept_id=args.concept_id,
+            stage_id=args.stage_id,
+        )
+    )
 
 
 if __name__ == "__main__":

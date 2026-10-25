@@ -6,6 +6,7 @@ import math
 from llama_index.core.embeddings import BaseEmbedding
 
 from app.core.config import Settings, get_settings
+from app.core.exceptions import ConfigurationError
 
 
 class DeterministicEmbedding(BaseEmbedding):
@@ -37,7 +38,18 @@ class EmbeddingModelFactory:
         self.settings = settings or get_settings()
 
     def create(self):
-        if self.settings.openai_api_key:
+        if self.settings.embedding_provider == "deterministic":
+            return DeterministicEmbedding(
+                model_name="deterministic-local",
+                dimension=self.settings.embedding_dimension,
+            )
+        if self.settings.embedding_provider == "openai":
+            if not self.settings.openai_api_key:
+                raise ConfigurationError(
+                    "OPENAI_API_KEY is required when EMBEDDING_PROVIDER=openai. "
+                    "Use EMBEDDING_PROVIDER=deterministic only for explicit "
+                    "local tests."
+                )
             from llama_index.embeddings.openai import OpenAIEmbedding
 
             return OpenAIEmbedding(
@@ -47,7 +59,6 @@ class EmbeddingModelFactory:
                 dimensions=self.settings.embedding_dimension,
                 timeout=self.settings.llm_timeout_seconds,
             )
-        return DeterministicEmbedding(
-            model_name="deterministic-local",
-            dimension=self.settings.embedding_dimension,
+        raise ConfigurationError(
+            f"unsupported embedding provider: {self.settings.embedding_provider!r}"
         )

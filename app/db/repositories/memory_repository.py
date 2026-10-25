@@ -23,7 +23,9 @@ class MemoryRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, user_id: str, content: str, source: str | None = None) -> MemoryRecord:
+    async def create(
+        self, user_id: str, content: str, source: str | None = None
+    ) -> MemoryRecord:
         memory = AIUserMemory(user_id=user_id, content=content, source=source)
         self.session.add(memory)
         await self.session.commit()
@@ -55,8 +57,12 @@ class InMemoryMemoryRepository:
     def __init__(self) -> None:
         self._items: list[MemoryRecord] = []
 
-    async def create(self, user_id: str, content: str, source: str | None = None) -> MemoryRecord:
-        record = MemoryRecord(str(uuid.uuid4()), user_id, content, source, datetime.now().astimezone())
+    async def create(
+        self, user_id: str, content: str, source: str | None = None
+    ) -> MemoryRecord:
+        record = MemoryRecord(
+            str(uuid.uuid4()), user_id, content, source, datetime.now().astimezone()
+        )
         self._items.append(record)
         return record
 

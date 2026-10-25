@@ -6,7 +6,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.dependencies import get_current_user_id, get_tutor_service
-from app.core.exceptions import ConversationAccessError, ConversationNotFoundError, GenerationError
+from app.core.exceptions import (
+    ConversationAccessError,
+    ConversationNotFoundError,
+    GenerationError,
+)
 from app.main import app
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.memory.context_builder import ContextBuilder
@@ -37,16 +41,23 @@ class FakeAnswerGenerator:
 
 def build_pipeline(generator=None, documents=None):
     history = HistoryManager()
-    documents = documents if documents is not None else [
-        RetrievedDocument(
-            content="GDP는 일정 기간 한 나라 안에서 생산된 최종 재화와 서비스의 가치입니다.",
-            source="approved-fixture",
-            document_id="finance-1",
-            chunk_id="chunk-1",
-            title="GDP 기초",
-            version="test",
-        )
-    ]
+    documents = (
+        documents
+        if documents is not None
+        else [
+            RetrievedDocument(
+                content=(
+                    "GDP는 일정 기간 한 나라 안에서 생산된 "
+                    "최종 재화와 서비스의 가치입니다."
+                ),
+                source="approved-fixture",
+                document_id="finance-1",
+                chunk_id="chunk-1",
+                title="GDP 기초",
+                version="test",
+            )
+        ]
+    )
     return MultiTurnRAG(
         history_manager=history,
         retriever=Retriever(InMemoryRetriever(documents), top_k=5),
@@ -59,13 +70,20 @@ async def test_first_and_follow_up_questions_keep_conversation_and_rewrite():
     pipeline = build_pipeline()
 
     first = await pipeline.run("user-1", "GDP가 뭐야?")
-    second = await pipeline.run("user-1", "그럼 GDP가 증가하면 무조건 좋은 거야?", first.conversation_id)
+    second = await pipeline.run(
+        "user-1", "그럼 GDP가 증가하면 무조건 좋은 거야?", first.conversation_id
+    )
 
     assert first.conversation_id
     assert second.conversation_id == first.conversation_id
     assert "GDP" in second.rewritten_query
     history = await pipeline.history_manager.load(first.conversation_id, "user-1")
-    assert [item.role for item in history.messages] == ["user", "assistant", "user", "assistant"]
+    assert [item.role for item in history.messages] == [
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+    ]
     assert second.citations[0].document_id == "finance-1"
 
 

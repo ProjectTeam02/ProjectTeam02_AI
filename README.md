@@ -1,45 +1,83 @@
 # Leren AI Tutor — Multi-turn RAG MVP
 
-FastAPI 기반 경제·금융 학습 튜터입니다. 대화 세션/메시지는 PostgreSQL에 저장하고, 승인된 학습자료는 LlamaIndex와 PostgreSQL pgvector로 chunking·embedding·검색합니다.
+FastAPI, LlamaIndex, PostgreSQL/pgvector 기반 경제·금융 튜터입니다. 같은
+`conversationId`의 최근 대화를 사용해 후속 질문을 검색용 독립 질문으로 바꾸고,
+`approved` 문서만 검색하여 답변·실제 citation·보수적인 `grounded` 값을 반환합니다.
 
-## 실행
+## 빠른 시작
+
+Python 3.12가 필요합니다. 현재 프로젝트의 가상환경이 다른 버전이면 재사용하지 말고
+PyCharm에서 Python 3.12 인터프리터로 새 `.venv`를 만드세요.
 
 ```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -U pip
+.venv/bin/python -m pip install -r requirements-dev.txt
 cp .env.example .env
-# .env의 INTERNAL_API_TOKEN과 필요하면 OPENAI_API_KEY를 설정
-python -m pip install -r requirements-dev.txt
-python -m uvicorn main:app --reload
-python -m pytest -q
 ```
 
-로컬 PostgreSQL을 쓰면 `DATABASE_URL`의 호스트는 `localhost`, Docker Compose 안에서는 `db`여야 합니다.
+Docker Compose의 PostgreSQL은 호스트 `localhost:5433`에 노출됩니다. AI 컨테이너
+안에서는 compose가 `db:5432`를 주입합니다.
 
 ```bash
-docker compose up --build
+docker compose up -d db
+for migration in migrations/*.sql; do
+  docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d leren < "$migration"
+done
+docker compose up -d ai
 ```
 
-DB 마이그레이션은 `migrations/001...003`을 순서대로 실행합니다. 프로젝트는 마이그레이션 실행기를 임의로 포함하지 않으므로 PostgreSQL 클라이언트나 운영 마이그레이션 도구로 적용하세요.
-
-## 문서 인덱싱
-
-검증·승인된 `.txt` 또는 `.md` 파일만 `data/`에 넣고 실행합니다. 저장소에는 실제 금융 원천자료를 임의로 추가하지 않았습니다.
+호스트/PyCharm 실행:
 
 ```bash
-python scripts/ingest_documents.py --path data --source official-material --version 2026-01
+.venv/bin/python -m uvicorn main:app --reload
+.venv/bin/python -m pytest -q
+.venv/bin/python -m ruff check .
 ```
 
-`OPENAI_API_KEY`가 있으면 설정된 OpenAI 호환 embedding/LLM을 사용하고, 키가 없으면 인덱싱에는 결정적 로컬 embedding, 답변에는 근거 부족을 알리는 오프라인 fallback을 사용합니다. 실제 서비스 품질 검증에는 운영 모델과 승인된 자료가 필요합니다.
+`OPENAI_API_KEY`가 없어도 import, `/health`, mock 테스트는 동작합니다. API 없이
+로컬 pgvector E2E를 명시적으로 시험하려면 `.env`에
+`EMBEDDING_PROVIDER=deterministic`, `LLM_PROVIDER=offline`을 설정합니다. 이 모드는
+품질 평가나 운영용이 아닙니다. `EMBEDDING_PROVIDER=openai`인데 키가 없으면
+인덱싱/검색은 성공으로 위장하지 않고 503/설정 오류를 반환합니다.
 
-## API
+## 승인 문서 인덱싱
 
-`POST /api/tutor/chat`는 `X-Internal-API-Key`와 `X-User-ID` 헤더를 요구합니다. 본문의 `user_id`가 인증된 사용자와 다르면 거부합니다.
+네트워크 수집은 자동 실행하지 않습니다. 자료의 접근 권한·라이선스·갱신 주기와
+내용 검수를 먼저 완료한 뒤 로컬 manifest를 사용합니다.
 
-```json
-{
-  "user_id": "user-001",
-  "conversation_id": null,
-  "message": "GDP가 뭐야?"
-}
+```bash
+.venv/bin/python -m scripts.ingest_documents --manifest data/manifest.json
 ```
 
-후속 요청에 첫 응답의 `conversation_id`를 전달하면 같은 대화를 이어갑니다. `GET /api/memory/{user_id}`도 같은 서버 간 인증 경계를 사용합니다. Node.js 백엔드가 JWT를 확정하면 `get_current_user_id` 내부를 JWT 검증기로 교체하고 서비스 계층은 그대로 유지할 수 있습니다.
+manifest 형식은 [docs/source-manifest.example.json](docs/source-manifest.example.json)을
+참고하세요. `review_status`가 설정의 `APPROVED_REVIEW_STATUS`와 다르면 전체 실행이
+실패합니다. 같은 본문은 SHA-256 `content_hash`로 중복 적재하지 않으며, 문서가
+바뀌면 새 청크를 저장하고 이전 vector node를 제거합니다. 컬렉션에 기록된 embedding
+provider/model/dimension이 현재 설정과 다르면 명시적으로 재인덱싱을 요구합니다.
+
+## 내부 Tutor API
+
+Node.js만 `POST /internal/v1/tutor/answer`를 호출합니다. `X-Internal-API-Key` 또는
+Bearer token은 `.env`의 `INTERNAL_API_TOKEN`과 일치해야 합니다.
+
+```bash
+curl -X POST http://localhost:8000/internal/v1/tutor/answer \
+  -H 'Content-Type: application/json' \
+  -H 'X-Internal-API-Key: change-me' \
+  -d '{
+    "userId":"test-user-001",
+    "conversationId":null,
+    "requestId":"request-001",
+    "stageId":"stage-001",
+    "conceptId":"concept-001",
+    "question":"기준금리가 오르면 어떤 영향이 있나요?"
+  }'
+```
+
+응답의 `conversationId`를 후속 요청에 그대로 넣습니다. `requestId` 재전송은 같은
+저장 답변을 반환하고 메시지를 중복 저장하지 않습니다. `/api/tutor/chat`는 기존
+테스트 호환 경로이며 운영 앱은 Node.js 공개 API만 호출해야 합니다.
+
+상세한 데이터 흐름, migration, API 응답, 검증 범위와 협의 항목은
+[P0 구현 문서](docs/P0_IMPLEMENTATION.md)에 있습니다.

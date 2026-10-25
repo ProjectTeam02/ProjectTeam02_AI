@@ -8,10 +8,19 @@ from app.rag.llamaindex.vector_store import VectorStoreFactory
 class IndexManager:
     """Create and cache LlamaIndex indexes for a pgvector collection."""
 
-    def __init__(self, settings: Settings | None = None, vector_store_factory=None, embedding_factory=None):
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        vector_store_factory=None,
+        embedding_factory=None,
+    ):
         self.settings = settings or get_settings()
-        self.vector_store_factory = vector_store_factory or VectorStoreFactory(self.settings)
-        self.embedding_factory = embedding_factory or EmbeddingModelFactory(self.settings)
+        self.vector_store_factory = vector_store_factory or VectorStoreFactory(
+            self.settings
+        )
+        self.embedding_factory = embedding_factory or EmbeddingModelFactory(
+            self.settings
+        )
         self._indexes = {}
 
     def get_or_create(self, collection: str | None = None):

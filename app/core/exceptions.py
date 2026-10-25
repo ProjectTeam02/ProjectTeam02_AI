@@ -4,6 +4,16 @@ class AppError(Exception):
 
 class RetrievalError(AppError):
     """Raised when retrieval fails."""
+
+
+class ConfigurationError(AppError):
+    """Raised when a required provider or index setting is invalid."""
+
+
+class IndexConfigurationError(ConfigurationError):
+    """Raised when an existing vector index is incompatible with settings."""
+
+
 class ConversationNotFoundError(Exception):
     """The requested conversation does not exist."""
 

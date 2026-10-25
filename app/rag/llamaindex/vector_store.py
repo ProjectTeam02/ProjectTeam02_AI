@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from urllib.parse import urlparse
+from sqlalchemy.engine import make_url
 
 from app.core.config import Settings, get_settings
 
@@ -14,13 +14,15 @@ class VectorStoreFactory:
     def create(self, collection: str | None = None):
         from llama_index.vector_stores.postgres import PGVectorStore
 
-        parsed = urlparse(self.settings.database_url.replace("+asyncpg", ""))
-        return PGVectorStore.from_params(
-            host=parsed.hostname or "localhost",
-            port=str(parsed.port or 5432),
-            database=(parsed.path or "/leren").lstrip("/"),
-            user=parsed.username or "postgres",
-            password=parsed.password or "",
+        async_url = make_url(self.settings.database_url)
+        sync_url = async_url.set(drivername="postgresql+psycopg")
+        return PGVectorStore(
+            connection_string=sync_url,
+            async_connection_string=async_url,
             table_name=collection or self.settings.vector_store_collection,
+            schema_name=self.settings.vector_store_schema,
             embed_dim=self.settings.embedding_dimension,
+            use_jsonb=True,
+            perform_setup=True,
+            initialization_fail_on_error=True,
         )
