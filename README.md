@@ -56,6 +56,19 @@ manifest 형식은 [docs/source-manifest.example.json](docs/source-manifest.exam
 바뀌면 새 청크를 저장하고 이전 vector node를 제거합니다. 컬렉션에 기록된 embedding
 provider/model/dimension이 현재 설정과 다르면 명시적으로 재인덱싱을 요구합니다.
 
+### 한국은행 2026 경제금융용어 KB
+
+```bash
+.venv/bin/python -m scripts.ingest_documents \
+  --bok-source data/bok_terms_2026.json \
+  --bok-terms data/bok_terms_2026_rag.jsonl
+```
+
+789개 용어 중 수식·레이아웃 재검토가 필요한 29개는 `needs_review`로
+유지하고 자동 인덱싱하지 않습니다. 데이터 구조, 검색 정책, 검증 결과와
+라이선스 확인 사항은 [BOK Knowledge Base 문서](docs/BOK_KNOWLEDGE_BASE.md)를
+참고하세요.
+
 ## 내부 Tutor API
 
 Node.js만 `POST /internal/v1/tutor/answer`를 호출합니다. `X-Internal-API-Key` 또는

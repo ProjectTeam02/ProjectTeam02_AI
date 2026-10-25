@@ -72,6 +72,9 @@ class MultiTurnRAG:
         documents = await self.retriever.retrieve(
             rewritten_query, concept_id=concept_id, stage_id=stage_id
         )
+        documents = await self.retriever.retrieve_related(
+            documents, concept_id=concept_id, stage_id=stage_id
+        )
         context = self.context_builder.build(
             history=history,
             retrieved_context=documents,

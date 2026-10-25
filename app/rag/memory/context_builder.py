@@ -103,5 +103,10 @@ class ContextBuilder:
             f"source_id={doc.source_id or doc.document_id}; "
             f"URL={doc.source_url or doc.source}; "
             f"버전={doc.version or '(없음)'}; 검수={doc.review_status}\n{doc.content}"
+            f"\n용어={doc.term or doc.title or '(없음)'}; "
+            f"발행처={doc.publisher or '(없음)'}; "
+            f"판={doc.edition or '(없음)'}; "
+            f"인쇄쪽={doc.printed_page or '(없음)'}; "
+            f"검색방식={doc.retrieval_method}"
             for doc in documents
         )

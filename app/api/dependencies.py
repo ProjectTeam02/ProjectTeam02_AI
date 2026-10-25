@@ -1,4 +1,5 @@
 import secrets
+from pathlib import Path
 
 from fastapi import Depends, Header, HTTPException
 
@@ -6,6 +7,7 @@ from app.core.config import Settings, get_settings
 from app.db.postgres import get_session
 from app.db.repositories.conversation_repository import ConversationRepository
 from app.db.repositories.memory_repository import MemoryRepository
+from app.ingestion.bok_terms_loader import BOKTermCatalog
 from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.llamaindex.llm_factory import LLMFactory
@@ -75,7 +77,17 @@ async def get_tutor_service(session=Depends(get_session)) -> TutorService:
         history_manager=history,
         query_rewriter=QueryRewriter(llm, settings_value.llm_timeout_seconds),
         retriever=Retriever(
-            LlamaIndexRetriever(settings=settings_value), settings_value.retrieval_top_k
+            LlamaIndexRetriever(settings=settings_value),
+            settings_value.retrieval_top_k,
+            exact_matcher=(
+                BOKTermCatalog(
+                    Path(settings_value.bok_terms_path),
+                    settings_value.approved_review_status,
+                )
+                if settings_value.bok_hybrid_search_enabled
+                else None
+            ),
+            related_term_top_k=settings_value.related_term_top_k,
         ),
         context_builder=ContextBuilder(settings_value.context_max_tokens),
         answer_generator=AnswerGenerator(llm, settings_value),

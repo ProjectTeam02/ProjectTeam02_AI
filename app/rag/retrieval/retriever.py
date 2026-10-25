@@ -51,6 +51,15 @@ class InMemoryRetriever:
                         published_at=document.published_at,
                         updated_at=document.updated_at,
                         content_hash=document.content_hash,
+                        term=document.term,
+                        term_kr=document.term_kr,
+                        term_en=document.term_en,
+                        publisher=document.publisher,
+                        document_name=document.document_name,
+                        edition=document.edition,
+                        printed_page=document.printed_page,
+                        related_terms=document.related_terms,
+                        retrieval_method=document.retrieval_method,
                     )
                 )
         scored.sort(key=lambda item: item.score or 0, reverse=True)
@@ -64,9 +73,19 @@ class InMemoryRetriever:
 
 
 class Retriever:
-    def __init__(self, backend=None, top_k: int | None = None):
+    """Retrieval policy combining exact BOK term matches and vector search."""
+
+    def __init__(
+        self,
+        backend=None,
+        top_k: int | None = None,
+        exact_matcher=None,
+        related_term_top_k: int = 2,
+    ):
         self.backend = backend or InMemoryRetriever()
         self.top_k = top_k or get_settings().retrieval_top_k
+        self.exact_matcher = exact_matcher
+        self.related_term_top_k = max(0, related_term_top_k)
 
     async def retrieve(
         self,
@@ -75,9 +94,74 @@ class Retriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
     ) -> list[RetrievedDocument]:
-        return await self.backend.retrieve(
+        limit = top_k or self.top_k
+        semantic = await self.backend.retrieve(
             query,
-            top_k or self.top_k,
+            limit,
             concept_id=concept_id,
             stage_id=stage_id,
         )
+        exact_retrieve = getattr(self.backend, "retrieve_exact", None)
+        if self.exact_matcher is None or exact_retrieve is None:
+            return semantic
+        terms = self.exact_matcher.match(query)
+        exact = (
+            await exact_retrieve(
+                terms,
+                limit,
+                concept_id=concept_id,
+                stage_id=stage_id,
+            )
+            if terms
+            else []
+        )
+        return self._merge(exact, semantic, limit)
+
+    async def retrieve_related(
+        self,
+        documents: list[RetrievedDocument],
+        concept_id: str | None = None,
+        stage_id: str | None = None,
+    ) -> list[RetrievedDocument]:
+        if not documents or self.related_term_top_k == 0:
+            return documents
+        exact_retrieve = getattr(self.backend, "retrieve_exact", None)
+        if exact_retrieve is None:
+            return documents
+        related_terms: list[str] = []
+        existing_terms = {document.term for document in documents if document.term}
+        for document in documents:
+            for term in document.related_terms or []:
+                if term not in existing_terms and term not in related_terms:
+                    related_terms.append(term)
+                if len(related_terms) >= self.related_term_top_k:
+                    break
+            if len(related_terms) >= self.related_term_top_k:
+                break
+        if not related_terms:
+            return documents
+        related = await exact_retrieve(
+            related_terms,
+            self.related_term_top_k,
+            concept_id=concept_id,
+            stage_id=stage_id,
+        )
+        return self._merge(documents, related, self.top_k + self.related_term_top_k)
+
+    @staticmethod
+    def _merge(
+        primary: list[RetrievedDocument],
+        secondary: list[RetrievedDocument],
+        limit: int,
+    ) -> list[RetrievedDocument]:
+        merged: list[RetrievedDocument] = []
+        seen: set[tuple[str, str]] = set()
+        for document in [*primary, *secondary]:
+            key = document.citation_key()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(document)
+            if len(merged) >= limit:
+                break
+        return merged

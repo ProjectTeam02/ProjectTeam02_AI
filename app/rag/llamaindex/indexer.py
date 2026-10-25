@@ -23,6 +23,16 @@ class IngestDocument:
     updated_at: datetime | None = None
     license: str | None = None
     content_hash: str = ""
+    term: str | None = None
+    term_kr: str | None = None
+    term_en: str | None = None
+    publisher: str | None = None
+    document_name: str | None = None
+    edition: str | None = None
+    printed_page: int | None = None
+    related_terms: list[str] | None = None
+    review_flags: list[dict[str, str]] | None = None
+    knowledge_scope: str = "scoped"
 
     @property
     def metadata(self) -> dict:
@@ -39,6 +49,16 @@ class IngestDocument:
             "updated_at": self.updated_at.isoformat() if self.updated_at else "",
             "license": self.license or "",
             "content_hash": self.content_hash,
+            "term": self.term or "",
+            "term_kr": self.term_kr or "",
+            "term_en": self.term_en or "",
+            "publisher": self.publisher or "",
+            "document": self.document_name or "",
+            "edition": self.edition or "",
+            "printed_page": self.printed_page or 0,
+            "related_terms": self.related_terms or [],
+            "review_flags": self.review_flags or [],
+            "knowledge_scope": self.knowledge_scope,
         }
 
 
@@ -179,6 +199,21 @@ class DocumentIndexer:
             published_at=DocumentIndexer._datetime(item.get("published_at")),
             updated_at=DocumentIndexer._datetime(item.get("updated_at")),
             license=item.get("license"),
+            content_hash=str(item.get("content_hash", "")),
+            term=item.get("term"),
+            term_kr=item.get("term_kr"),
+            term_en=item.get("term_en"),
+            publisher=item.get("publisher"),
+            document_name=item.get("document"),
+            edition=item.get("edition"),
+            printed_page=(
+                int(item["printed_page"])
+                if item.get("printed_page") is not None
+                else None
+            ),
+            related_terms=list(item.get("related_terms") or []),
+            review_flags=list(item.get("review_flags") or []),
+            knowledge_scope=str(item.get("knowledge_scope", "scoped")),
         )
 
     @staticmethod

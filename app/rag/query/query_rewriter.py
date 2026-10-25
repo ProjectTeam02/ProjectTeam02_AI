@@ -64,14 +64,15 @@ class QueryRewriter:
                 pass
         return self._deterministic_rewrite(message, messages)
 
-    def _needs_rewrite(self, message: str) -> bool:
+    @classmethod
+    def _needs_rewrite(cls, message: str) -> bool:
         normalized = message.strip()
-        if any(marker in normalized for marker in self.FOLLOW_UP_MARKERS):
+        if any(marker in normalized for marker in cls.FOLLOW_UP_MARKERS):
             return True
         connector = next(
             (
                 marker
-                for marker in self.LEADING_CONNECTORS
+                for marker in cls.LEADING_CONNECTORS
                 if normalized.startswith(marker)
             ),
             None,
@@ -81,7 +82,7 @@ class QueryRewriter:
         remainder = normalized[len(connector) :]
         tokens = re.findall(r"[A-Za-z][A-Za-z0-9-]*|[가-힣]{2,}", remainder)
         explicit_topic = any(
-            token not in self.GENERIC_FOLLOW_UP_WORDS for token in tokens
+            token not in cls.GENERIC_FOLLOW_UP_WORDS for token in tokens
         )
         return not explicit_topic
 
@@ -114,7 +115,14 @@ class QueryRewriter:
             for item in messages
             if cls._item_value(item, "role") == "user"
         ]
-        previous = previous_user_questions[-1] if previous_user_questions else ""
+        previous = next(
+            (
+                question
+                for question in reversed(previous_user_questions)
+                if not cls._needs_rewrite(question)
+            ),
+            previous_user_questions[-1] if previous_user_questions else "",
+        )
         topic_tokens = re.findall(r"[A-Za-z][A-Za-z0-9-]*|[가-힣]{2,}", previous)
         topic = " ".join(topic_tokens[:8]).strip()
         if not topic:
