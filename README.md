@@ -35,11 +35,16 @@ docker compose up -d ai
 .venv/bin/python -m ruff check .
 ```
 
-`OPENAI_API_KEY`가 없어도 import, `/health`, mock 테스트는 동작합니다. API 없이
-로컬 pgvector E2E를 명시적으로 시험하려면 `.env`에
+기본 Provider는 OpenRouter입니다. `.env`에 `OPENROUTER_API_KEY`를 입력하고
+`LLM_PROVIDER=openrouter`, `EMBEDDING_PROVIDER=openrouter`를 유지하세요. 키가
+없거나 `sk-or-v1-` 형식이 아니면 모델 호출을 시작하지 않고 명확한 설정 오류를
+반환합니다. 기존 OpenAI Provider도 `OPENAI_API_KEY`와 함께 선택할 수 있습니다.
+
+API 없이 로컬 pgvector E2E를 명시적으로 시험하려면 `.env`에
 `EMBEDDING_PROVIDER=deterministic`, `LLM_PROVIDER=offline`을 설정합니다. 이 모드는
-품질 평가나 운영용이 아닙니다. `EMBEDDING_PROVIDER=openai`인데 키가 없으면
-인덱싱/검색은 성공으로 위장하지 않고 503/설정 오류를 반환합니다.
+품질 평가나 운영용이 아닙니다. 운영 설정에서 Provider 키가 없으면 인덱싱/검색을
+성공으로 위장하지 않고 503/설정 오류를 반환합니다. 상세 설정은
+[OpenRouter 연동 문서](docs/OPENROUTER_SETUP.md)를 참고하세요.
 
 ## 승인 문서 인덱싱
 
@@ -100,3 +105,5 @@ Node.js가 자신의 ERD 테이블에 저장합니다. `/api/tutor/chat`는 기�
 
 상세한 데이터 흐름, migration, API 응답, 검증 범위와 협의 항목은
 [P0 구현 문서](docs/P0_IMPLEMENTATION.md)에 있습니다.
+백엔드와 AI 서버의 후속 작업 분류는 [남은 작업 목록](docs/REMAINING_WORK.md)을
+참고하세요.

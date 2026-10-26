@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
+from app.core.exceptions import ConfigurationError
 from app.db.postgres import get_session
 from app.db.repositories.memory_repository import MemoryRepository
 from app.ingestion.bok_terms_loader import BOKTermCatalog
@@ -74,7 +75,16 @@ async def require_internal_api(
 
 async def get_tutor_service() -> TutorService:
     settings_value = get_settings()
-    llm = LLMFactory(settings_value).create()
+    try:
+        llm = LLMFactory(settings_value).create()
+    except ConfigurationError as exc:
+        # Dependency resolution happens before the route handler's try/except.
+        # Convert provider configuration failures into the same safe 503 used
+        # for runtime model failures, without exposing a key or secret.
+        raise HTTPException(
+            status_code=503,
+            detail="AI provider configuration is unavailable",
+        ) from exc
     bok_catalog = None
     if (
         settings_value.bok_hybrid_search_enabled

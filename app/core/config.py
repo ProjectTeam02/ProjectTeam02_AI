@@ -10,11 +10,14 @@ class Settings(BaseSettings):
     # docker-compose exposes PostgreSQL on host port 5433. Containers override
     # this URL with the service hostname ``db`` and container port 5432.
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/leren"
+    # Provider credentials are intentionally separate.  An OpenRouter key must
+    # never silently fall back to OPENAI_API_KEY (or vice versa).
+    openrouter_api_key: str | None = None
     openai_api_key: str | None = None
-    llm_provider: str = "openai"
-    llm_model: str = "gpt-4o-mini"
-    embedding_provider: str = "openai"
-    embedding_model: str = "text-embedding-3-small"
+    llm_provider: str = "openrouter"
+    llm_model: str = "openai/gpt-4o-mini"
+    embedding_provider: str = "openrouter"
+    embedding_model: str = "openai/text-embedding-3-small"
     llm_base_url: str | None = None
     embedding_base_url: str | None = None
     llm_timeout_seconds: float = 30.0
@@ -48,6 +51,22 @@ class Settings(BaseSettings):
     @classmethod
     def normalize_provider(cls, value: str) -> str:
         return value.strip().lower()
+
+    @field_validator("openrouter_api_key", "openai_api_key", mode="before")
+    @classmethod
+    def normalize_optional_secret(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = str(value).strip()
+        return value or None
+
+    @field_validator("llm_model", "embedding_model")
+    @classmethod
+    def validate_model_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("model name must not be empty")
+        return value
 
     @field_validator("embedding_dimension", "retrieval_top_k", "context_max_tokens")
     @classmethod
