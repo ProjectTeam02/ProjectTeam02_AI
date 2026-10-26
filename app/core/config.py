@@ -18,9 +18,11 @@ class Settings(BaseSettings):
     llm_base_url: str | None = None
     embedding_base_url: str | None = None
     llm_timeout_seconds: float = 30.0
+    internal_request_timeout_seconds: float = 45.0
     llm_max_output_tokens: int = 700
     embedding_dimension: int = 1536
     retrieval_top_k: int = 5
+    retrieval_min_score: float = Field(default=0.3, ge=-1.0, le=1.0)
     context_max_tokens: int = 3000
     history_max_messages: int = 12
     history_max_tokens: int = 1200
@@ -31,6 +33,10 @@ class Settings(BaseSettings):
     vector_store_schema: str = "public"
     approved_review_status: str = "approved"
     grounding_min_overlap: float = Field(default=0.12, ge=0.0, le=1.0)
+    bok_terms_path: str = "data/bok_terms_2026_rag.jsonl"
+    bok_source_path: str = "data/bok_terms_2026.json"
+    bok_hybrid_search_enabled: bool = True
+    related_term_top_k: int = Field(default=2, ge=0, le=10)
 
     model_config = SettingsConfigDict(
         env_file=".env",

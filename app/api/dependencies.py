@@ -1,22 +1,31 @@
 import secrets
+from pathlib import Path
 
 from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
 from app.db.postgres import get_session
-from app.db.repositories.conversation_repository import ConversationRepository
 from app.db.repositories.memory_repository import MemoryRepository
+from app.ingestion.bok_terms_loader import BOKTermCatalog
 from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.llamaindex.llm_factory import LLMFactory
 from app.rag.llamaindex.retriever import LlamaIndexRetriever
 from app.rag.memory.context_builder import ContextBuilder
-from app.rag.memory.history_manager import HistoryManager
+from app.rag.memory.history_manager import (
+    HistoryManager,
+    InMemoryConversationRepository,
+)
 from app.rag.pipelines.multiturn_rag import MultiTurnRAG
 from app.rag.query.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
 from app.services.memory_service import MemoryService
 from app.services.tutor_service import TutorService
+
+# The legacy public-compatible route is retained for local compatibility only.
+# The internal Node.js contract never uses this repository or persists backend
+# conversation tables; Node.js supplies history and owns its ERD tables.
+_legacy_history_repository = InMemoryConversationRepository()
 
 
 def settings() -> Settings:
@@ -63,11 +72,20 @@ async def require_internal_api(
     _verify_internal_token(x_internal_api_key, authorization)
 
 
-async def get_tutor_service(session=Depends(get_session)) -> TutorService:
+async def get_tutor_service() -> TutorService:
     settings_value = get_settings()
     llm = LLMFactory(settings_value).create()
+    bok_catalog = None
+    if (
+        settings_value.bok_hybrid_search_enabled
+        and Path(settings_value.bok_terms_path).is_file()
+    ):
+        bok_catalog = BOKTermCatalog(
+            Path(settings_value.bok_terms_path),
+            settings_value.approved_review_status,
+        )
     history = HistoryManager(
-        ConversationRepository(session),
+        _legacy_history_repository,
         max_messages=settings_value.history_max_messages,
         max_tokens=settings_value.history_max_tokens,
     )
@@ -75,7 +93,10 @@ async def get_tutor_service(session=Depends(get_session)) -> TutorService:
         history_manager=history,
         query_rewriter=QueryRewriter(llm, settings_value.llm_timeout_seconds),
         retriever=Retriever(
-            LlamaIndexRetriever(settings=settings_value), settings_value.retrieval_top_k
+            LlamaIndexRetriever(settings=settings_value),
+            settings_value.retrieval_top_k,
+            exact_matcher=bok_catalog,
+            related_term_top_k=settings_value.related_term_top_k,
         ),
         context_builder=ContextBuilder(settings_value.context_max_tokens),
         answer_generator=AnswerGenerator(llm, settings_value),

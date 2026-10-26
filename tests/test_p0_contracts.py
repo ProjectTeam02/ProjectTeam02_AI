@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,7 +11,6 @@ from app.core.config import Settings
 from app.evaluation.rag_metrics import compare_runs, evaluate_retrieval
 from app.ingestion.document_loader import load_manifest
 from app.main import app
-from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.llamaindex.indexer import DocumentIndexer, IngestDocument
 from app.rag.memory.history_manager import HistoryManager
@@ -38,10 +38,21 @@ def approved_rate_document() -> RetrievedDocument:
 
 
 def internal_service() -> TutorService:
+    class FakeGenerator:
+        llm = object()
+        model_id = "test-model"
+        last_usage = {"prompt_tokens": 12, "completion_tokens": 8}
+
+        async def generate(self, query, context):
+            return (
+                "기준금리가 오르면 대출금리 상승 압력이 생길 수 있습니다. "
+                "[출처: DOC-RATE/DOC-RATE:1]"
+            )
+
     pipeline = MultiTurnRAG(
         history_manager=HistoryManager(),
         retriever=Retriever(InMemoryRetriever([approved_rate_document()])),
-        answer_generator=AnswerGenerator(llm=None),
+        answer_generator=FakeGenerator(),
     )
     return TutorService(pipeline)
 
@@ -51,12 +62,19 @@ def test_internal_api_camel_case_contract_and_idempotency():
     app.dependency_overrides[get_tutor_service] = lambda: service
     app.dependency_overrides[require_internal_api] = lambda: None
     payload = {
-        "userId": "user-1",
-        "conversationId": None,
-        "requestId": "request-1",
-        "stageId": "stage-rate",
-        "conceptId": "concept-rate",
+        "userId": str(uuid.uuid4()),
+        "conversationId": str(uuid.uuid4()),
+        "requestId": str(uuid.uuid4()),
         "question": "기준금리가 오르면 어떻게 돼?",
+        "modelTier": "BASIC",
+        "history": [],
+        "context": {
+            "entryPoint": "CONCEPT",
+            "stageId": None,
+            "conceptId": None,
+            "conceptCode": None,
+        },
+        "knowledgeScope": {"conceptCodes": []},
     }
     try:
         client = TestClient(app)
@@ -66,16 +84,21 @@ def test_internal_api_camel_case_contract_and_idempotency():
         assert second.status_code == 200
         body = first.json()
         assert second.json() == body
-        assert body["conversationId"]
-        assert body["requestId"] == "request-1"
-        assert body["grounded"] is True
-        assert body["citations"][0] == {
-            "sourceId": "SRC-RATE",
+        assert body["requestId"] == payload["requestId"]
+        assert body["groundingStatus"] == "GROUNDED"
+        assert body["historyFromSeq"] is None
+        assert body["sources"][0] == {
             "documentId": "DOC-RATE",
             "documentVersion": "v1",
-            "title": "기준금리 학습자료",
-            "url": "https://example.test/rate",
+            "chunkId": "DOC-RATE:1",
+            "titleSnapshot": "기준금리 학습자료",
+            "conceptCode": None,
+            "rank": 1,
+            "relevanceScore": body["sources"][0]["relevanceScore"],
         }
+        assert 0.0 <= body["sources"][0]["relevanceScore"] <= 1.0
+        assert body["usage"]["inputTokens"] == 12
+        assert body["usage"]["outputTokens"] == 8
     finally:
         app.dependency_overrides.clear()
 

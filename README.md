@@ -56,7 +56,23 @@ manifest 형식은 [docs/source-manifest.example.json](docs/source-manifest.exam
 바뀌면 새 청크를 저장하고 이전 vector node를 제거합니다. 컬렉션에 기록된 embedding
 provider/model/dimension이 현재 설정과 다르면 명시적으로 재인덱싱을 요구합니다.
 
+### 한국은행 2026 경제금융용어 KB
+
+```bash
+.venv/bin/python -m scripts.ingest_documents \
+  --bok-source data/bok_terms_2026.json \
+  --bok-terms data/bok_terms_2026_rag.jsonl
+```
+
+789개 용어 중 수식·레이아웃 재검토가 필요한 29개는 `needs_review`로
+유지하고 자동 인덱싱하지 않습니다. 데이터 구조, 검색 정책, 검증 결과와
+라이선스 확인 사항은 [BOK Knowledge Base 문서](docs/BOK_KNOWLEDGE_BASE.md)를
+참고하세요.
+
 ## 내부 Tutor API
+
+ERD 기준 내부 AI Tutor 계약과 DB 소유권은 [AI Backend ERD mapping](docs/AI_BACKEND_ERD_MAPPING.md)와
+[Internal Tutor API contract](docs/TUTOR_INTERNAL_API_CONTRACT.md)에 정리했다.
 
 Node.js만 `POST /internal/v1/tutor/answer`를 호출합니다. `X-Internal-API-Key` 또는
 Bearer token은 `.env`의 `INTERNAL_API_TOKEN`과 일치해야 합니다.
@@ -66,18 +82,21 @@ curl -X POST http://localhost:8000/internal/v1/tutor/answer \
   -H 'Content-Type: application/json' \
   -H 'X-Internal-API-Key: change-me' \
   -d '{
-    "userId":"test-user-001",
-    "conversationId":null,
-    "requestId":"request-001",
-    "stageId":"stage-001",
-    "conceptId":"concept-001",
-    "question":"기준금리가 오르면 어떤 영향이 있나요?"
+    "userId":"e66e192d-fcae-4575-9c7c-3d2b83f4b5ab",
+    "conversationId":"60fa8bac-b124-49bc-b8e0-393b611bc34b",
+    "requestId":"aafb8e7b-1e15-428e-8a7d-e746c4aa9c04",
+    "question":"기준금리가 오르면 어떤 영향이 있나요?",
+    "modelTier":"BASIC",
+    "history":[],
+    "context":null,
+    "knowledgeScope":{"conceptCodes":[]}
   }'
 ```
 
-응답의 `conversationId`를 후속 요청에 그대로 넣습니다. `requestId` 재전송은 같은
-저장 답변을 반환하고 메시지를 중복 저장하지 않습니다. `/api/tutor/chat`는 기존
-테스트 호환 경로이며 운영 앱은 Node.js 공개 API만 호출해야 합니다.
+`conversationId`는 Node.js가 생성하고 후속 요청에 그대로 넣습니다. FastAPI는
+conversation/message/request 테이블을 저장하지 않으며, 응답의 `sources`와 `usage`를
+Node.js가 자신의 ERD 테이블에 저장합니다. `/api/tutor/chat`는 기존 테스트 호환
+경로이며 운영 앱은 Node.js 공개 API만 호출해야 합니다.
 
 상세한 데이터 흐름, migration, API 응답, 검증 범위와 협의 항목은
 [P0 구현 문서](docs/P0_IMPLEMENTATION.md)에 있습니다.

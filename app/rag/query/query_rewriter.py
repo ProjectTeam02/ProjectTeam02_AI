@@ -19,6 +19,8 @@ class QueryRewriter:
         "앞에서",
         "방금",
         "무슨 관계",
+        "어떤 영향",
+        "영향이 있어",
         "왜 그래",
     )
     LEADING_CONNECTORS = ("그럼", "그러면")
@@ -38,6 +40,7 @@ class QueryRewriter:
     def __init__(self, llm=None, timeout_seconds: float = 10.0):
         self.llm = llm
         self.timeout_seconds = timeout_seconds
+        self.last_usage: dict | None = None
 
     async def rewrite(
         self,
@@ -47,6 +50,7 @@ class QueryRewriter:
         messages = (
             history.messages if isinstance(history, ConversationHistory) else history
         )
+        self.last_usage = None
         if not messages or not self._needs_rewrite(message):
             return message
 
@@ -56,6 +60,7 @@ class QueryRewriter:
                     self.llm.acomplete(self._prompt(message, messages)),
                     self.timeout_seconds,
                 )
+                self.last_usage = self._extract_usage(response)
                 text = getattr(response, "text", str(response)).strip()
                 if text:
                     return text[:1000]
@@ -64,14 +69,15 @@ class QueryRewriter:
                 pass
         return self._deterministic_rewrite(message, messages)
 
-    def _needs_rewrite(self, message: str) -> bool:
+    @classmethod
+    def _needs_rewrite(cls, message: str) -> bool:
         normalized = message.strip()
-        if any(marker in normalized for marker in self.FOLLOW_UP_MARKERS):
+        if any(marker in normalized for marker in cls.FOLLOW_UP_MARKERS):
             return True
         connector = next(
             (
                 marker
-                for marker in self.LEADING_CONNECTORS
+                for marker in cls.LEADING_CONNECTORS
                 if normalized.startswith(marker)
             ),
             None,
@@ -81,7 +87,7 @@ class QueryRewriter:
         remainder = normalized[len(connector) :]
         tokens = re.findall(r"[A-Za-z][A-Za-z0-9-]*|[가-힣]{2,}", remainder)
         explicit_topic = any(
-            token not in self.GENERIC_FOLLOW_UP_WORDS for token in tokens
+            token not in cls.GENERIC_FOLLOW_UP_WORDS for token in tokens
         )
         return not explicit_topic
 
@@ -112,11 +118,41 @@ class QueryRewriter:
         previous_user_questions = [
             cls._item_value(item, "content")
             for item in messages
-            if cls._item_value(item, "role") == "user"
+            if cls._item_value(item, "role").lower() == "user"
         ]
-        previous = previous_user_questions[-1] if previous_user_questions else ""
+        summaries = [
+            cls._item_value(item, "content")
+            for item in messages
+            if cls._item_value(item, "role").lower() == "summary"
+        ]
+        previous = next(
+            (
+                question
+                for question in reversed(previous_user_questions)
+                if not cls._needs_rewrite(question)
+            ),
+            (
+                previous_user_questions[-1]
+                if previous_user_questions
+                else summaries[-1]
+                if summaries
+                else ""
+            ),
+        )
         topic_tokens = re.findall(r"[A-Za-z][A-Za-z0-9-]*|[가-힣]{2,}", previous)
         topic = " ".join(topic_tokens[:8]).strip()
         if not topic:
             return message
         return f"이전 대화의 주제({topic})와 관련하여 다음 질문에 답하라: {message}"
+
+    @staticmethod
+    def _extract_usage(response) -> dict | None:
+        raw = getattr(response, "raw", None)
+        usage = getattr(raw, "usage", None)
+        if usage is None and isinstance(raw, dict):
+            usage = raw.get("usage")
+        if usage is None:
+            return None
+        if hasattr(usage, "model_dump"):
+            return usage.model_dump()
+        return dict(usage) if isinstance(usage, dict) else None

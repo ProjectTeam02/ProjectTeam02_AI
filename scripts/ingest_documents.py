@@ -12,6 +12,7 @@ from pathlib import Path
 
 from app.db.postgres import session_factory
 from app.db.repositories.rag_repository import RAGDocumentRepository
+from app.ingestion.bok_terms_loader import load_bok_terms, validate_bok_dataset
 from app.ingestion.document_loader import discover_documents, load_manifest
 from app.rag.llamaindex.indexer import DocumentIndexer
 
@@ -27,22 +28,36 @@ async def run(
     license_name: str | None = None,
     concept_id: str | None = None,
     stage_id: str | None = None,
+    bok_terms: Path | None = None,
+    bok_source: Path | None = None,
 ) -> int:
-    documents = (
-        load_manifest(manifest)
-        if manifest
-        else discover_documents(
-            path,
-            source,
-            version,
-            review_status,
-            source_id,
-            source_url,
-            license_name,
-            concept_id,
-            stage_id,
+    if bok_terms:
+        if bok_source is None:
+            raise ValueError("--bok-source is required with --bok-terms")
+        validation = validate_bok_dataset(bok_source, bok_terms)
+        documents = load_bok_terms(bok_terms, approved_only=True)
+        print(
+            "Validated BOK dataset: "
+            f"source={validation.source_count}, rag={validation.rag_count}, "
+            f"approved={validation.approved_count}, "
+            f"needs_review={validation.review_count} (excluded)"
         )
-    )
+    else:
+        documents = (
+            load_manifest(manifest)
+            if manifest
+            else discover_documents(
+                path,
+                source,
+                version,
+                review_status,
+                source_id,
+                source_url,
+                license_name,
+                concept_id,
+                stage_id,
+            )
+        )
     if not documents:
         print(f"No approved .txt/.md documents found under {path}")
         return 0
@@ -65,6 +80,8 @@ def main() -> None:
     parser.add_argument("--license", dest="license_name", default=None)
     parser.add_argument("--concept-id", default=None)
     parser.add_argument("--stage-id", default=None)
+    parser.add_argument("--bok-terms", type=Path, default=None)
+    parser.add_argument("--bok-source", type=Path, default=None)
     args = parser.parse_args()
     asyncio.run(
         run(
@@ -78,6 +95,8 @@ def main() -> None:
             license_name=args.license_name,
             concept_id=args.concept_id,
             stage_id=args.stage_id,
+            bok_terms=args.bok_terms,
+            bok_source=args.bok_source,
         )
     )
 

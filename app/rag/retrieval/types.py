@@ -14,12 +14,22 @@ class RetrievedDocument:
     source_id: str | None = None
     source_url: str | None = None
     concept_id: str | None = None
+    concept_code: str | None = None
     stage_id: str | None = None
     review_status: str = "approved"
     license: str | None = None
     published_at: datetime | str | None = None
     updated_at: datetime | str | None = None
     content_hash: str | None = None
+    term: str | None = None
+    term_kr: str | None = None
+    term_en: str | None = None
+    publisher: str | None = None
+    document_name: str | None = None
+    edition: str | None = None
+    printed_page: int | None = None
+    related_terms: list[str] | None = None
+    retrieval_method: str = "vector"
 
     def citation_key(self) -> tuple[str, str]:
         return self.document_id, self.chunk_id

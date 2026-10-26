@@ -12,6 +12,7 @@ from app.core.exceptions import (
     ConversationAccessError,
     ConversationNotFoundError,
     GenerationError,
+    GenerationTimeoutError,
     RetrievalError,
 )
 from app.schemas.tutor import (
@@ -70,6 +71,10 @@ async def internal_answer(
     )
     try:
         return await service.answer_internal(request)
+    except GenerationTimeoutError as exc:
+        raise HTTPException(
+            status_code=504, detail="AI tutor request timed out"
+        ) from exc
     except ConversationNotFoundError as exc:
         raise HTTPException(status_code=404, detail="conversation not found") from exc
     except ConversationAccessError as exc:

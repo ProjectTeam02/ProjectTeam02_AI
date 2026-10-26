@@ -1,0 +1,571 @@
+{
+  "schema_version": "bok-rag-evaluation-result.v1",
+  "measurement_scope": "retrieval_only",
+  "environment": {
+    "python": "3.14.6",
+    "embedding_provider": "deterministic",
+    "embedding_model": "deterministic-local",
+    "embedding_dimension": 128,
+    "collection": "bok_terms_e2e",
+    "top_k": 5,
+    "minimum_vector_score": 0.3
+  },
+  "case_count": 40,
+  "answerable_case_count": 36,
+  "metrics": {
+    "recall_at_5": 1.0,
+    "mrr": 1.0,
+    "no_evidence_accuracy": 1.0,
+    "average_latency_ms": 87.352,
+    "cold_start_latency_ms": 1547.069,
+    "warm_average_latency_ms": 49.924,
+    "p95_latency_ms": 68.18,
+    "citation_accuracy": null,
+    "groundedness": null,
+    "multi_turn_context_accuracy": 1.0,
+    "input_tokens": null,
+    "output_tokens": null,
+    "cost": null
+  },
+  "unmeasured_reason": "No paid LLM call was made. Citation, groundedness, answer quality, provider token usage, and cost require a separately authorized full run.",
+  "cases": [
+    {
+      "id": "def-01",
+      "rewritten_query": "경제 용어 '기준금리'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-154",
+        "bok800-714",
+        "bok800-253",
+        "bok800-736"
+      ],
+      "relevant_document_ids": [
+        "bok800-154"
+      ],
+      "latency_ms": 1547.069
+    },
+    {
+      "id": "def-02",
+      "rewritten_query": "경제 용어 '인플레이션'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-504",
+        "bok800-714",
+        "bok800-253",
+        "bok800-180",
+        "bok800-209"
+      ],
+      "relevant_document_ids": [
+        "bok800-504"
+      ],
+      "latency_ms": 47.349
+    },
+    {
+      "id": "def-03",
+      "rewritten_query": "경제 용어 '디플레이션'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-211",
+        "bok800-253",
+        "bok800-714",
+        "bok800-504",
+        "bok800-705"
+      ],
+      "relevant_document_ids": [
+        "bok800-211"
+      ],
+      "latency_ms": 66.204
+    },
+    {
+      "id": "def-04",
+      "rewritten_query": "경제 용어 '국내총생산(GDP)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-074",
+        "bok800-253",
+        "bok800-714",
+        "bok800-083"
+      ],
+      "relevant_document_ids": [
+        "bok800-074"
+      ],
+      "latency_ms": 49.909
+    },
+    {
+      "id": "def-05",
+      "rewritten_query": "경제 용어 '국민총소득(GNI)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-083",
+        "bok800-253",
+        "bok800-714",
+        "bok800-137",
+        "bok800-074",
+        "bok800-086"
+      ],
+      "relevant_document_ids": [
+        "bok800-083"
+      ],
+      "latency_ms": 68.18
+    },
+    {
+      "id": "def-06",
+      "rewritten_query": "경제 용어 '소비자물가지수(CPI)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-347",
+        "bok800-253",
+        "bok800-714",
+        "bok800-322",
+        "bok800-504"
+      ],
+      "relevant_document_ids": [
+        "bok800-347"
+      ],
+      "latency_ms": 67.749
+    },
+    {
+      "id": "def-07",
+      "rewritten_query": "경제 용어 '광의통화(M2)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-060",
+        "bok800-253",
+        "bok800-714",
+        "bok800-137",
+        "bok800-685"
+      ],
+      "relevant_document_ids": [
+        "bok800-060"
+      ],
+      "latency_ms": 49.006
+    },
+    {
+      "id": "def-08",
+      "rewritten_query": "경제 용어 '협의통화(M1)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-725",
+        "bok800-253",
+        "bok800-714",
+        "bok800-685"
+      ],
+      "relevant_document_ids": [
+        "bok800-725"
+      ],
+      "latency_ms": 48.606
+    },
+    {
+      "id": "def-09",
+      "rewritten_query": "경제 용어 '채권시장'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-627",
+        "bok800-253",
+        "bok800-714",
+        "bok800-485"
+      ],
+      "relevant_document_ids": [
+        "bok800-627"
+      ],
+      "latency_ms": 50.033
+    },
+    {
+      "id": "def-10",
+      "rewritten_query": "경제 용어 '주식시장'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-584",
+        "bok800-253",
+        "bok800-714",
+        "bok800-415",
+        "bok800-485"
+      ],
+      "relevant_document_ids": [
+        "bok800-584"
+      ],
+      "latency_ms": 50.493
+    },
+    {
+      "id": "def-11",
+      "rewritten_query": "경제 용어 '기축통화'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-158",
+        "bok800-714",
+        "bok800-253",
+        "bok800-062"
+      ],
+      "relevant_document_ids": [
+        "bok800-158"
+      ],
+      "latency_ms": 49.171
+    },
+    {
+      "id": "def-12",
+      "rewritten_query": "경제 용어 '기회비용'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-161",
+        "bok800-714",
+        "bok800-253",
+        "bok800-710"
+      ],
+      "relevant_document_ids": [
+        "bok800-161"
+      ],
+      "latency_ms": 50.134
+    },
+    {
+      "id": "def-13",
+      "rewritten_query": "경제 용어 '단리/복리'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-179",
+        "bok800-253",
+        "bok800-485"
+      ],
+      "relevant_document_ids": [
+        "bok800-179"
+      ],
+      "latency_ms": 49.69
+    },
+    {
+      "id": "def-14",
+      "rewritten_query": "경제 용어 '자기자본이익률(ROE)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-518",
+        "bok800-714",
+        "bok800-253",
+        "bok800-583"
+      ],
+      "relevant_document_ids": [
+        "bok800-518"
+      ],
+      "latency_ms": 50.215
+    },
+    {
+      "id": "def-15",
+      "rewritten_query": "경제 용어 '주가수익비율(PER)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-577",
+        "bok800-253",
+        "bok800-714",
+        "bok800-583"
+      ],
+      "relevant_document_ids": [
+        "bok800-577"
+      ],
+      "latency_ms": 48.883
+    },
+    {
+      "id": "def-16",
+      "rewritten_query": "경제 용어 '주가순자산비율(PBR)'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-578",
+        "bok800-714",
+        "bok800-253",
+        "bok800-577"
+      ],
+      "relevant_document_ids": [
+        "bok800-578"
+      ],
+      "latency_ms": 48.244
+    },
+    {
+      "id": "def-17",
+      "rewritten_query": "경제 용어 '수요견인 인플레이션'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-353",
+        "bok800-253",
+        "bok800-714",
+        "bok800-298"
+      ],
+      "relevant_document_ids": [
+        "bok800-353"
+      ],
+      "latency_ms": 48.595
+    },
+    {
+      "id": "def-18",
+      "rewritten_query": "경제 용어 '비용인상 인플레이션'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-298",
+        "bok800-714",
+        "bok800-253",
+        "bok800-353"
+      ],
+      "relevant_document_ids": [
+        "bok800-298"
+      ],
+      "latency_ms": 47.854
+    },
+    {
+      "id": "def-19",
+      "rewritten_query": "경제 용어 '고정금리'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-044",
+        "bok800-253",
+        "bok800-714",
+        "bok800-264"
+      ],
+      "relevant_document_ids": [
+        "bok800-044"
+      ],
+      "latency_ms": 48.528
+    },
+    {
+      "id": "def-20",
+      "rewritten_query": "경제 용어 '변동금리'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-264",
+        "bok800-714",
+        "bok800-253",
+        "bok800-044"
+      ],
+      "relevant_document_ids": [
+        "bok800-264"
+      ],
+      "latency_ms": 48.091
+    },
+    {
+      "id": "def-21",
+      "rewritten_query": "경제 용어 '통화정책'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-679",
+        "bok800-253",
+        "bok800-714",
+        "bok800-485"
+      ],
+      "relevant_document_ids": [
+        "bok800-679"
+      ],
+      "latency_ms": 48.65
+    },
+    {
+      "id": "def-22",
+      "rewritten_query": "경제 용어 '재정정책'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-544",
+        "bok800-253",
+        "bok800-714",
+        "bok800-415",
+        "bok800-026"
+      ],
+      "relevant_document_ids": [
+        "bok800-544"
+      ],
+      "latency_ms": 52.114
+    },
+    {
+      "id": "def-23",
+      "rewritten_query": "경제 용어 '공개시장운영'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-051",
+        "bok800-253",
+        "bok800-714",
+        "bok800-137",
+        "bok800-680"
+      ],
+      "relevant_document_ids": [
+        "bok800-051"
+      ],
+      "latency_ms": 49.13
+    },
+    {
+      "id": "def-24",
+      "rewritten_query": "경제 용어 '실업률'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-403",
+        "bok800-253",
+        "bok800-079",
+        "bok800-415",
+        "bok800-042"
+      ],
+      "relevant_document_ids": [
+        "bok800-403"
+      ],
+      "latency_ms": 71.247
+    },
+    {
+      "id": "def-25",
+      "rewritten_query": "경제 용어 '경제성장률'를 초보자가 이해하기 쉽게 정의해 줘.",
+      "retrieved_document_ids": [
+        "bok800-031",
+        "bok800-253",
+        "bok800-714",
+        "bok800-535"
+      ],
+      "relevant_document_ids": [
+        "bok800-031"
+      ],
+      "latency_ms": 48.564
+    },
+    {
+      "id": "compare-01",
+      "rewritten_query": "'고정금리'와 '변동금리'의 차이를 설명해 줘.",
+      "retrieved_document_ids": [
+        "bok800-044",
+        "bok800-264",
+        "bok800-414"
+      ],
+      "relevant_document_ids": [
+        "bok800-044",
+        "bok800-264"
+      ],
+      "latency_ms": 65.482
+    },
+    {
+      "id": "compare-02",
+      "rewritten_query": "'국내총생산(GDP)'와 '국민총소득(GNI)'의 차이를 설명해 줘.",
+      "retrieved_document_ids": [
+        "bok800-074",
+        "bok800-083",
+        "bok800-086"
+      ],
+      "relevant_document_ids": [
+        "bok800-074",
+        "bok800-083"
+      ],
+      "latency_ms": 67.147
+    },
+    {
+      "id": "compare-03",
+      "rewritten_query": "'수요견인 인플레이션'와 '비용인상 인플레이션'의 차이를 설명해 줘.",
+      "retrieved_document_ids": [
+        "bok800-298",
+        "bok800-353"
+      ],
+      "relevant_document_ids": [
+        "bok800-298",
+        "bok800-353"
+      ],
+      "latency_ms": 46.629
+    },
+    {
+      "id": "compare-04",
+      "rewritten_query": "'광의통화(M2)'와 '협의통화(M1)'의 차이를 설명해 줘.",
+      "retrieved_document_ids": [
+        "bok800-060",
+        "bok800-725",
+        "bok800-685"
+      ],
+      "relevant_document_ids": [
+        "bok800-060",
+        "bok800-725"
+      ],
+      "latency_ms": 66.583
+    },
+    {
+      "id": "compare-05",
+      "rewritten_query": "'주가수익비율(PER)'와 '주가순자산비율(PBR)'의 차이를 설명해 줘.",
+      "retrieved_document_ids": [
+        "bok800-578",
+        "bok800-577",
+        "bok800-583"
+      ],
+      "relevant_document_ids": [
+        "bok800-577",
+        "bok800-578"
+      ],
+      "latency_ms": 64.488
+    },
+    {
+      "id": "multi-rate-1",
+      "rewritten_query": "기준금리가 뭐야?",
+      "retrieved_document_ids": [
+        "bok800-154",
+        "bok800-699",
+        "bok800-220",
+        "bok800-736"
+      ],
+      "relevant_document_ids": [
+        "bok800-154"
+      ],
+      "latency_ms": 45.77
+    },
+    {
+      "id": "multi-rate-2",
+      "rewritten_query": "이전 대화의 주제(기준금리가 뭐야)와 관련하여 다음 질문에 답하라: 그럼 그게 오르면 어떤 일이 생겨?",
+      "retrieved_document_ids": [
+        "bok800-154",
+        "bok800-736"
+      ],
+      "relevant_document_ids": [
+        "bok800-154"
+      ],
+      "latency_ms": 47.09
+    },
+    {
+      "id": "multi-rate-3",
+      "rewritten_query": "이전 대화의 주제(기준금리가 뭐야)와 관련하여 다음 질문에 답하라: 대출금리랑 무슨 관계가 있어?",
+      "retrieved_document_ids": [
+        "bok800-154",
+        "bok800-736"
+      ],
+      "relevant_document_ids": [
+        "bok800-154"
+      ],
+      "latency_ms": 45.732
+    },
+    {
+      "id": "multi-inflation-1",
+      "rewritten_query": "인플레이션이 뭐야?",
+      "retrieved_document_ids": [
+        "bok800-504",
+        "bok800-699",
+        "bok800-562",
+        "bok800-689",
+        "bok800-209"
+      ],
+      "relevant_document_ids": [
+        "bok800-504"
+      ],
+      "latency_ms": 46.369
+    },
+    {
+      "id": "multi-inflation-2",
+      "rewritten_query": "이전 대화의 주제(인플레이션이 뭐야)와 관련하여 다음 질문에 답하라: 그게 심해지면 돈의 가치는 어떻게 돼?",
+      "retrieved_document_ids": [
+        "bok800-504",
+        "bok800-353",
+        "bok800-209"
+      ],
+      "relevant_document_ids": [
+        "bok800-504"
+      ],
+      "latency_ms": 46.849
+    },
+    {
+      "id": "multi-inflation-3",
+      "rewritten_query": "디플레이션과는 반대인 거야?",
+      "retrieved_document_ids": [
+        "bok800-211",
+        "bok800-384",
+        "bok800-002",
+        "bok800-504",
+        "bok800-705"
+      ],
+      "relevant_document_ids": [
+        "bok800-211",
+        "bok800-504"
+      ],
+      "latency_ms": 66.112
+    },
+    {
+      "id": "no-evidence-01",
+      "rewritten_query": "화성의 날씨를 알려 줘.",
+      "retrieved_document_ids": [],
+      "relevant_document_ids": [],
+      "latency_ms": 13.437
+    },
+    {
+      "id": "no-evidence-02",
+      "rewritten_query": "내일 특정 주식 가격을 정확히 예측해 줘.",
+      "retrieved_document_ids": [],
+      "relevant_document_ids": [],
+      "latency_ms": 23.437
+    },
+    {
+      "id": "no-evidence-03",
+      "rewritten_query": "로마제국 황제의 생일을 모두 알려 줘.",
+      "retrieved_document_ids": [],
+      "relevant_document_ids": [],
+      "latency_ms": 28.906
+    },
+    {
+      "id": "no-evidence-04",
+      "rewritten_query": "오늘 복권 당첨 번호를 알려 줘.",
+      "retrieved_document_ids": [],
+      "relevant_document_ids": [],
+      "latency_ms": 16.347
+    }
+  ]
+}
