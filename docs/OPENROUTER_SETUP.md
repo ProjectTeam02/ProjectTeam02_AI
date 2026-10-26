@@ -2,8 +2,9 @@
 
 ## 기본 설정
 
-`.env.example`을 복사해 `.env`를 만든 뒤 실제 키를 로컬 `.env`에만 입력한다.
-`.env`는 `.gitignore`에 포함되어 있으며 키를 소스나 문서에 저장하지 않는다.
+프로젝트 루트에 `.env`를 직접 만들고 실제 키를 로컬 파일에만 입력한다.
+`.env`와 `.env.example`은 모두 `.gitignore`에 포함되어 있으며 키를 소스나
+문서에 저장하지 않는다.
 
 ```dotenv
 OPENROUTER_API_KEY=sk-or-v1-<local-secret>

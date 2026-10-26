@@ -13,7 +13,15 @@ PyCharm에서 Python 3.12 인터프리터로 새 `.venv`를 만드세요.
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -U pip
 .venv/bin/python -m pip install -r requirements-dev.txt
-cp .env.example .env
+touch .env
+```
+
+`.env`는 Git에 올리지 말고 아래 필수 설정을 로컬 파일에 직접 입력하세요.
+
+```dotenv
+OPENROUTER_API_KEY=sk-or-v1-실제키
+LLM_PROVIDER=openrouter
+EMBEDDING_PROVIDER=openrouter
 ```
 
 Docker Compose의 PostgreSQL은 호스트 `localhost:5433`에 노출됩니다. AI 컨테이너
