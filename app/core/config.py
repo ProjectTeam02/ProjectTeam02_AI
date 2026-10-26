@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     llm_base_url: str | None = None
     embedding_base_url: str | None = None
     llm_timeout_seconds: float = 30.0
+    internal_request_timeout_seconds: float = 45.0
     llm_max_output_tokens: int = 700
     embedding_dimension: int = 1536
     retrieval_top_k: int = 5

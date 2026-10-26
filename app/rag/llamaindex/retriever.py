@@ -20,6 +20,7 @@ class LlamaIndexRetriever:
         top_k: int = 5,
         concept_id: str | None = None,
         stage_id: str | None = None,
+        concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         try:
             manager = self.index_manager
@@ -31,7 +32,7 @@ class LlamaIndexRetriever:
             index = manager.get_or_create(self.settings.vector_store_collection)
             from llama_index.core.vector_stores import MetadataFilters
 
-            filters = self._filters(concept_id, stage_id)
+            filters = self._filters(concept_id, stage_id, concept_codes)
             llama_retriever = index.as_retriever(
                 similarity_top_k=top_k, filters=MetadataFilters(filters=filters)
             )
@@ -39,7 +40,7 @@ class LlamaIndexRetriever:
             if concept_id or stage_id:
                 from llama_index.core.vector_stores import MetadataFilter
 
-                global_filters = self._filters(None, None)
+                global_filters = self._filters(None, None, concept_codes)
                 global_filters.append(
                     MetadataFilter(key="knowledge_scope", value="global")
                 )
@@ -74,6 +75,7 @@ class LlamaIndexRetriever:
         top_k: int = 5,
         concept_id: str | None = None,
         stage_id: str | None = None,
+        concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         if not terms:
             return []
@@ -90,11 +92,9 @@ class LlamaIndexRetriever:
             results: list[RetrievedDocument] = []
             per_term_limit = max(1, min(2, top_k))
             for term in terms:
-                filters = self._filters(None, None)
+                filters = self._filters(None, None, concept_codes)
                 filters.append(MetadataFilter(key="term", value=term))
-                filters.append(
-                    MetadataFilter(key="knowledge_scope", value="global")
-                )
+                filters.append(MetadataFilter(key="knowledge_scope", value="global"))
                 retriever = index.as_retriever(
                     similarity_top_k=per_term_limit,
                     filters=MetadataFilters(filters=filters),
@@ -108,8 +108,13 @@ class LlamaIndexRetriever:
             logger.exception("LlamaIndex exact term retrieval failed")
             raise RetrievalError("exact term retrieval failed") from exc
 
-    def _filters(self, concept_id: str | None, stage_id: str | None):
-        from llama_index.core.vector_stores import MetadataFilter
+    def _filters(
+        self,
+        concept_id: str | None,
+        stage_id: str | None,
+        concept_codes: list[str] | None = None,
+    ):
+        from llama_index.core.vector_stores import FilterOperator, MetadataFilter
 
         filters = [
             MetadataFilter(
@@ -120,6 +125,14 @@ class LlamaIndexRetriever:
             filters.append(MetadataFilter(key="concept_id", value=concept_id))
         if stage_id:
             filters.append(MetadataFilter(key="stage_id", value=stage_id))
+        if concept_codes:
+            filters.append(
+                MetadataFilter(
+                    key="concept_code",
+                    value=concept_codes,
+                    operator=FilterOperator.IN,
+                )
+            )
         return filters
 
     @staticmethod
@@ -133,19 +146,20 @@ class LlamaIndexRetriever:
             score=(
                 1.0
                 if retrieval_method == "exact"
-                else float(item.score) if item.score is not None else None
+                else float(item.score)
+                if item.score is not None
+                else None
             ),
             document_id=str(
                 metadata.get("document_id", node.ref_doc_id or "unknown-document")
             ),
             chunk_id=str(metadata.get("chunk_id", node.node_id)),
             title=metadata.get("title"),
-            version=metadata.get("document_version")
-            or metadata.get("version")
-            or None,
+            version=metadata.get("document_version") or metadata.get("version") or None,
             source_id=metadata.get("source_id") or None,
             source_url=metadata.get("source_url") or None,
             concept_id=metadata.get("concept_id") or None,
+            concept_code=metadata.get("concept_code") or None,
             stage_id=metadata.get("stage_id") or None,
             review_status=str(metadata.get("review_status", "")),
             license=metadata.get("license") or None,

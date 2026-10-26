@@ -59,10 +59,13 @@ class CitationValidator:
         if unsupported:
             return CitationValidationResult(False, False, [], unsupported)
 
-        referenced = [
-            source_by_key[key]
-            for key in {(doc_id, chunk_id) for doc_id, chunk_id in references}
-        ]
+        referenced = []
+        seen_keys: set[tuple[str, str]] = set()
+        for document_id, chunk_id in references:
+            key = (document_id, chunk_id)
+            if key not in seen_keys:
+                referenced.append(source_by_key[key])
+                seen_keys.add(key)
         approved = [
             source
             for source in referenced

@@ -1,4 +1,10 @@
-# Leren 2.0 Multi-turn RAG P0 구현 기록
+# Leren 2.0 Multi-turn RAG P0 구현 기록 (역사 문서)
+
+> 최신 Node.js/FastAPI ERD 소유권과 내부 Tutor API 응답 계약은
+> [AI Backend ERD mapping](AI_BACKEND_ERD_MAPPING.md) 및
+> [Internal Tutor API contract](TUTOR_INTERNAL_API_CONTRACT.md)을 기준으로 한다.
+> 이 문서의 초기 P0 응답 예시(`conversationId`, `citations`, `grounded`)는
+> 최신 내부 계약을 대체하지 않는다.
 
 ## 구현 범위
 

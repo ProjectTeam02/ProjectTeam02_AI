@@ -26,5 +26,9 @@ class GenerationError(Exception):
     """The answer model could not produce a response."""
 
 
+class GenerationTimeoutError(GenerationError):
+    """The configured generation deadline was exceeded."""
+
+
 class CitationValidationError(Exception):
     """A generated citation did not match retrieved evidence."""

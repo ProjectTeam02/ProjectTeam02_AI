@@ -14,6 +14,7 @@ class RetrievedDocument:
     source_id: str | None = None
     source_url: str | None = None
     concept_id: str | None = None
+    concept_code: str | None = None
     stage_id: str | None = None
     review_status: str = "approved"
     license: str | None = None

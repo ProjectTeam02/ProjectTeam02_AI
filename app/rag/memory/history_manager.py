@@ -14,6 +14,7 @@ class HistoryMessage:
     role: str
     content: str
     created_at: datetime | None = None
+    sequence_no: int | None = None
 
 
 @dataclass(slots=True)
@@ -152,6 +153,100 @@ class HistoryManager:
         record = await finder(user_id, request_id)
         return self._turn(record) if record is not None else None
 
+    def from_external(
+        self,
+        *,
+        conversation_id: str,
+        user_id: str,
+        messages: list,
+        summary: str | None = None,
+        summary_until_seq: int | None = None,
+        stage_id: str | None = None,
+        concept_id: str | None = None,
+    ) -> tuple[ConversationHistory, int | None]:
+        """Build bounded history from the Node.js-owned conversation payload.
+
+        Messages covered by ``summary_until_seq`` are excluded to avoid sending the
+        same conversation content twice. No repository method is called here.
+        """
+        normalized: list[HistoryMessage] = []
+        for item in messages:
+            sequence_no = int(
+                getattr(item, "sequence_no", None)
+                if not isinstance(item, dict)
+                else item.get("sequence_no", item.get("sequenceNo"))
+            )
+            if summary_until_seq is not None and sequence_no <= summary_until_seq:
+                continue
+            role = (
+                getattr(item, "role", "unknown")
+                if not isinstance(item, dict)
+                else item.get("role", "unknown")
+            )
+            role_value = getattr(role, "value", role)
+            content = (
+                getattr(item, "content", "")
+                if not isinstance(item, dict)
+                else item.get("content", "")
+            )
+            normalized.append(
+                HistoryMessage(
+                    role=str(role_value).lower(),
+                    content=str(content),
+                    sequence_no=sequence_no,
+                )
+            )
+
+        selected: list[HistoryMessage] = []
+        token_count = 0
+        summary_message: HistoryMessage | None = None
+        if summary:
+            summary_budget = max(1, self.max_tokens // 3)
+            summary_text = summary[: summary_budget * 4]
+            summary_message = HistoryMessage(
+                role="summary",
+                content=summary_text,
+                sequence_no=summary_until_seq,
+            )
+            token_count = self._estimate_tokens(summary_text)
+
+        for message in reversed(normalized[-self.max_messages :]):
+            estimated = self._estimate_tokens(message.content)
+            if selected and token_count + estimated > self.max_tokens:
+                break
+            if not selected and token_count + estimated > self.max_tokens:
+                available = max(1, self.max_tokens - token_count)
+                message = HistoryMessage(
+                    role=message.role,
+                    content=message.content[-available * 4 :],
+                    sequence_no=message.sequence_no,
+                )
+                estimated = self._estimate_tokens(message.content)
+            selected.append(message)
+            token_count += estimated
+        selected.reverse()
+        if summary_message is not None:
+            selected.insert(0, summary_message)
+
+        history_from_seq = next(
+            (
+                message.sequence_no
+                for message in selected
+                if message.role != "summary" and message.sequence_no is not None
+            ),
+            None,
+        )
+        return (
+            ConversationHistory(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                messages=selected,
+                stage_id=stage_id,
+                concept_id=concept_id,
+            ),
+            history_from_seq,
+        )
+
     async def append(
         self, conversation_id: str, message: str, user_id: str | None = None
     ) -> None:
@@ -167,9 +262,12 @@ class HistoryManager:
         token_count = 0
         for item in reversed(history.messages[-self.max_messages :]):
             message = HistoryMessage(
-                item.role, item.content, getattr(item, "created_at", None)
+                item.role,
+                item.content,
+                getattr(item, "created_at", None),
+                getattr(item, "sequence_no", None),
             )
-            estimated = max(1, len(message.content) // 4)
+            estimated = self._estimate_tokens(message.content)
             if selected and token_count + estimated > self.max_tokens:
                 break
             selected.append(message)
@@ -210,3 +308,9 @@ class HistoryManager:
             citations,
             getattr(record, "grounded", bool(citations)),
         )
+
+    @staticmethod
+    def _estimate_tokens(content: str) -> int:
+        # Used only for bounding context. Provider-reported usage remains the
+        # authoritative value returned by the internal API.
+        return max(1, len(content) // 4)

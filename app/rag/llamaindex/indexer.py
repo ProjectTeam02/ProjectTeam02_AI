@@ -17,6 +17,7 @@ class IngestDocument:
     source_id: str = ""
     source_url: str | None = None
     concept_id: str | None = None
+    concept_code: str | None = None
     stage_id: str | None = None
     review_status: str = "approved"
     published_at: datetime | None = None
@@ -43,6 +44,7 @@ class IngestDocument:
             "title": self.title,
             "source_url": self.source_url or self.source,
             "concept_id": self.concept_id or "",
+            "concept_code": self.concept_code or "",
             "stage_id": self.stage_id or "",
             "review_status": self.review_status,
             "published_at": self.published_at.isoformat() if self.published_at else "",
@@ -194,6 +196,7 @@ class DocumentIndexer:
             source_id=str(item.get("source_id", item.get("source", "unknown"))),
             source_url=item.get("source_url", item.get("source")),
             concept_id=item.get("concept_id"),
+            concept_code=item.get("concept_code"),
             stage_id=item.get("stage_id"),
             review_status=str(item.get("review_status", "approved")),
             published_at=DocumentIndexer._datetime(item.get("published_at")),

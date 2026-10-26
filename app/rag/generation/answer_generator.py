@@ -4,7 +4,7 @@ import asyncio
 import logging
 
 from app.core.config import Settings, get_settings
-from app.core.exceptions import GenerationError
+from app.core.exceptions import GenerationError, GenerationTimeoutError
 from app.rag.memory.context_builder import ContextBundle
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,7 @@ class AnswerGenerator:
         self.last_usage: dict | None = None
 
     async def generate(self, query: str, context: ContextBundle | str) -> str:
+        self.last_usage = None
         if self.llm is None:
             return self._offline_answer(query, context)
 
@@ -30,6 +31,8 @@ class AnswerGenerator:
             if not answer:
                 raise GenerationError("LLM returned an empty answer")
             return answer[: self.settings.llm_max_output_tokens * 5]
+        except asyncio.TimeoutError as exc:
+            raise GenerationTimeoutError("LLM response timed out") from exc
         except GenerationError:
             raise
         except Exception as exc:

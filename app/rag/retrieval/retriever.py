@@ -18,6 +18,7 @@ class InMemoryRetriever:
         top_k: int = 5,
         concept_id: str | None = None,
         stage_id: str | None = None,
+        concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         query_tokens = self._tokens(query)
         scored: list[RetrievedDocument] = []
@@ -27,6 +28,8 @@ class InMemoryRetriever:
             if concept_id and document.concept_id != concept_id:
                 continue
             if stage_id and document.stage_id != stage_id:
+                continue
+            if concept_codes and document.concept_code not in concept_codes:
                 continue
             content_tokens = self._tokens(
                 document.content + " " + (document.title or "")
@@ -45,6 +48,7 @@ class InMemoryRetriever:
                         source_id=document.source_id,
                         source_url=document.source_url,
                         concept_id=document.concept_id,
+                        concept_code=document.concept_code,
                         stage_id=document.stage_id,
                         review_status=document.review_status,
                         license=document.license,
@@ -93,24 +97,44 @@ class Retriever:
         top_k: int | None = None,
         concept_id: str | None = None,
         stage_id: str | None = None,
+        concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         limit = top_k or self.top_k
-        semantic = await self.backend.retrieve(
-            query,
-            limit,
-            concept_id=concept_id,
-            stage_id=stage_id,
-        )
+        if concept_codes is None:
+            semantic = await self.backend.retrieve(
+                query,
+                limit,
+                concept_id=concept_id,
+                stage_id=stage_id,
+            )
+        else:
+            try:
+                semantic = await self.backend.retrieve(
+                    query,
+                    limit,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                )
+            except TypeError:
+                semantic = await self.backend.retrieve(
+                    query,
+                    limit,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                )
         exact_retrieve = getattr(self.backend, "retrieve_exact", None)
         if self.exact_matcher is None or exact_retrieve is None:
             return semantic
         terms = self.exact_matcher.match(query)
         exact = (
-            await exact_retrieve(
+            await self._retrieve_exact(
+                exact_retrieve,
                 terms,
                 limit,
-                concept_id=concept_id,
-                stage_id=stage_id,
+                concept_id,
+                stage_id,
+                concept_codes,
             )
             if terms
             else []
@@ -122,6 +146,7 @@ class Retriever:
         documents: list[RetrievedDocument],
         concept_id: str | None = None,
         stage_id: str | None = None,
+        concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         if not documents or self.related_term_top_k == 0:
             return documents
@@ -140,13 +165,41 @@ class Retriever:
                 break
         if not related_terms:
             return documents
-        related = await exact_retrieve(
+        related = await self._retrieve_exact(
+            exact_retrieve,
             related_terms,
             self.related_term_top_k,
-            concept_id=concept_id,
-            stage_id=stage_id,
+            concept_id,
+            stage_id,
+            concept_codes,
         )
         return self._merge(documents, related, self.top_k + self.related_term_top_k)
+
+    @staticmethod
+    async def _retrieve_exact(
+        exact_retrieve,
+        terms: list[str],
+        top_k: int,
+        concept_id: str | None,
+        stage_id: str | None,
+        concept_codes: list[str] | None,
+    ):
+        if concept_codes is None:
+            return await exact_retrieve(
+                terms, top_k, concept_id=concept_id, stage_id=stage_id
+            )
+        try:
+            return await exact_retrieve(
+                terms,
+                top_k,
+                concept_id=concept_id,
+                stage_id=stage_id,
+                concept_codes=concept_codes,
+            )
+        except TypeError:
+            return await exact_retrieve(
+                terms, top_k, concept_id=concept_id, stage_id=stage_id
+            )
 
     @staticmethod
     def _merge(

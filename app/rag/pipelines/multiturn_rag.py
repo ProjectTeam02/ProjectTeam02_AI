@@ -20,6 +20,7 @@ class RAGResult:
     rewritten_query: str
     retrieved_documents: list[RetrievedDocument]
     grounded: bool = False
+    history_from_seq: int | None = None
 
 
 class MultiTurnRAG:
@@ -68,13 +69,93 @@ class MultiTurnRAG:
         else:
             history = await self.history_manager.create(user_id, stage_id, concept_id)
 
+        result = await self._execute(
+            conversation_id=history.conversation_id,
+            message=message,
+            history=history,
+            learning_concept=learning_concept,
+            incorrect_answer=incorrect_answer,
+            stage_id=stage_id,
+            concept_id=concept_id,
+        )
+        # Persist only after generation and validation completed. append_turn is
+        # atomic, so a failed write cannot leave only one side of the exchange.
+        persisted = await self.history_manager.append_turn(
+            history.conversation_id,
+            user_id,
+            message,
+            result.answer,
+            request_id=request_id,
+            sources=result.citations,
+            grounded=result.grounded,
+        )
+        if persisted.answer != result.answer:
+            result.answer = persisted.answer
+            result.citations = persisted.citations
+        result.conversation_id = persisted.conversation_id
+        result.grounded = persisted.grounded
+        return result
+
+    async def run_external(
+        self,
+        *,
+        user_id: str,
+        conversation_id: str,
+        message: str,
+        history,
+        learning_concept: str | None = None,
+        incorrect_answer: str | None = None,
+        stage_id: str | None = None,
+        concept_id: str | None = None,
+        concept_codes: list[str] | None = None,
+        history_from_seq: int | None = None,
+    ) -> RAGResult:
+        """Run with Node.js-supplied context without touching conversation tables."""
+        return await self._execute(
+            conversation_id=conversation_id,
+            message=message,
+            history=history,
+            learning_concept=learning_concept,
+            incorrect_answer=incorrect_answer,
+            stage_id=stage_id,
+            concept_id=concept_id,
+            concept_codes=concept_codes,
+            history_from_seq=history_from_seq,
+        )
+
+    async def _execute(
+        self,
+        *,
+        conversation_id: str,
+        message: str,
+        history,
+        learning_concept: str | None,
+        incorrect_answer: str | None,
+        stage_id: str | None,
+        concept_id: str | None,
+        concept_codes: list[str] | None = None,
+        history_from_seq: int | None = None,
+    ) -> RAGResult:
         rewritten_query = await self.query_rewriter.rewrite(message, history)
         documents = await self.retriever.retrieve(
-            rewritten_query, concept_id=concept_id, stage_id=stage_id
+            rewritten_query,
+            concept_id=concept_id,
+            stage_id=stage_id,
+            concept_codes=concept_codes,
         )
         documents = await self.retriever.retrieve_related(
-            documents, concept_id=concept_id, stage_id=stage_id
+            documents,
+            concept_id=concept_id,
+            stage_id=stage_id,
+            concept_codes=concept_codes,
         )
+        if concept_codes:
+            allowed_codes = set(concept_codes)
+            documents = [
+                document
+                for document in documents
+                if document.concept_code in allowed_codes
+            ]
         context = self.context_builder.build(
             history=history,
             retrieved_context=documents,
@@ -108,26 +189,12 @@ class MultiTurnRAG:
             citations = []
         else:
             citations = validation.citations
-
-        # Persist only after generation and validation completed. append_turn is
-        # atomic, so a failed write cannot leave only one side of the exchange.
-        persisted = await self.history_manager.append_turn(
-            history.conversation_id,
-            user_id,
-            message,
-            answer,
-            request_id=request_id,
-            sources=citations,
-            grounded=validation.grounded,
-        )
-        if persisted.answer != answer:
-            answer = persisted.answer
-            citations = persisted.citations
         return RAGResult(
-            conversation_id=persisted.conversation_id,
+            conversation_id=conversation_id,
             answer=answer,
             citations=citations,
             rewritten_query=rewritten_query,
             retrieved_documents=documents,
-            grounded=persisted.grounded,
+            grounded=validation.grounded,
+            history_from_seq=history_from_seq,
         )
