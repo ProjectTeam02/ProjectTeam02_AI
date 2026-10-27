@@ -1,0 +1,27 @@
+{
+  "status": "NOT_AVAILABLE",
+  "concept_code": "C0704",
+  "mapping_status": "NOT_GENERATED",
+  "reason": "required mentor dataset files are not present; no substitute dataset was used",
+  "dataset_report": {
+    "status": "NOT_AVAILABLE",
+    "approved_path": "data/mentor_dataset/terms_approved.jsonl",
+    "review_path": "data/mentor_dataset/terms_needs_review.jsonl",
+    "approved_count": 0,
+    "review_count": 0,
+    "source_counts": null,
+    "duplicate_document_ids": [],
+    "duplicate_content_hashes": [],
+    "empty_content_document_ids": [],
+    "content_hash_mismatches": [],
+    "missing_fields": null,
+    "licenses": null,
+    "multi_source_terms": null,
+    "expected_count_mismatches": [],
+    "notes": [
+      "Required mentor dataset file(s) are missing: data/mentor_dataset/terms_approved.jsonl, data/mentor_dataset/terms_needs_review.jsonl"
+    ]
+  },
+  "llm_classification": "NOT_RUN",
+  "gold_labels": "NOT_AVAILABLE"
+}
