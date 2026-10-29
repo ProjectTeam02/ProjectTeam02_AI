@@ -16,12 +16,12 @@
 
 ## 3. 구현 파일
 
-- `app/ingestion/mentor_dataset.py`: 통합 JSONL/커리큘럼 검증, C0704 후보 선별
+- `app/question_generation/dataset.py`: 통합 JSONL/커리큘럼 검증, C0704 후보 선별
 - `app/evaluation/relevance.py`: 키워드 분류기, LLM dry-run 인터페이스, Gold Label 기반 Precision/Recall/F1
 - `scripts/check_knowledge_dataset.py`: terms 파일 검증 CLI
 - `scripts/check_curriculum.py`: curriculum 구조 검증 CLI
 - `scripts/select_concept_documents.py`: C0704 후보·CSV 검수 큐 생성 CLI
-- `app/services/question_generation.py`: 승인 근거가 없으면 차단하고, 있으면 기존 blueprint 기반 `DRAFT_READY` 프롬프트만 준비
+- `app/question_generation/generator.py`: 승인 근거가 없으면 차단하고, 있으면 기존 blueprint 기반 `DRAFT_READY` 프롬프트만 준비
 
 ## 4. 아직 검증하지 못한 기능
 

@@ -10,7 +10,7 @@ from app.core.exceptions import (
     GenerationTimeoutError,
 )
 from app.rag.generation.answer_generator import AnswerGenerator
-from app.rag.pipelines.multiturn_rag import MultiTurnRAG
+from app.rag.pipeline import MultiTurnRAG
 from app.schemas.tutor import (
     Citation,
     GroundingStatus,

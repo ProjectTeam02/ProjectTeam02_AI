@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any, Protocol
 
-from app.ingestion.mentor_dataset import select_c0704_candidates
+from app.question_generation.dataset import select_c0704_candidates
 
 
 class RelevanceClassifier(Protocol):

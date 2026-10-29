@@ -1,4 +1,4 @@
-from app.db.repositories.memory_repository import InMemoryMemoryRepository
+from app.repositories.memory_repository import InMemoryMemoryRepository
 from app.schemas.memory import MemoryCreate, MemoryResponse
 
 

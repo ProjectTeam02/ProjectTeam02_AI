@@ -32,4 +32,4 @@
 
 사람이 검수한 100~200개 Gold Label이 준비되기 전에는 Precision, Recall, F1, TP, FP, FN을 계산하지 않는다. Keyword Only, Keyword+LLM, Vector, Hybrid 비교 코드는 Gold Label을 받은 뒤 연결할 수 있도록 `app/evaluation/relevance.py`에 준비했다.
 
-문제 생성 쪽은 `app/services/question_generation.py`에서 승인된 근거가 없으면 `BLOCKED_NO_APPROVED_EVIDENCE`, 근거와 blueprint가 있으면 `DRAFT_READY`만 반환한다. 실제 LLM 호출·문제 승인·채점·보상은 수행하지 않는다.
+문제 생성 쪽은 `app/question_generation/generator.py`에서 승인된 근거가 없으면 `BLOCKED_NO_APPROVED_EVIDENCE`, 근거와 blueprint가 있으면 `DRAFT_READY`만 반환한다. 실제 LLM 호출·문제 승인·채점·보상은 수행하지 않는다.

@@ -1,47 +1,24 @@
-from collections.abc import AsyncGenerator
+"""Compatibility facade for the renamed database connection module.
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+The ``_engine`` alias is intentionally retained because local tests and older
+scripts monkeypatch it for database-free table ownership checks.
+"""
 
-from app.core.config import get_settings
-from app.db.models import (
-    AIUserMemory,
-    Base,
-    RAGChunk,
-    RAGDocument,
-    RAGIndexConfiguration,
-)
+from app.db import connection as _connection
 
-_engine = create_async_engine(get_settings().database_url, pool_pre_ping=True)
-_session_factory = async_sessionmaker(_engine, expire_on_commit=False)
+_engine = _connection._engine
 
-
-def session_factory() -> AsyncSession:
-    return _session_factory()
-
-
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with _session_factory() as session:
-        yield session
+session_factory = _connection.session_factory
+get_session = _connection.get_session
+dispose_engine = _connection.dispose_engine
 
 
 async def create_tables() -> None:
-    """Create only FastAPI-owned local tables.
+    original_engine = _connection._engine
+    _connection._engine = _engine
+    try:
+        await _connection.create_tables()
+    finally:
+        _connection._engine = original_engine
 
-    ``ai_conversations``, ``ai_messages``, ``ai_message_sources`` and
-    ``ai_requests`` belong to Node.js according to the current ERD. They remain
-    mapped for legacy compatibility but are deliberately excluded here.
-    Production deployments should use the backend migration owner instead of
-    calling this helper.
-    """
-    tables = [
-        AIUserMemory.__table__,
-        RAGDocument.__table__,
-        RAGChunk.__table__,
-        RAGIndexConfiguration.__table__,
-    ]
-    async with _engine.begin() as connection:
-        await connection.run_sync(Base.metadata.create_all, tables=tables)
-
-
-async def dispose_engine() -> None:
-    await _engine.dispose()
+__all__ = ["create_tables", "dispose_engine", "get_session", "session_factory"]
