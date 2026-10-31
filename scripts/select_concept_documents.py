@@ -12,7 +12,7 @@ import csv
 import json
 from pathlib import Path
 
-from app.ingestion.mentor_dataset import (
+from app.question_generation.dataset import (
     inspect_terms_dataset,
     read_terms_for_candidates,
     select_c0704_candidates,

@@ -1,8 +1,5 @@
-from fastapi import APIRouter
+"""Compatibility import for the pre-v1 router path."""
 
-router = APIRouter(tags=["health"])
+from app.api.v1.routers.health import router
 
-
-@router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+__all__ = ["router"]

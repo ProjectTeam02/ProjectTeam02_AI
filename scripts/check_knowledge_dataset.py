@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from app.ingestion.mentor_dataset import inspect_terms_dataset
+from app.question_generation.dataset import inspect_terms_dataset
 
 
 def main() -> None:

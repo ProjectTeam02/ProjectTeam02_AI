@@ -5,21 +5,21 @@ from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import ConfigurationError
-from app.db.postgres import get_session
-from app.db.repositories.memory_repository import MemoryRepository
-from app.ingestion.bok_terms_loader import BOKTermCatalog
+from app.db.connection import get_session
 from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
-from app.rag.llamaindex.llm_factory import LLMFactory
-from app.rag.llamaindex.retriever import LlamaIndexRetriever
+from app.rag.indexing.llm_factory import LLMFactory
+from app.rag.ingestion.bok_terms_loader import BOKTermCatalog
 from app.rag.memory.context_builder import ContextBuilder
 from app.rag.memory.history_manager import (
     HistoryManager,
     InMemoryConversationRepository,
 )
-from app.rag.pipelines.multiturn_rag import MultiTurnRAG
-from app.rag.query.query_rewriter import QueryRewriter
+from app.rag.pipeline import MultiTurnRAG
+from app.rag.retrieval.llamaindex_retriever import LlamaIndexRetriever
+from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
+from app.repositories.memory_repository import MemoryRepository
 from app.services.memory_service import MemoryService
 from app.services.tutor_service import TutorService
 

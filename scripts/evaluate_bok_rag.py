@@ -11,9 +11,9 @@ from time import perf_counter
 
 from app.core.config import get_settings
 from app.evaluation.rag_metrics import evaluate_retrieval
-from app.ingestion.bok_terms_loader import BOKTermCatalog
-from app.rag.llamaindex.retriever import LlamaIndexRetriever
-from app.rag.query.query_rewriter import QueryRewriter
+from app.rag.ingestion.bok_terms_loader import BOKTermCatalog
+from app.rag.retrieval.llamaindex_retriever import LlamaIndexRetriever
+from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
 
 

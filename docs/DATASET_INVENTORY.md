@@ -22,7 +22,7 @@
 | `data/bok_terms_2026_rag.jsonl` | 789 | 기존 BOK 전용 RAG 입력 | 검토 보류 자동 제외 |
 | `data/bok_extraction_report.json` | 1 | 추출 품질 보고서 | 읽기 전용 |
 
-이 BOK 데이터는 멘토 통합 데이터셋의 대체 입력으로 사용하지 않았다. BOK 로더(`app/ingestion/bok_terms_loader.py`)는 기존 API 호환성을 위해 유지된다.
+이 BOK 데이터는 멘토 통합 데이터셋의 대체 입력으로 사용하지 않았다. BOK 로더(`app/rag/ingestion/bok_terms_loader.py`)는 RAG ingestion 계층에서 유지된다.
 
 ## 현재 로컬 DB 읽기 전용 확인
 

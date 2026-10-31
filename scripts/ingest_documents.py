@@ -10,11 +10,11 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from app.db.postgres import session_factory
-from app.db.repositories.rag_repository import RAGDocumentRepository
-from app.ingestion.bok_terms_loader import load_bok_terms, validate_bok_dataset
-from app.ingestion.document_loader import discover_documents, load_manifest
-from app.rag.llamaindex.indexer import DocumentIndexer
+from app.db.connection import session_factory
+from app.rag.indexing.indexer import DocumentIndexer
+from app.rag.ingestion.bok_terms_loader import load_bok_terms, validate_bok_dataset
+from app.rag.ingestion.document_loader import discover_documents, load_manifest
+from app.repositories.rag_repository import RAGDocumentRepository
 
 
 async def run(
