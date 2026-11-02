@@ -112,6 +112,58 @@ docker compose up --build
 
 provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E는 검증할 수 없습니다. 이 경우 단위/계약 테스트와 offline/deterministic 설정을 사용하되, 운영 품질이 검증되었다고 간주하지 않습니다.
 
+### 라벨 품질·메타데이터 감사
+
+`라벨링.xlsx`가 제공되면 다음 명령이 원본을 수정하지 않고 중복 ID, 빈 필드,
+평가자 불일치, 골드 비교, 판정 근거, 지정 재검토 용어를 검사합니다.
+
+```bash
+.venv/bin/python scripts/validate_label_quality.py
+.venv/bin/python scripts/rebuild_precision_pipeline.py
+.venv/bin/python scripts/audit_metadata.py
+```
+
+`rebuild_precision_pipeline.py`는 로컬의 `라벨링.xlsx`를 기준으로 문자 수·토큰 수,
+0/1/2점 분포, 평가자 A/B 일치율, 문제 생성·튜터 검색 정책별 기준선, 기본/확장
+키워드의 Precision·Recall·F1을 계산합니다. LLM API 호출은 수행하지 않으며,
+현재 골드 라벨은 독립 검증 전의 참고 세트로 표시됩니다.
+
+생성된 행 단위 후보·검수 큐 CSV는 원문을 포함할 수 있으므로 로컬의
+`data/labeled/precision/`에만 보관하고 Git에는 추적하지 않습니다. 후보 점수는
+관련도 확률이 아닙니다. 요약 결과는 `reports/precision_pipeline_report.md`와
+`reports/precision_pipeline_summary.json`에서 확인할 수 있습니다.
+
+멘토·교수님에게 실험 과정을 순서대로 보여줄 때는
+[`notebook/precision_eda.ipynb`](notebook/precision_eda.ipynb)를 실행합니다.
+
+### 소규모 LLM 정밀 분류 파일럿
+
+`precision_eda.ipynb`의 LLM 파일럿 셀은 현재 모델의 기존 결과가 있으면 이를
+재사용하고, 결과가 없을 때만 10건의 소규모 호출을 실행합니다. 매번 새로
+호출하려면 Notebook의 `FORCE_RERUN_LLM = True`를 사용합니다. 먼저 비용과
+입력 토큰을 확인하려면 다음 명령을 실행합니다.
+
+```bash
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10
+```
+
+실제 OpenRouter 호출은 소규모 샘플에 대해서만 명시적으로 `--execute`를 붙여
+실행합니다. 결과 원문은 Git에 올리지 않는 `data/labeled/precision/`에 저장됩니다.
+
+```bash
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10 --execute
+```
+
+모델 결과의 `review_status`는 자동 승인하지 않고 항상 `PENDING`으로 저장합니다.
+현재 Excel 골드는 독립 평가셋이 아니므로 파일럿 결과만으로 Precision·Recall을
+주장하지 않습니다.
+Notebook은 기존 파이프라인 모듈을 호출해 같은 결과를 재현하고, 골드 분포와
+전략별 Precision·Recall을 표와 그래프로 확인할 수 있습니다.
+메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
+`reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
+평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
+`reports/evaluation_plan.md`에 정리되어 있습니다.
+
 ## 프로젝트 구조
 
 ```text

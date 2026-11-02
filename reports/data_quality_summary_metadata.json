@@ -1,0 +1,122 @@
+{
+  "status": "EXECUTED_WITH_AVAILABLE_ARTIFACTS",
+  "source_files": [
+    {
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/processed/normalized_documents.jsonl",
+      "row_count": 3539,
+      "coverage": {
+        "keyword": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "root_topic": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "relation_type": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "summary": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        }
+      },
+      "legacy_alias_columns": {
+        "keyword": [
+          "title"
+        ],
+        "summary": [
+          "content"
+        ]
+      }
+    },
+    {
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/processed/chunks.jsonl",
+      "row_count": 3545,
+      "coverage": {
+        "keyword": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "root_topic": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "relation_type": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "summary": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        }
+      },
+      "legacy_alias_columns": {
+        "keyword": [
+          "title"
+        ],
+        "summary": [
+          "content"
+        ]
+      }
+    },
+    {
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/reports/step3/keyword_predictions.csv",
+      "row_count": 789,
+      "coverage": {
+        "keyword": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "root_topic": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "relation_type": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        },
+        "summary": {
+          "source_columns": [],
+          "populated_count": 0,
+          "coverage_rate": 0.0
+        }
+      },
+      "legacy_alias_columns": {
+        "keyword": [
+          "term"
+        ],
+        "summary": []
+      }
+    }
+  ],
+  "required_field_audit": {
+    "keyword": [
+      "keyword"
+    ],
+    "root_topic": [
+      "root_topic",
+      "rootTopic"
+    ],
+    "relation_type": [
+      "relation_type",
+      "relationType"
+    ],
+    "summary": [
+      "summary"
+    ]
+  },
+  "conclusion": "현재 파일에서는 keyword/root_topic/relation_type/summary의 완전한 원천 메타데이터 세트를 확인하지 못했습니다."
+}

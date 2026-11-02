@@ -45,6 +45,17 @@ def build_classification_prompt(
     chunk: dict[str, Any], chapter: dict[str, Any], prompt_version: str = "llm-v1"
 ) -> str:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    # 모델은 분류값만 반환하고, 모델명·시각·검수상태는 실행 코드가 기록합니다.
+    required_fields = CLASSIFICATION_OUTPUT_SCHEMA["required"]
+    model_output_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": required_fields,
+        "properties": {
+            name: CLASSIFICATION_OUTPUT_SCHEMA["properties"][name]
+            for name in required_fields
+        },
+    }
     payload = {
         "chunk_id": chunk.get("chunk_id"),
         "title": chunk.get("title"),
@@ -63,7 +74,11 @@ def build_classification_prompt(
         "chunk for the supplied chapter. A relevance score is a rubric score, "
         "not a probability or measured accuracy. Use only evidence in the chunk. "
         "If evidence is insufficient, set needs_review=true. Return JSON only "
-        f"conforming to the supplied schema. Prompt version: {prompt_version}.\n"
+        "with every required field below. Do not omit fields or return a "
+        "Markdown code block. Prompt version: "
+        f"{prompt_version}.\n\nOutput JSON schema:\n"
+        + json.dumps(model_output_schema, ensure_ascii=False, indent=2)
+        + "\n\nInput:\n"
         + json.dumps(payload, ensure_ascii=False, indent=2)
     )
 

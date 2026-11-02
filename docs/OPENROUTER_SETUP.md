@@ -9,7 +9,7 @@
 ```dotenv
 OPENROUTER_API_KEY=sk-or-v1-<local-secret>
 LLM_PROVIDER=openrouter
-LLM_MODEL=openai/gpt-4o-mini
+LLM_MODEL=openai/gpt-5.6-sol
 LLM_BASE_URL=https://openrouter.ai/api/v1
 EMBEDDING_PROVIDER=openrouter
 EMBEDDING_MODEL=openai/text-embedding-3-small

@@ -10,3 +10,12 @@ data/*
 !data/.gitkeep
 !data/README.md
 .idea/
+
+# Codex 플러그인에서 제공되는 SKILL.md는 프로젝트 소스에 포함하지 않습니다.
+SKILL.md
+
+# 원본·라벨링 파일과 생성된 행 단위 결과는 로컬에서만 보관합니다.
+*.xlsx
+*.xls
+reports/**/*.csv
+data/**/*.csv
