@@ -205,7 +205,34 @@ def _canonical_path(paths: Iterable[Path]) -> Path:
 
 def load_corpus(data_dir: Path) -> tuple[list[NormalizedDocument], dict[str, Any]]:
     """Load one canonical export per source and return an audit inventory."""
-    files = discover_dataset_files(data_dir)
+    local_files = discover_dataset_files(data_dir)
+    files = list(local_files)
+    # 로컬 개발 환경에서는 기관별 미러 파일이 data/와 저장소 루트에
+    # 나뉘어 들어올 수 있습니다. data/ 내부 파일은 다시 세지 않고,
+    # 루트의 외부 파일은 기관·확장자별로 보완합니다.
+    if data_dir.name == "data":
+        external_files = [
+            path
+            for path in discover_dataset_files(data_dir.parent)
+            if not path.is_relative_to(data_dir)
+        ]
+        files.extend(external_files)
+
+    # 같은 기관·같은 확장자의 복사본이 여러 위치에 있으면 data/ 쪽을
+    # 우선하고, 각 확장자는 무결성 비교를 위해 한 번만 inventory에 넣습니다.
+    selected: dict[tuple[str, str], Path] = {}
+    for path in files:
+        source = source_for_path(path)
+        if source is None:
+            continue
+        key = (source, path.suffix.lower())
+        preferred = selected.get(key)
+        if preferred is None:
+            selected[key] = path
+            continue
+        if path.is_relative_to(data_dir) and not preferred.is_relative_to(data_dir):
+            selected[key] = path
+    files = sorted(selected.values())
     if not files:
         raise FileNotFoundError(
             "No dataset exports found. Place the KDI and BOK JSON/JSONL files "

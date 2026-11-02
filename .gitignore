@@ -17,5 +17,9 @@ SKILL.md
 # 원본·라벨링 파일과 생성된 행 단위 결과는 로컬에서만 보관합니다.
 *.xlsx
 *.xls
+/kdi 시사경제용어/
+/한국은행/
 reports/**/*.csv
 data/**/*.csv
+# 실행 중간 확인용 전체 데이터셋 출력은 canonical reports/pipeline만 사용합니다.
+/reports/pipeline_full/

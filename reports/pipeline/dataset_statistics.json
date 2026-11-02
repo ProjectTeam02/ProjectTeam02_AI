@@ -8,12 +8,12 @@
     "exact": true
   },
   "inventory": {
-    "data_dir": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data",
+    "data_dir": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI",
     "file_count": 4,
     "files": [
       {
         "source": "BOK",
-        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/한국은행/bok_terms_2026.json",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
         "format": "json",
         "record_count": 789,
         "file_sha256": "c9fef5ecbb42b30abac59639b61a9e2228bad0522ceed8e2b9e48e3b04cca633",
@@ -21,7 +21,7 @@
       },
       {
         "source": "BOK",
-        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/한국은행/bok_terms_2026_rag.jsonl",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
         "format": "jsonl",
         "record_count": 789,
         "file_sha256": "f80c85cd65665c55538a4eeb50388950920db615e19512c4d6a0afef51369f84",
@@ -29,7 +29,7 @@
       },
       {
         "source": "KDI",
-        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi 시사경제용어/kdi_terms.json",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
         "format": "json",
         "record_count": 2750,
         "file_sha256": "f28e8007b1e42e17804d0ad8c75363b2ce30358d67fb960fc4ba0caf40c13624",
@@ -37,7 +37,7 @@
       },
       {
         "source": "KDI",
-        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi 시사경제용어/kdi_terms.jsonl",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
         "format": "jsonl",
         "record_count": 2750,
         "file_sha256": "603523cd38a2a2ef7ac8b4f3332c7a4f6aa02f5d307142ed338c384f791de5bb",
@@ -47,8 +47,8 @@
     "duplicate_audit": [
       {
         "source": "BOK",
-        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/한국은행/bok_terms_2026_rag.jsonl",
-        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/한국은행/bok_terms_2026.json",
+        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
+        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
         "canonical_records": 789,
         "alternate_records": 789,
         "same_id_count": 789,
@@ -57,8 +57,8 @@
       },
       {
         "source": "KDI",
-        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi 시사경제용어/kdi_terms.jsonl",
-        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi 시사경제용어/kdi_terms.json",
+        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
+        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
         "canonical_records": 2750,
         "alternate_records": 2750,
         "same_id_count": 2750,
@@ -305,6 +305,6 @@
   "chapter_config_status": "DRAFT_NOT_CANONICAL",
   "visualizations": {
     "status": "GENERATED",
-    "directory": "reports/pipeline/figures"
+    "directory": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/reports/pipeline/figures"
   }
 }
