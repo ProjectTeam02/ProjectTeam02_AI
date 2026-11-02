@@ -30,6 +30,7 @@ from app.dataset_pipeline.evaluation import (  # noqa: E402
     precision_recall_f1,
     validate_relevance_score,
 )
+from app.dataset_pipeline.io import load_corpus  # noqa: E402
 from app.dataset_pipeline.keywords import Chapter, classify_chunk_by_keywords  # noqa: E402
 from app.dataset_pipeline.labels import (  # noqa: E402
     analyze_label_rows,
@@ -91,6 +92,34 @@ def _load_chapter(path: Path) -> Chapter:
     if not chapters:
         raise ValueError(f"{path}에 챕터가 없습니다.")
     return Chapter.from_dict(chapters[0])
+
+
+def _canonical_source_records(data_dir: Path) -> dict[str, dict[str, Any]]:
+    """Load both KDI and BOK source records without counting mirror exports twice."""
+    documents, _ = load_corpus(data_dir)
+    return {
+        document.document_id: {
+            "row_number": None,
+            "document_id": document.document_id,
+            "title": document.title,
+            "content": document.content,
+            "source": document.source,
+            "source_group": document.source,
+            "source_locator": document.source_locator or "",
+            "gold_score": None,
+            "reviewer_a": None,
+            "reviewer_b": None,
+            "quality": document.source_review_status,
+            "quality_flag": "",
+            "quiz_suitable": None,
+            "tutor_suitable": None,
+            "reason": "",
+            "keyword_label": "",
+            "binary_label": "",
+            "b_review": "",
+        }
+        for document in documents
+    }
 
 
 def _independent_gold_status(
@@ -299,9 +328,7 @@ def _hybrid_prediction(
     # 후보 밖의 문서를 결과에서 삭제하지 않고 명시적 음성으로 남겨
     # 세 가지 방식이 동일한 평가 모집단을 사용하도록 합니다.
     predictions = {document_id: False for document_id in evaluation_ids}
-    predictions.update(
-        _threshold_prediction(llm_results, threshold, candidate_ids)
-    )
+    predictions.update(_threshold_prediction(llm_results, threshold, candidate_ids))
     return predictions
 
 
@@ -415,6 +442,7 @@ def run(
     plot_path: Path = DEFAULT_PLOT,
     thresholds: Iterable[float] = DEFAULT_THRESHOLDS,
     tokenizer_name: str = "gpt-4o-mini",
+    data_dir: Path = ROOT / "data",
 ) -> dict[str, Any]:
     """Run a dry-run or final comparison when an independent Gold Set exists."""
     workbook = workbook_path
@@ -428,16 +456,21 @@ def run(
     records = _records(rows, analysis["detected_columns"])
     chapter = _load_chapter(chapter_path)
     tokenizer = ExactTokenizer(tokenizer_name)
-    source_rows = {record["document_id"]: record for record in records}
-    keyword_rows = _keyword_predictions(records, chapter, tokenizer)
+    # Gold가 KDI와 BOK를 함께 포함할 수 있도록 canonical corpus를 기본 입력으로
+    # 사용합니다. Excel의 KDI 행은 동일 ID의 canonical 행보다 우선합니다.
+    try:
+        source_rows = _canonical_source_records(data_dir)
+    except (FileNotFoundError, ValueError):
+        source_rows = {}
+    source_rows.update({record["document_id"]: record for record in records})
+    source_records = list(source_rows.values())
+    keyword_rows = _keyword_predictions(source_records, chapter, tokenizer)
     keyword_map = {row["document_id"]: row["keyword_candidate"] for row in keyword_rows}
     llm_results = _load_llm_results(llm_results_path)
     gold_status = _independent_gold_status(gold_path)
     source_hashes = {
-        record["document_id"]: hashlib.sha256(
-            record["content"].encode("utf-8")
-        ).hexdigest()
-        for record in records
+        document_id: hashlib.sha256(record["content"].encode("utf-8")).hexdigest()
+        for document_id, record in source_rows.items()
     }
     hash_mismatch_ids = [
         _text(row.get("document_id"))
@@ -517,9 +550,15 @@ def run(
         _write_failure_rows(failures_path, {}, {}, source_rows)
 
     readiness = {
-        "source_row_count": len(records),
+        "source_row_count": len(source_rows),
         "keyword_candidate_count": len(candidate_ids),
-        "keyword_candidate_rate": len(candidate_ids) / len(records) if records else 0,
+        "keyword_candidate_unit": (
+            "document_id; each source record is evaluated as one lineage-preserving "
+            "anchor chunk"
+        ),
+        "keyword_candidate_rate": len(candidate_ids) / len(source_rows)
+        if source_rows
+        else 0,
         "llm_result_count": len(llm_ids),
         "llm_coverage_of_source": len(llm_ids & set(source_rows)) / len(source_rows)
         if source_rows
@@ -547,6 +586,7 @@ def run(
             "curriculum_status", "UNKNOWN"
         ),
         "input_file": _display_path(workbook),
+        "source_corpus": _display_path(data_dir),
         "gold_set": {key: value for key, value in gold_status.items() if key != "rows"},
         "readiness": readiness,
         "thresholds": thresholds,
@@ -654,6 +694,7 @@ def main() -> None:
     parser.add_argument("--failures", type=Path, default=DEFAULT_FAILURES)
     parser.add_argument("--plot", type=Path, default=DEFAULT_PLOT)
     parser.add_argument("--threshold", type=float, action="append", dest="thresholds")
+    parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
     args = parser.parse_args()
     result = run(
         workbook_path=args.workbook,
@@ -665,6 +706,7 @@ def main() -> None:
         failures_path=args.failures,
         plot_path=args.plot,
         thresholds=args.thresholds or DEFAULT_THRESHOLDS,
+        data_dir=args.data_dir,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

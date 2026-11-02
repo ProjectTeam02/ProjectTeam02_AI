@@ -1,9 +1,10 @@
 {
   "status": "DRY_RUN_INDEPENDENT_GOLD_REQUIRED",
-  "generated_at": "2026-11-02T13:33:42.093286+00:00",
+  "generated_at": "2026-11-02T17:31:23.593024+00:00",
   "chapter_id": "inflation",
   "chapter_config_status": "DRAFT_NOT_CANONICAL",
-  "input_file": "라벨링.xlsx",
+  "input_file": "data/라벨링.xlsx",
+  "source_corpus": "data",
   "gold_set": {
     "status": "MISSING",
     "path": "reports/independent_gold_test.csv",
@@ -12,12 +13,13 @@
     "valid_row_count": 0
   },
   "readiness": {
-    "source_row_count": 160,
-    "keyword_candidate_count": 5,
-    "keyword_candidate_rate": 0.03125,
+    "source_row_count": 3539,
+    "keyword_candidate_count": 148,
+    "keyword_candidate_unit": "document_id; each source record is evaluated as one lineage-preserving anchor chunk",
+    "keyword_candidate_rate": 0.041819723085617405,
     "llm_result_count": 10,
-    "llm_coverage_of_source": 0.0625,
-    "llm_coverage_of_keyword_candidates": 1.0,
+    "llm_coverage_of_source": 0.0028256569652444193,
+    "llm_coverage_of_keyword_candidates": 0.033783783783783786,
     "non_candidate_llm_sample_count": 5,
     "hybrid_non_candidate_sample_is_diagnostic_only": true
   },

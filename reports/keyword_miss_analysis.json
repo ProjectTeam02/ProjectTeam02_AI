@@ -1,9 +1,9 @@
 {
   "status": "REFERENCE_DIAGNOSTIC_ONLY",
   "warning": "현재 확정 골드는 독립 Gold가 아니므로 성능·테스트 튜닝에 사용하지 않음",
-  "total_documents": 160,
-  "keyword_candidate_count": 5,
-  "keyword_candidate_rate": 0.03125,
+  "total_documents": 320,
+  "keyword_candidate_count": 51,
+  "keyword_candidate_rate": 0.159375,
   "reference_positive_misses_count": 57,
   "reference_positive_misses_by_score": {
     "2": 2,
@@ -167,10 +167,11 @@
     }
   ],
   "source_distribution": {
+    "BOK": 160,
     "KDI": 160
   },
-  "reviewer_disagreement_count": 10,
-  "quality_review_row_count": 7,
+  "reviewer_disagreement_count": 102,
+  "quality_review_row_count": 17,
   "miss_examples": [
     {
       "document_id": "kdi_dic_723",

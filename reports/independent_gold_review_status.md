@@ -5,10 +5,10 @@
 - 평가 상태: **`NOT_EVALUATED`**
 - 사유: 독립 합의 Gold가 아직 생성되지 않았습니다.
 - 검수 큐: `data/labeled/precision/independent_gold_review_queue.csv`
-- 검수 행 수: **160건**
-- 개발셋/테스트셋: `{'test': 27, 'development': 133}`
-- 출처 그룹: `['KDI']`
-- 현재 입력의 BOK 포함 여부: **False**
+- 검수 행 수: **320건**
+- 개발셋/테스트셋: `{'development': 270, 'test': 50}`
+- 출처 그룹: `['BOK', 'KDI']`
+- 현재 입력의 BOK 포함 여부: **True**
 
 ## 독립성 보호 규칙
 
