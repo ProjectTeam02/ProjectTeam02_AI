@@ -1,5 +1,7 @@
+# 로컬 개발용 AI 서버와 PostgreSQL/pgvector 데이터베이스를 함께 실행합니다.
 services:
   ai:
+    # FastAPI AI 서버 컨테이너입니다.
     build: .
     ports:
       - "8000:8000"
@@ -11,6 +13,7 @@ services:
       - db
 
   db:
+    # 벡터 검색을 지원하는 PostgreSQL 이미지입니다.
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: postgres

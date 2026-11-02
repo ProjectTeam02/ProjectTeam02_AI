@@ -1,3 +1,4 @@
+# 파일 역할: 검색 및 데이터 선별 결과의 평가 지표를 계산합니다.
 """Hybrid relevance classification interfaces and offline evaluation helpers.
 
 Only the deterministic keyword classifier is executable without an approved
@@ -14,6 +15,7 @@ from app.question_generation.dataset import select_c0704_candidates
 
 
 class RelevanceClassifier(Protocol):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     version: str
 
     def classify(self, row: dict[str, Any], concept_code: str) -> dict[str, Any]: ...
@@ -21,6 +23,7 @@ class RelevanceClassifier(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class ClassificationMetrics:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     status: str
     tp: int = 0
     fp: int = 0
@@ -31,6 +34,7 @@ class ClassificationMetrics:
     reason: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return asdict(self)
 
 
@@ -42,6 +46,7 @@ class KeywordRelevanceClassifier:
     def classify(
         self, row: dict[str, Any], concept_code: str = "C0704"
     ) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         candidates = select_c0704_candidates([row])
         if not candidates:
             return {
@@ -68,11 +73,13 @@ class LLMRelevanceClassifier:
     version = "llm-dry-run-v1"
 
     def __init__(self, client=None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.client = client
 
     def classify(
         self, row: dict[str, Any], concept_code: str = "C0704"
     ) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if self.client is None:
             raise RuntimeError(
                 "LLM relevance classification is not configured; no model call was made"

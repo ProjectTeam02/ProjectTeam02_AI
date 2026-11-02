@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "chunk_id",
+    "chapter_id",
+    "relevance_score",
+    "reason",
+    "subtopics",
+    "evidence_span",
+    "quiz_candidate",
+    "needs_review"
+  ],
+  "properties": {
+    "chunk_id": {"type": "string"},
+    "chapter_id": {"type": "string"},
+    "relevance_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "reason": {"type": "string"},
+    "subtopics": {"type": "array", "items": {"type": "string"}},
+    "evidence_span": {"type": ["string", "null"]},
+    "quiz_candidate": {"type": "boolean"},
+    "needs_review": {"type": "boolean"},
+    "model_name": {"type": "string"},
+    "classified_at": {"type": "string"},
+    "prompt_version": {"type": "string"},
+    "rubric_version": {"type": "string"},
+    "review_status": {
+      "type": "string",
+      "enum": ["PENDING", "APPROVED", "REJECTED", "NEEDS_REVISION"]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "design_status": "PROPOSAL_ONLY",
+  "identity_fields": {
+    "document_id": "string|required|stable source document identifier",
+    "source_id": "string|required|source collection identifier",
+    "content_hash": "string|required|sha256(content), used for deduplication",
+    "document_version": "string|required|source version snapshot"
+  },
+  "provenance_fields": {
+    "source_url": "string|required when known",
+    "source_type": "enum:BOK,KDI,KOSIS,OpenDART,AI_HUB,LEREN,UNKNOWN",
+    "publisher": "string|nullable",
+    "printed_page": "integer|nullable"
+  },
+  "curriculum_fields": {
+    "chapter_label": "string|nullable|human-readable label only",
+    "concept_id": "string|nullable|must come from canonical curriculum",
+    "concept_code": "string|nullable|must come from canonical curriculum",
+    "stage_id": "string|nullable|must come from canonical curriculum",
+    "mapping_status": "enum:PENDING_HUMAN_REVIEW,APPROVED,NEEDS_REVIEW,IRRELEVANT",
+    "mapping_method": "enum:manual,keyword,llm,hybrid|nullable",
+    "evidence_sentence": "string|nullable|reviewable source excerpt"
+  },
+  "usage_fields": {
+    "usage_type": "enum:both_candidate,tutor_candidate,question_candidate,review_only,excluded",
+    "tutor_allowed": "boolean|derived only after all gates pass",
+    "question_generation_allowed": "boolean|derived only after all gates pass"
+  },
+  "governance_fields": {
+    "source_review_status": "enum:approved,needs_review",
+    "mapping_review_status": "enum:approved,needs_review,irrelevant",
+    "license_status": "enum:approved,pending_review,unknown,rejected",
+    "reviewer": "string|nullable",
+    "reviewed_at": "datetime|nullable",
+    "review_note": "string|nullable"
+  },
+  "important_non_inventions": [
+    "Do not create chapter/concept/stage IDs from the label '인플레이션'.",
+    "C0704 and R07_S04 are code/test references only until a canonical curriculum file is supplied.",
+    "Do not treat current BOK review_status=approved as license or pedagogical approval."
+  ]
+}

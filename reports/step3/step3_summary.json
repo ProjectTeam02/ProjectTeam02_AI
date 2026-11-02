@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-10-29T12:29:18.443326+00:00",
+  "status": "STEP3A_REVIEW_DATA_READY",
+  "source_record_count": 789,
+  "source_sha256": "1af26782060923348847d96f96140558b45773b39f728bb13187144cf2b5b055",
+  "source_review_status_counts": {
+    "approved": 760,
+    "needs_review": 29
+  },
+  "keyword_prediction_counts": {
+    "DIRECT": 41,
+    "EXCLUDE": 735,
+    "INDIRECT": 13
+  },
+  "review_counts": {
+    "candidate_55": 55,
+    "boundary_50": 50,
+    "random_100": 100,
+    "combined": 205
+  },
+  "gold_label_counts": {
+    "approved": 0,
+    "needs_review": 0,
+    "irrelevant": 0
+  },
+  "gold_evaluation_status": "NOT_EVALUATED",
+  "curriculum": {
+    "paths_checked": [
+      "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/mentor_dataset/curriculum_full.json",
+      "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/curriculum.json",
+      "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/curriculum/curriculum_full.json"
+    ],
+    "canonical_file_found": false,
+    "design_doc_found": true,
+    "design_reference_ids": [
+      "C0704",
+      "R07_S04",
+      "C0701",
+      "C0703"
+    ],
+    "production_ids_confirmed": false
+  },
+  "enum_audit": {
+    "source_review_status": [
+      "approved",
+      "needs_review"
+    ],
+    "mapping_review_status_proposed": [
+      "approved",
+      "needs_review",
+      "irrelevant"
+    ],
+    "existing_keyword_classification_labels": [
+      "DIRECT",
+      "INDIRECT",
+      "EXCLUDE"
+    ],
+    "existing_candidate_review_status": "PENDING",
+    "conflict": "PENDING and DIRECT/INDIRECT/EXCLUDE are model/workflow outputs, not the same as Gold Label enums."
+  },
+  "chunk_embedding_design": "reports/step3/chunk_embedding_design.json",
+  "llm_calls": 0,
+  "db_writes": 0,
+  "source_data_modified": false
+}

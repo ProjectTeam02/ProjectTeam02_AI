@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 from app.core.config import Settings, get_settings
@@ -14,6 +15,7 @@ class IndexManager:
         vector_store_factory=None,
         embedding_factory=None,
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
         self.vector_store_factory = vector_store_factory or VectorStoreFactory(
             self.settings
@@ -24,6 +26,7 @@ class IndexManager:
         self._indexes = {}
 
     def get_or_create(self, collection: str | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         collection = collection or self.settings.vector_store_collection
         if collection not in self._indexes:
             from llama_index.core import VectorStoreIndex

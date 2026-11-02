@@ -1,0 +1,54 @@
+# 현재는 확정 커리큘럼이 아니라 후보 추출용 초안입니다.
+config_version: draft-2026-11-01
+# 멘토 검토 후 최종 커리큘럼으로 승격하기 전까지는 초안 상태로 유지합니다.
+curriculum_status: DRAFT_NOT_CANONICAL
+notes: >-
+  The repository does not contain the production curriculum file. This is an
+  editable pilot rubric for broad candidate extraction only; it is not a final
+  Leren chapter definition.
+chapters:
+  # 챕터별 정의와 키워드는 Python 코드가 아니라 설정으로 관리합니다.
+  - chapter_id: inflation
+    chapter_name: 물가와 인플레이션
+    chapter_definition: >-
+      물가 수준과 물가 상승률, 인플레이션의 측정·원인·종류·기대·정책
+      파급을 이해하는 경제 학습 범위.
+    include_criteria: >-
+      Include chunks that define inflation or deflation, explain price levels
+      or inflation measurement, causes, expectations, effects, or policy.
+    exclude_criteria: >-
+      Exclude incidental mentions, proper names or laws containing 인플레이션,
+      and chunks where prices are only an unrelated example.
+    keywords:
+      - 인플레이션
+      - 물가 상승
+      - 물가상승
+      - 물가 상승률
+      - 물가상승률
+      - 물가 수준
+      - 물가수준
+      - 소비자물가지수
+      - 소비자물가
+      - CPI
+    related_keywords:
+      - 생산자물가지수
+      - 근원인플레이션
+      - 기대인플레이션
+      - 실질 금리
+      - 실질금리
+      - 화폐 가치
+      - 화폐가치
+      - 디플레이션
+      - 디스인플레이션
+      - 스태그플레이션
+      - 수요견인 인플레이션
+      - 비용인상 인플레이션
+    opposite_keywords:
+      - 물가 하락
+      - 물가하락
+      - 디플레이션
+      - 디스인플레이션
+    exclude_keywords:
+      - 인플레이션감축법
+      - 인플레이션 감축법
+    rubric_version: inflation-rubric-draft-v1

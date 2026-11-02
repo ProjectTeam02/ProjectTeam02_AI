@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import re
@@ -8,6 +9,7 @@ from app.rag.retrieval.types import RetrievedDocument
 
 @dataclass(slots=True)
 class CitationValidationResult:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     valid: bool
     grounded: bool
     citations: list[RetrievedDocument]
@@ -26,12 +28,14 @@ class CitationValidator:
     )
 
     def __init__(self, approved_status: str = "approved", min_overlap: float = 0.08):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.approved_status = approved_status
         self.min_overlap = min_overlap
 
     def validate(
         self, answer: str, sources: list[RetrievedDocument] | list[str]
     ) -> bool:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not answer.strip():
             return False
         if not sources:
@@ -44,11 +48,13 @@ class CitationValidator:
     def validate_and_build(
         self, answer: str, sources: list[RetrievedDocument]
     ) -> CitationValidationResult:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._result(answer, sources)
 
     def _result(
         self, answer: str, sources: list[RetrievedDocument]
     ) -> CitationValidationResult:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         source_by_key = {source.citation_key(): source for source in sources}
         references = self._citation_pattern.findall(answer)
         unsupported = [
@@ -77,6 +83,7 @@ class CitationValidator:
         return CitationValidationResult(True, grounded, approved, [])
 
     def _has_claim_overlap(self, answer: str, sources: list[RetrievedDocument]) -> bool:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         answer_without_citations = self._citation_pattern.sub("", answer)
         answer_tokens = self._tokens(answer_without_citations)
         source_tokens = self._tokens(" ".join(source.content for source in sources))
@@ -89,4 +96,5 @@ class CitationValidator:
 
     @staticmethod
     def _tokens(text: str) -> set[str]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return set(re.findall(r"[A-Za-z0-9]{2,}|[가-힣]{2,}", text.lower()))

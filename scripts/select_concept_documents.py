@@ -1,3 +1,4 @@
+# 파일 역할: 데이터 분석·검증·생성 작업을 독립적으로 실행하는 CLI 스크립트입니다.
 """Select C0704 candidate documents from supplied local JSONL only.
 
 The output is a human review queue.  It is never an approval or an index
@@ -20,6 +21,7 @@ from app.question_generation.dataset import (
 
 
 def main() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--approved",

@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 from app.core.config import Settings, get_settings
@@ -7,6 +8,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 def _validate_model(provider: str, model: str, kind: str) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if not model.strip():
         raise ConfigurationError(f"{kind} model must not be empty")
     # OpenRouter uses provider-qualified model IDs (for example,
@@ -19,6 +21,7 @@ def _validate_model(provider: str, model: str, kind: str) -> None:
 
 
 def _api_key(settings: Settings, provider: str) -> str:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if provider == "openrouter":
         key = settings.openrouter_api_key
         if not key:
@@ -48,10 +51,13 @@ class OpenRouterLLM:
     """
 
     def __new__(cls, *args, **kwargs):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from llama_index.llms.openai import OpenAI
 
         class _OpenRouterOpenAI(OpenAI):
+            # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
             def _get_model_name(self) -> str:
+                # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
                 model_name = super()._get_model_name()
                 return model_name.split("/", 1)[1] if "/" in model_name else model_name
 
@@ -59,10 +65,13 @@ class OpenRouterLLM:
 
 
 class LLMFactory:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, settings: Settings | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
 
     def create(self):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if self.settings.llm_provider in {"none", "offline"}:
             return None
         provider = self.settings.llm_provider

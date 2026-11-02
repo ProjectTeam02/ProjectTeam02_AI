@@ -1,0 +1,27 @@
+# EDA와 후보 분류 파이프라인에서 사용하는 실행 설정입니다.
+tokenizer:
+  # 실제 호출 모델의 토크나이저와 맞춰 토큰 수를 측정합니다.
+  model_alias: gpt-4o-mini
+chunking:
+  # 문단 경계를 우선하되 이 토큰 상한을 넘으면 추가 분할합니다.
+  max_tokens: 700
+  # 긴 문서를 나눌 때 앞뒤 청크에 공유할 토큰 수입니다.
+  overlap_tokens: 100
+sampling:
+  # 키워드가 매칭되지 않은 자료를 무작위 검토할 표본 크기입니다.
+  unmatched_chunks: 100
+classification:
+  # LLM 분류 요청의 버전과 비용 산정용 기본 출력 길이입니다.
+  prompt_version: llm-classification-v1
+  expected_output_tokens: 180
+  requests_per_minute_assumption: 30
+  models:
+    # 가격이 확인되기 전까지는 비용을 숫자로 계산하지 않습니다.
+    - model: openai/gpt-4o-mini
+      input_usd_per_1m_tokens: null
+      output_usd_per_1m_tokens: null
+      price_status: UNCONFIRMED_CONFIG_REQUIRED
+    - model: openai/gpt-4.1-mini
+      input_usd_per_1m_tokens: null
+      output_usd_per_1m_tokens: null
+      price_status: UNCONFIRMED_CONFIG_REQUIRED

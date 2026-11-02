@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import asyncio
@@ -11,12 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class AnswerGenerator:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, llm=None, settings: Settings | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
         self.llm = llm
         self.last_usage: dict | None = None
 
     async def generate(self, query: str, context: ContextBundle | str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.last_usage = None
         if self.llm is None:
             return self._offline_answer(query, context)
@@ -41,6 +45,7 @@ class AnswerGenerator:
 
     @staticmethod
     def _extract_usage(response) -> dict | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         raw = getattr(response, "raw", None)
         usage = getattr(raw, "usage", None)
         if usage is None and isinstance(raw, dict):
@@ -55,6 +60,7 @@ class AnswerGenerator:
 
     @staticmethod
     def _prompt(query: str, context: ContextBundle | str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         context_text = (
             context.text if isinstance(context, ContextBundle) else str(context)
         )
@@ -75,6 +81,7 @@ class AnswerGenerator:
 
     @staticmethod
     def _offline_answer(query: str, context: ContextBundle | str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         documents = context.documents if isinstance(context, ContextBundle) else []
         if not documents:
             return (

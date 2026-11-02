@@ -1,3 +1,4 @@
+# 파일 역할: 환경 설정, 예외, 로깅 등 애플리케이션 공통 기능을 제공합니다.
 class AppError(Exception):
     """Base application exception."""
 

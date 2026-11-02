@@ -1,3 +1,4 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
 from __future__ import annotations
 
 import hashlib
@@ -13,6 +14,7 @@ from app.ingestion.mentor_dataset import (
 
 
 def _row(document_id: str, term: str, source: str = "BOK") -> dict:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     content = f"{term}의 정의와 물가상승률 설명"
     return {
         "document_id": document_id,
@@ -32,6 +34,7 @@ def _row(document_id: str, term: str, source: str = "BOK") -> dict:
 
 
 def test_missing_mentor_files_are_reported_without_substitution(tmp_path: Path) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     report = inspect_terms_dataset(
         tmp_path / "approved.jsonl", tmp_path / "review.jsonl"
     )
@@ -40,6 +43,7 @@ def test_missing_mentor_files_are_reported_without_substitution(tmp_path: Path) 
 
 
 def test_terms_inventory_detects_hashes_and_source_counts(tmp_path: Path) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     approved = tmp_path / "terms_approved.jsonl"
     review = tmp_path / "terms_needs_review.jsonl"
     approved.write_text(
@@ -56,6 +60,7 @@ def test_terms_inventory_detects_hashes_and_source_counts(tmp_path: Path) -> Non
 
 
 def test_c0704_selection_keeps_pending_and_excludes_ira_false_positive() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     unrelated = _row("bok-3", "금융시장")
     unrelated["content"] = "금융시장과 유동성에 대한 정의"
     unrelated["definition"] = unrelated["content"]
@@ -76,6 +81,7 @@ def test_c0704_selection_keeps_pending_and_excludes_ira_false_positive() -> None
 
 
 def test_keyword_classifier_and_gold_label_metrics_are_explicit() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     result = KeywordRelevanceClassifier().classify(_row("bok-1", "인플레이션"))
     assert result["classification_label"] == "DIRECT"
     assert result["review_status"] == "PENDING"
@@ -91,6 +97,7 @@ def test_keyword_classifier_and_gold_label_metrics_are_explicit() -> None:
 
 
 def test_curriculum_validator_checks_prerequisite_direction(tmp_path: Path) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     path = tmp_path / "curriculum_full.json"
     path.write_text(
         json.dumps(

@@ -1,3 +1,4 @@
+# 파일 역할: API와 RAG·저장소 사이의 서비스 업무 흐름을 조정합니다.
 from __future__ import annotations
 
 import asyncio
@@ -24,12 +25,15 @@ from app.schemas.tutor import (
 
 
 class TutorService:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, pipeline: MultiTurnRAG | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.pipeline = pipeline or MultiTurnRAG()
 
     async def answer(
         self, request: TutorRequest, authenticated_user_id: str | None = None
     ) -> TutorResponse:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if (
             authenticated_user_id is not None
             and request.user_id != authenticated_user_id
@@ -67,6 +71,7 @@ class TutorService:
     async def answer_internal(
         self, request: InternalTutorRequest
     ) -> InternalTutorResponse:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         settings = get_settings()
         generator = self.pipeline.answer_generator
         self._ensure_llm_available()
@@ -153,12 +158,14 @@ class TutorService:
 
     @staticmethod
     def _safe_score(score: float | None) -> float | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if score is None:
             return None
         score = float(score)
         return score if 0.0 <= score <= 1.0 else None
 
     def _ensure_llm_available(self) -> None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if isinstance(self.pipeline.answer_generator, AnswerGenerator):
             if self.pipeline.answer_generator.llm is None:
                 raise ConfigurationError(
@@ -176,6 +183,7 @@ class TutorService:
         retriever,
         settings,
     ) -> InternalTutorUsage:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         raw_usages = [
             getattr(query_rewriter, "last_usage", None),
             getattr(generator, "last_usage", None),
@@ -219,6 +227,7 @@ class TutorService:
 
     @staticmethod
     def _sum_usage(usages: list[dict | None], *keys: str) -> int | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         values: list[int] = []
         for usage in usages:
             if not usage:

@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-10-31T16:15:30.897326+00:00",
+  "status": "NOT_EVALUATED",
+  "method": "keyword-only",
+  "rule_version": "keyword-v1",
+  "source_record_count": 789,
+  "candidate_count": 54,
+  "non_exclude_candidate_count": 53,
+  "prediction_label_counts": {
+    "DIRECT": 39,
+    "EXCLUDE": 736,
+    "INDIRECT": 14
+  },
+  "labeled_count": 0,
+  "required_gold_count": 789,
+  "predictions_path": "reports/step2/inflation_keyword_predictions.csv",
+  "gold_template_path": "reports/step2/inflation_gold_label_template.csv",
+  "llm_calls": 0,
+  "db_writes": 0,
+  "metrics": null,
+  "reason": "Full human gold labels are required; blank or partial labels are not inferred."
+}

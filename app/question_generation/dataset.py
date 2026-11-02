@@ -1,3 +1,4 @@
+# 파일 역할: 문제 생성 대상 데이터와 문제 생성 계획을 관리합니다.
 """Read-only validation and candidate selection for the mentor dataset.
 
 The mentor files are intentionally not bundled with the repository.  These
@@ -35,6 +36,7 @@ class MentorDatasetError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class DatasetReport:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     status: str
     approved_path: str
     review_path: str
@@ -53,11 +55,13 @@ class DatasetReport:
     notes: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return asdict(self)
 
 
 @dataclass(frozen=True, slots=True)
 class CurriculumReport:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     status: str
     path: str
     region_count: int = 0
@@ -77,10 +81,12 @@ class CurriculumReport:
     notes: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return asdict(self)
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     rows: list[dict[str, Any]] = []
     for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
@@ -98,6 +104,7 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _source_type(row: dict[str, Any]) -> str:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     raw = " ".join(
         str(row.get(key, ""))
         for key in ("source_type", "publisher", "source_id", "source")
@@ -110,6 +117,7 @@ def _source_type(row: dict[str, Any]) -> str:
 
 
 def _duplicates(values: Iterable[str]) -> tuple[str, ...]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     counts = Counter(value for value in values if value)
     return tuple(sorted(value for value, count in counts.items() if count > 1))
 
@@ -268,6 +276,7 @@ def inspect_terms_dataset(
 
 
 def _flatten_stage_rows(regions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     stages: list[dict[str, Any]] = []
     for region in regions:
         for stage in region.get("stages") or region.get("stage_list") or []:
@@ -280,6 +289,7 @@ def _flatten_stage_rows(regions: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def validate_curriculum(path: Path) -> CurriculumReport:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if not path.is_file():
         return CurriculumReport(
             status="NOT_AVAILABLE",
@@ -328,6 +338,7 @@ def validate_curriculum(path: Path) -> CurriculumReport:
     visited: set[str] = set()
 
     def visit(node: str, stack: list[str]) -> None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if node in visiting:
             try:
                 cycles.update(stack[stack.index(node) :])
@@ -400,6 +411,7 @@ def validate_curriculum(path: Path) -> CurriculumReport:
 
 
 def _candidate_text(row: dict[str, Any]) -> str:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     values = [
         row.get("title"),
         row.get("term"),
@@ -474,6 +486,7 @@ def select_c0704_candidates(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def read_terms_for_candidates(path: Path) -> list[dict[str, Any]]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if not path.is_file():
         raise FileNotFoundError(path)
     return _read_jsonl(path)

@@ -1,3 +1,4 @@
+# 파일 역할: 환경 설정, 예외, 로깅 등 애플리케이션 공통 기능을 제공합니다.
 from functools import lru_cache
 
 from pydantic import Field, field_validator
@@ -5,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     app_name: str = "ProjectTeam02 AI"
     environment: str = "development"
     # docker-compose exposes PostgreSQL on host port 5433. Containers override
@@ -50,11 +52,13 @@ class Settings(BaseSettings):
     @field_validator("llm_provider", "embedding_provider")
     @classmethod
     def normalize_provider(cls, value: str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return value.strip().lower()
 
     @field_validator("openrouter_api_key", "openai_api_key", mode="before")
     @classmethod
     def normalize_optional_secret(cls, value: str | None) -> str | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if value is None:
             return None
         value = str(value).strip()
@@ -63,6 +67,7 @@ class Settings(BaseSettings):
     @field_validator("llm_model", "embedding_model")
     @classmethod
     def validate_model_name(cls, value: str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         value = value.strip()
         if not value:
             raise ValueError("model name must not be empty")
@@ -71,6 +76,7 @@ class Settings(BaseSettings):
     @field_validator("embedding_dimension", "retrieval_top_k", "context_max_tokens")
     @classmethod
     def positive_integer(cls, value: int) -> int:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if value <= 0:
             raise ValueError("must be greater than zero")
         return value
@@ -78,4 +84,5 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return Settings()

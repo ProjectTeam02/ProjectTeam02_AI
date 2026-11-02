@@ -1,3 +1,4 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -24,15 +25,19 @@ from app.services.tutor_service import TutorService
 
 @dataclass
 class FakeResponse:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     text: str
 
 
 class FakeAnswerGenerator:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, answer: str | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.answer = answer
         self.queries: list[str] = []
 
     async def generate(self, query, context):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.queries.append(query)
         if self.answer is not None:
             return self.answer
@@ -40,6 +45,7 @@ class FakeAnswerGenerator:
 
 
 def build_pipeline(generator=None, documents=None):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     history = HistoryManager()
     documents = (
         documents
@@ -67,6 +73,7 @@ def build_pipeline(generator=None, documents=None):
 
 @pytest.mark.asyncio
 async def test_first_and_follow_up_questions_keep_conversation_and_rewrite():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     pipeline = build_pipeline()
 
     first = await pipeline.run("user-1", "GDP가 뭐야?")
@@ -89,6 +96,7 @@ async def test_first_and_follow_up_questions_keep_conversation_and_rewrite():
 
 @pytest.mark.asyncio
 async def test_missing_and_foreign_conversation_are_rejected():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     pipeline = build_pipeline()
     first = await pipeline.run("user-1", "GDP가 뭐야?")
 
@@ -100,6 +108,7 @@ async def test_missing_and_foreign_conversation_are_rejected():
 
 @pytest.mark.asyncio
 async def test_no_search_result_returns_safe_answer_without_citation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     pipeline = build_pipeline(documents=[])
     result = await pipeline.run("user-1", "전혀 모르는 개념을 알려줘")
     assert result.citations == []
@@ -108,8 +117,11 @@ async def test_no_search_result_returns_safe_answer_without_citation():
 
 @pytest.mark.asyncio
 async def test_generation_failure_does_not_persist_partial_turn():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     class FailingGenerator:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         async def generate(self, query, context):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             raise GenerationError("timeout")
 
     pipeline = build_pipeline(generator=FailingGenerator())
@@ -122,6 +134,7 @@ async def test_generation_failure_does_not_persist_partial_turn():
 
 @pytest.mark.asyncio
 async def test_context_is_bounded_and_citation_rejects_unknown_chunk():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     context = ContextBuilder(max_tokens=100).build(
         history=[{"role": "user", "content": "x" * 1000}],
         retrieved_context=[],
@@ -138,6 +151,7 @@ async def test_context_is_bounded_and_citation_rejects_unknown_chunk():
 
 @pytest.mark.asyncio
 async def test_query_rewriter_only_uses_previous_topic():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     rewritten = await QueryRewriter().rewrite(
         "그럼 금리와 무슨 관계야?",
         [{"role": "user", "content": "인플레이션이 뭐야?"}],
@@ -147,6 +161,7 @@ async def test_query_rewriter_only_uses_previous_topic():
 
 
 def test_tutor_api_uses_authenticated_user_and_preserves_conversation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     pipeline = build_pipeline()
     service = TutorService(pipeline)
     app.dependency_overrides[get_tutor_service] = lambda: service

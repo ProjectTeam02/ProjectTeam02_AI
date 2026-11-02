@@ -1,0 +1,39 @@
+{
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "source": "data/bok_terms_2026_rag.jsonl",
+  "source_sha256": "1af26782060923348847d96f96140558b45773b39f728bb13187144cf2b5b055",
+  "population_count": 789,
+  "keyword_selected_count": 55,
+  "keyword_not_selected_count": 734,
+  "boundary_sample_count": 50,
+  "random_sample_count": 100,
+  "combined_review_count": 205,
+  "random_seed": 20261029,
+  "random_method": "random.Random(seed).sample(sorted(remaining_document_ids), 100)",
+  "boundary_method": "top 50 non-selected rows ranked by related economic context term score, then document_id",
+  "boundary_terms": [
+    "구매력",
+    "금리",
+    "기대",
+    "경기",
+    "공급",
+    "수요",
+    "실업",
+    "성장",
+    "소비",
+    "원자재",
+    "유가",
+    "임금",
+    "재정",
+    "통화",
+    "투자",
+    "환율"
+  ],
+  "review_document_id_sha256": "f32da74a47b95bddd0a39e560dcbed93f7ff23baeba03bff399a3452cbd83a10",
+  "general_population_recall_allowed": false,
+  "notes": [
+    "Gold labels are blank and must be entered by a human reviewer.",
+    "needs_review is deferred in binary relevance metrics, not treated as negative.",
+    "A sampled result is not an exact recall estimate for all 789 documents."
+  ]
+}

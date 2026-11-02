@@ -1,3 +1,4 @@
+# 파일 역할: 데이터 분석·검증·생성 작업을 독립적으로 실행하는 CLI 스크립트입니다.
 """Validate curriculum structure and prerequisite references read-only."""
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ from app.question_generation.dataset import validate_curriculum
 
 
 def main() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--path", type=Path, default=Path("data/mentor_dataset/curriculum_full.json")

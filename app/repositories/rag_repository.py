@@ -1,3 +1,4 @@
+# 파일 역할: 애플리케이션 저장소 계층에서 대화·메모리·RAG 데이터를 조회하고 저장합니다.
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -13,9 +14,11 @@ class RAGDocumentRepository:
     """Persist application-owned document metadata alongside the vector index."""
 
     def __init__(self, session: AsyncSession):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.session = session
 
     async def existing_content_hashes(self, hashes: Iterable[str]) -> set[str]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         values = list(hashes)
         if not values:
             return set()
@@ -25,6 +28,7 @@ class RAGDocumentRepository:
         return set(result.scalars().all())
 
     async def chunk_ids_for_documents(self, document_ids: Iterable[str]) -> list[str]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         values = list(document_ids)
         if not values:
             return []
@@ -40,6 +44,7 @@ class RAGDocumentRepository:
         embedding_model: str,
         embedding_dimension: int,
     ) -> None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         configuration = await self.session.get(RAGIndexConfiguration, collection_name)
         if configuration is None:
             self.session.add(

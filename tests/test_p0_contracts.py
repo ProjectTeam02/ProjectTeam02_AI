@@ -1,3 +1,4 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
 from __future__ import annotations
 
 import json
@@ -22,6 +23,7 @@ from app.services.tutor_service import TutorService
 
 
 def approved_rate_document() -> RetrievedDocument:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return RetrievedDocument(
         content="기준금리가 오르면 일반적으로 대출금리의 상승 압력이 커질 수 있습니다.",
         source="https://example.test/rate",
@@ -38,12 +40,15 @@ def approved_rate_document() -> RetrievedDocument:
 
 
 def internal_service() -> TutorService:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     class FakeGenerator:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         llm = object()
         model_id = "test-model"
         last_usage = {"prompt_tokens": 12, "completion_tokens": 8}
 
         async def generate(self, query, context):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             return (
                 "기준금리가 오르면 대출금리 상승 압력이 생길 수 있습니다. "
                 "[출처: DOC-RATE/DOC-RATE:1]"
@@ -58,6 +63,7 @@ def internal_service() -> TutorService:
 
 
 def test_internal_api_camel_case_contract_and_idempotency():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     service = internal_service()
     app.dependency_overrides[get_tutor_service] = lambda: service
     app.dependency_overrides[require_internal_api] = lambda: None
@@ -104,6 +110,7 @@ def test_internal_api_camel_case_contract_and_idempotency():
 
 
 def test_internal_api_rejects_missing_service_authentication():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     client = TestClient(app)
     response = client.post(
         "/internal/v1/tutor/answer",
@@ -120,6 +127,7 @@ def test_internal_api_rejects_missing_service_authentication():
 
 @pytest.mark.asyncio
 async def test_rewriter_does_not_pollute_unrelated_short_question():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     history = [{"role": "user", "content": "기준금리가 뭐야?"}]
     rewritten = await QueryRewriter().rewrite("환율이 뭐야?", history)
     assert rewritten == "환율이 뭐야?"
@@ -129,6 +137,7 @@ async def test_rewriter_does_not_pollute_unrelated_short_question():
 
 @pytest.mark.asyncio
 async def test_retriever_filters_unapproved_and_concept_stage():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     approved = approved_rate_document()
     draft = RetrievedDocument(
         content="기준금리 초안",
@@ -148,6 +157,7 @@ async def test_retriever_filters_unapproved_and_concept_stage():
 
 
 def test_grounding_requires_claim_overlap_and_real_citation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     source = approved_rate_document()
     validator = CitationValidator(min_overlap=0.2)
     unrelated = validator.validate_and_build(
@@ -164,8 +174,11 @@ def test_grounding_requires_claim_overlap_and_real_citation():
 
 @pytest.mark.asyncio
 async def test_pipeline_removes_case_insensitive_fabricated_citation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     class FabricatingGenerator:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         async def generate(self, query, context):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             return "근거 없는 답변 [Source: OTHER/unknown]"
 
     pipeline = MultiTurnRAG(
@@ -180,6 +193,7 @@ async def test_pipeline_removes_case_insensitive_fabricated_citation():
 
 
 def test_manifest_loader_requires_metadata_and_preserves_fields(tmp_path):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     (tmp_path / "rate.md").write_text("기준금리 설명\n\n\n검수 문서", encoding="utf-8")
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
@@ -211,6 +225,7 @@ def test_manifest_loader_requires_metadata_and_preserves_fields(tmp_path):
 
 
 def test_retrieval_metrics_and_comparison():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     result = evaluate_retrieval([(["wrong", "right"], {"right"})], k=2)
     assert result.recall_at_k == 1.0
     assert result.mrr == 0.5
@@ -224,44 +239,60 @@ def test_retrieval_metrics_and_comparison():
 
 @pytest.mark.asyncio
 async def test_indexer_writes_metadata_and_replaces_old_nodes():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     class FakeVectorStore:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.deleted: list[str] = []
 
         async def adelete_nodes(self, node_ids):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.deleted.extend(node_ids)
 
     class FakeIndex:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.vector_store = FakeVectorStore()
             self.nodes = []
 
         async def ainsert_nodes(self, nodes):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.nodes.extend(nodes)
 
     class FakeManager:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.index = FakeIndex()
 
         def get_or_create(self, collection):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             assert collection == "test_collection"
             return self.index
 
     class FakeRepository:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.saved = []
             self.configuration = None
 
         async def ensure_index_configuration(self, *configuration):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.configuration = configuration
 
         async def existing_content_hashes(self, hashes):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             return set()
 
         async def chunk_ids_for_documents(self, document_ids):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             return ["old-node"]
 
         async def save_documents(self, documents, nodes, embedding_dimension):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             self.saved = [documents, nodes, embedding_dimension]
 
     settings = Settings(
@@ -299,6 +330,7 @@ async def test_indexer_writes_metadata_and_replaces_old_nodes():
 
 @pytest.mark.asyncio
 async def test_indexer_rejects_unapproved_document_before_vector_write():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     settings = Settings(embedding_provider="deterministic")
     indexer = DocumentIndexer(settings=settings)
     with pytest.raises(ValueError, match="only approved"):
