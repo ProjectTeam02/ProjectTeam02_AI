@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import re
@@ -10,6 +11,7 @@ class InMemoryRetriever:
     """Deterministic lexical retriever used for fixtures and no-key development runs."""
 
     def __init__(self, documents: list[RetrievedDocument] | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.documents = documents or []
 
     async def retrieve(
@@ -20,6 +22,7 @@ class InMemoryRetriever:
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         query_tokens = self._tokens(query)
         scored: list[RetrievedDocument] = []
         for document in self.documents:
@@ -73,6 +76,7 @@ class InMemoryRetriever:
     def _tokens(text: str) -> set[str]:
         # Keep Latin abbreviations such as GDP separate from Korean particles
         # ("GDP가"), otherwise a follow-up query misses the same concept.
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return set(re.findall(r"[A-Za-z0-9]{2,}|[가-힣]{2,}", text.lower()))
 
 
@@ -86,6 +90,7 @@ class Retriever:
         exact_matcher=None,
         related_term_top_k: int = 2,
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.backend = backend or InMemoryRetriever()
         self.top_k = top_k or get_settings().retrieval_top_k
         self.exact_matcher = exact_matcher
@@ -99,6 +104,7 @@ class Retriever:
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         limit = top_k or self.top_k
         if concept_codes is None:
             semantic = await self.backend.retrieve(
@@ -148,6 +154,7 @@ class Retriever:
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not documents or self.related_term_top_k == 0:
             return documents
         exact_retrieve = getattr(self.backend, "retrieve_exact", None)
@@ -184,6 +191,7 @@ class Retriever:
         stage_id: str | None,
         concept_codes: list[str] | None,
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if concept_codes is None:
             return await exact_retrieve(
                 terms, top_k, concept_id=concept_id, stage_id=stage_id
@@ -207,6 +215,7 @@ class Retriever:
         secondary: list[RetrievedDocument],
         limit: int,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         merged: list[RetrievedDocument] = []
         seen: set[tuple[str, str]] = set()
         for document in [*primary, *secondary]:

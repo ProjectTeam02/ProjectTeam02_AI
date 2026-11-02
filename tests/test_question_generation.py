@@ -1,7 +1,9 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
 from app.services.question_generation import prepare_question_generation
 
 
 def test_question_generation_blocks_without_approved_evidence() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     plan = prepare_question_generation(
         concept_code="C0704",
         stage_id="R07_S04",
@@ -20,6 +22,7 @@ def test_question_generation_blocks_without_approved_evidence() -> None:
 
 
 def test_question_generation_prepares_draft_prompt_without_calling_model() -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     plan = prepare_question_generation(
         concept_code="C0704",
         stage_id="R07_S04",

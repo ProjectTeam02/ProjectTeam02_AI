@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import asyncio
@@ -11,6 +12,7 @@ from app.rag.retrieval.types import RetrievedDocument
 
 @dataclass(slots=True)
 class HistoryMessage:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     role: str
     content: str
     created_at: datetime | None = None
@@ -19,6 +21,7 @@ class HistoryMessage:
 
 @dataclass(slots=True)
 class ConversationHistory:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     conversation_id: str
     user_id: str
     messages: list[HistoryMessage] = field(default_factory=list)
@@ -28,6 +31,7 @@ class ConversationHistory:
 
 @dataclass(slots=True)
 class PersistedTurn:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     conversation_id: str
     answer: str
     citations: list[RetrievedDocument] = field(default_factory=list)
@@ -38,6 +42,7 @@ class InMemoryConversationRepository:
     """A process-local repository for tests and API smoke runs without a database."""
 
     def __init__(self) -> None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self._conversations: dict[str, ConversationHistory] = {}
         self._requests: dict[tuple[str, str], PersistedTurn] = {}
         self._lock = asyncio.Lock()
@@ -45,6 +50,7 @@ class InMemoryConversationRepository:
     async def create(
         self, user_id: str, stage_id: str | None = None, concept_id: str | None = None
     ) -> ConversationHistory:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         async with self._lock:
             conversation = ConversationHistory(
                 str(uuid.uuid4()), user_id, stage_id=stage_id, concept_id=concept_id
@@ -55,6 +61,7 @@ class InMemoryConversationRepository:
     async def get_owned(
         self, conversation_id: str, user_id: str
     ) -> ConversationHistory:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         conversation = self._conversations.get(conversation_id)
         if conversation is None:
             raise ConversationNotFoundError(conversation_id)
@@ -78,6 +85,7 @@ class InMemoryConversationRepository:
         sources: list[RetrievedDocument] | None = None,
         grounded: bool = False,
     ) -> PersistedTurn:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         async with self._lock:
             if request_id and (user_id, request_id) in self._requests:
                 return self._requests[(user_id, request_id)]
@@ -104,11 +112,14 @@ class InMemoryConversationRepository:
     async def find_turn_by_request_id(
         self, user_id: str, request_id: str
     ) -> PersistedTurn | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._requests.get((user_id, request_id))
 
 
 class HistoryManager:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, repository=None, max_messages: int = 12, max_tokens: int = 1200):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.repository = repository or InMemoryConversationRepository()
         self.max_messages = max(2, max_messages)
         self.max_tokens = max(100, max_tokens)
@@ -116,10 +127,12 @@ class HistoryManager:
     async def create(
         self, user_id: str, stage_id: str | None = None, concept_id: str | None = None
     ) -> ConversationHistory:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         history = await self.repository.create(user_id, stage_id, concept_id)
         return self._history(history)
 
     async def load(self, conversation_id: str, user_id: str) -> ConversationHistory:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         history = await self.repository.get_owned(conversation_id, user_id)
         return self._history(history)
 
@@ -133,6 +146,7 @@ class HistoryManager:
         sources: list[RetrievedDocument] | None = None,
         grounded: bool = False,
     ) -> PersistedTurn:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         record = await self.repository.append_turn(
             conversation_id,
             user_id,
@@ -147,6 +161,7 @@ class HistoryManager:
     async def find_turn_by_request_id(
         self, user_id: str, request_id: str
     ) -> PersistedTurn | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         finder = getattr(self.repository, "find_turn_by_request_id", None)
         if finder is None:
             return None
@@ -258,6 +273,7 @@ class HistoryManager:
         await self.repository.append_turn(conversation_id, user_id, message, "")
 
     def _history(self, history) -> ConversationHistory:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         selected: list[HistoryMessage] = []
         token_count = 0
         for item in reversed(history.messages[-self.max_messages :]):
@@ -285,6 +301,7 @@ class HistoryManager:
 
     @staticmethod
     def _turn(record) -> PersistedTurn:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         citations = []
         for source in getattr(record, "citations", getattr(record, "sources", [])):
             if isinstance(source, RetrievedDocument):
@@ -313,4 +330,5 @@ class HistoryManager:
     def _estimate_tokens(content: str) -> int:
         # Used only for bounding context. Provider-reported usage remains the
         # authoritative value returned by the internal API.
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return max(1, len(content) // 4)

@@ -1,0 +1,41 @@
+{
+  "status": "DESIGN_ONLY_NO_DB_WRITE",
+  "document_to_chunk": {
+    "document_id": "one canonical source record and one RAGDocument",
+    "chunk_id": "generated after SentenceSplitter; not present in BOK source JSONL",
+    "splitter": "LlamaIndex SentenceSplitter",
+    "chunk_size": 700,
+    "chunk_overlap": 100,
+    "current_chunk_id_rule": "document_id:sha256(content)[:12]:chunk_index"
+  },
+  "current_storage": {
+    "document_table": "rag_documents",
+    "chunk_table": "rag_document_chunks",
+    "vector_owner": "LlamaIndex PGVectorStore",
+    "application_registry_embedding": "RAGChunk.embedding is None; metadata/audit only",
+    "document_content_dedup": "RAGDocument.content_hash unique"
+  },
+  "proposed_embedding_cache_key": {
+    "format": "sha256(provider|model|dimension|document_version|document_content_hash|chunk_size|chunk_overlap|chunk_id|chunk_content_hash)",
+    "required_inputs": [
+      "embedding_provider",
+      "embedding_model",
+      "embedding_dimension",
+      "document_version",
+      "document_content_hash",
+      "chunk_size",
+      "chunk_overlap",
+      "chunk_id",
+      "chunk_content_hash"
+    ],
+    "reason": "Changing model, version, source text, or chunking must invalidate the cache."
+  },
+  "invalidation_rules": [
+    "source content_hash changes",
+    "document_version changes",
+    "chunk_size or chunk_overlap changes",
+    "embedding provider/model/dimension changes",
+    "chunk text hash changes"
+  ],
+  "implementation_note": "This is a design proposal only; no schema or index change was made in STEP 3-A."
+}

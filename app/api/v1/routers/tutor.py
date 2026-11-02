@@ -1,3 +1,4 @@
+# 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -34,6 +35,7 @@ async def chat(
     current_user_id: str = Depends(get_current_user_id),
     service: TutorService = Depends(get_tutor_service),
 ) -> TutorResponse:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     try:
         return await service.answer(request, authenticated_user_id=current_user_id)
     except ConversationNotFoundError as exc:
@@ -62,6 +64,7 @@ async def internal_answer(
     request: InternalTutorRequest,
     service: TutorService = Depends(get_tutor_service),
 ) -> InternalTutorResponse:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     logger.info(
         "internal tutor request",
         extra={

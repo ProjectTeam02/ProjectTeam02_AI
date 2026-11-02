@@ -1,3 +1,4 @@
+# 파일 역할: 애플리케이션 저장소 계층에서 대화·메모리·RAG 데이터를 조회하고 저장합니다.
 from __future__ import annotations
 
 import uuid
@@ -14,6 +15,7 @@ from app.db.models import AIConversation, AIMessage, AIMessageSource
 
 @dataclass(slots=True)
 class MessageRecord:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     id: str
     role: str
     content: str
@@ -24,6 +26,7 @@ class MessageRecord:
 
 @dataclass(slots=True)
 class ConversationRecord:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     id: str
     user_id: str
     messages: list[MessageRecord]
@@ -34,6 +37,7 @@ class ConversationRecord:
 
 @dataclass(slots=True)
 class SourceRecord:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     source_id: str
     document_id: str
     chunk_id: str
@@ -44,6 +48,7 @@ class SourceRecord:
 
 @dataclass(slots=True)
 class TurnRecord:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     conversation_id: str
     answer: str
     sources: list[SourceRecord]
@@ -54,11 +59,13 @@ class ConversationRepository:
     """Transaction boundary for conversations and their messages."""
 
     def __init__(self, session: AsyncSession):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.session = session
 
     async def create(
         self, user_id: str, stage_id: str | None = None, concept_id: str | None = None
     ) -> ConversationRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         conversation = AIConversation(
             user_id=user_id, stage_id=stage_id, concept_id=concept_id
         )
@@ -68,6 +75,7 @@ class ConversationRepository:
         return self._record(conversation, [])
 
     async def get_owned(self, conversation_id: str, user_id: str) -> ConversationRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         try:
             conversation_uuid = uuid.UUID(conversation_id)
         except ValueError as exc:
@@ -101,6 +109,7 @@ class ConversationRepository:
         sources: list | None = None,
         grounded: bool = False,
     ) -> TurnRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         try:
             conversation_uuid = uuid.UUID(conversation_id)
         except ValueError as exc:
@@ -189,6 +198,7 @@ class ConversationRepository:
     async def find_turn_by_request_id(
         self, user_id: str, request_id: str
     ) -> TurnRecord | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return await self._find_turn(user_id, request_id)
 
     async def _find_turn(
@@ -197,6 +207,7 @@ class ConversationRepository:
         request_id: str,
         conversation_id: uuid.UUID | None = None,
     ) -> TurnRecord | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         query = (
             select(AIMessage)
             .join(AIConversation, AIConversation.id == AIMessage.conversation_id)
@@ -229,6 +240,7 @@ class ConversationRepository:
 
     @staticmethod
     def _message(message: AIMessage) -> MessageRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return MessageRecord(
             str(message.id),
             message.role,
@@ -240,6 +252,7 @@ class ConversationRepository:
 
     @staticmethod
     def _source_record(source: AIMessageSource) -> SourceRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return SourceRecord(
             source_id=source.source_id,
             document_id=source.document_id,
@@ -253,6 +266,7 @@ class ConversationRepository:
     def _record(
         conversation: AIConversation, messages: list[MessageRecord]
     ) -> ConversationRecord:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return ConversationRecord(
             str(conversation.id),
             conversation.user_id,

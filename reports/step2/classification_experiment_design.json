@@ -1,0 +1,75 @@
+{
+  "design_status": "DESIGN_ONLY_NO_LLM_CALL",
+  "task": "inflation relevance classification",
+  "input_unit": "one canonical source document row; no duplicated purpose corpus",
+  "candidate_pool": "all 789 BOK RAG rows for recall measurement; approved and needs_review reported separately",
+  "labels": [
+    "approved",
+    "needs_review",
+    "irrelevant"
+  ],
+  "gold_label_definition": {
+    "approved": "human confirms the document materially teaches the target chapter/concept and evidence is sufficient",
+    "needs_review": "human cannot decide without additional context, source verification, or curriculum mapping",
+    "irrelevant": "document is not materially relevant to the target chapter/concept; incidental keyword is insufficient"
+  },
+  "classification_methods": {
+    "keyword_only": {
+      "input": "normalized term/title/definition/content plus versioned keyword and exclusion lists",
+      "output": "label, matched_keywords, score, rule_version, evidence_sentence",
+      "current_reference": "app/question_generation/dataset.py::select_c0704_candidates and KeywordRelevanceClassifier",
+      "known_limitation": "current baseline marks many incidental mentions as DIRECT; it is a candidate generator, not ground truth"
+    },
+    "llm_only": {
+      "input": "same source row plus chapter learning goal and output schema",
+      "output": "label, confidence, rationale, evidence_quote, document_id, model_version",
+      "execution_in_step2": "NOT_RUN; no external LLM call",
+      "required_guard": "JSON schema validation, evidence quote must be contained in source content, retry/abstain on invalid output"
+    },
+    "hybrid": {
+      "input": "keyword candidates and exclusions followed by LLM review of ambiguous rows",
+      "output": "final candidate label, method_trace, evidence, confidence, reviewer_status",
+      "recommended_order": [
+        "high-precision exact term and exclusion rules",
+        "LLM only for ambiguous/context candidates",
+        "human review for all approved mappings before operational use"
+      ]
+    }
+  },
+  "evaluation": {
+    "unit": "document_id, grouped by source_id and chapter mapping",
+    "positive_labels": [
+      "approved"
+    ],
+    "primary_metrics": [
+      "precision",
+      "recall",
+      "f1"
+    ],
+    "secondary_metrics": [
+      "coverage",
+      "abstention_rate",
+      "false_positive_rate",
+      "evidence_span_accuracy"
+    ],
+    "formula": {
+      "precision": "TP / (TP + FP)",
+      "recall": "TP / (TP + FN)",
+      "f1": "2 * precision * recall / (precision + recall)"
+    },
+    "split_policy": "human-labeled stratified train/dev/test; do not leak duplicate content_hash across splits",
+    "threshold_policy": "choose approval threshold on dev set; report test metrics and confidence intervals",
+    "missing_gold_behavior": "NOT_EVALUATED; candidate labels must never be treated as gold"
+  },
+  "minimum_gold_set": {
+    "recommendation": "label all pilot candidates before comparing methods",
+    "stratification": [
+      "core",
+      "related",
+      "context",
+      "keyword_false_positive",
+      "needs_review_source"
+    ],
+    "double_review": "at least two reviewers for disagreements and a documented adjudication decision"
+  }
+}

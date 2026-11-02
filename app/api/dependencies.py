@@ -1,3 +1,4 @@
+# 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
 import secrets
 from pathlib import Path
 
@@ -30,6 +31,7 @@ _legacy_history_repository = InMemoryConversationRepository()
 
 
 def settings() -> Settings:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return get_settings()
 
 
@@ -37,6 +39,7 @@ def _verify_internal_token(
     x_internal_api_key: str | None = Header(default=None),
     authorization: str | None = Header(default=None),
 ) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     configured_token = get_settings().internal_api_token
     supplied_token = x_internal_api_key
     if (
@@ -60,6 +63,7 @@ async def get_current_user_id(
     x_user_id: str | None = Header(default=None),
     authorization: str | None = Header(default=None),
 ) -> str:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     _verify_internal_token(x_internal_api_key, authorization)
     if not x_user_id:
         raise HTTPException(status_code=401, detail="X-User-ID is required")
@@ -70,10 +74,12 @@ async def require_internal_api(
     x_internal_api_key: str | None = Header(default=None),
     authorization: str | None = Header(default=None),
 ) -> None:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     _verify_internal_token(x_internal_api_key, authorization)
 
 
 async def get_tutor_service() -> TutorService:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     settings_value = get_settings()
     try:
         llm = LLMFactory(settings_value).create()
@@ -119,4 +125,5 @@ async def get_tutor_service() -> TutorService:
 
 
 async def get_memory_service(session=Depends(get_session)) -> MemoryService:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return MemoryService(MemoryRepository(session))

@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import asyncio
@@ -38,6 +39,7 @@ class QueryRewriter:
     }
 
     def __init__(self, llm=None, timeout_seconds: float = 10.0):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.llm = llm
         self.timeout_seconds = timeout_seconds
         self.last_usage: dict | None = None
@@ -47,6 +49,7 @@ class QueryRewriter:
         message: str,
         history: ConversationHistory | list[HistoryMessage] | list[dict],
     ) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         messages = (
             history.messages if isinstance(history, ConversationHistory) else history
         )
@@ -71,6 +74,7 @@ class QueryRewriter:
 
     @classmethod
     def _needs_rewrite(cls, message: str) -> bool:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         normalized = message.strip()
         if any(marker in normalized for marker in cls.FOLLOW_UP_MARKERS):
             return True
@@ -93,12 +97,14 @@ class QueryRewriter:
 
     @staticmethod
     def _item_value(item: HistoryMessage | dict, key: str, default: str = "") -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if isinstance(item, dict):
             return str(item.get(key, default))
         return str(getattr(item, key, default))
 
     @classmethod
     def _prompt(cls, message: str, messages: list[HistoryMessage] | list[dict]) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         history_text = "\n".join(
             f"{cls._item_value(item, 'role', 'unknown')}: "
             f"{cls._item_value(item, 'content')}"
@@ -115,6 +121,7 @@ class QueryRewriter:
     def _deterministic_rewrite(
         cls, message: str, messages: list[HistoryMessage] | list[dict]
     ) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         previous_user_questions = [
             cls._item_value(item, "content")
             for item in messages
@@ -147,6 +154,7 @@ class QueryRewriter:
 
     @staticmethod
     def _extract_usage(response) -> dict | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         raw = getattr(response, "raw", None)
         usage = getattr(raw, "usage", None)
         if usage is None and isinstance(raw, dict):

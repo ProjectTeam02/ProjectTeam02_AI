@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,6 +9,7 @@ from app.rag.retrieval.types import RetrievedDocument
 
 @dataclass(slots=True)
 class ContextBundle:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     current_question: str
     rewritten_query: str
     history: list[HistoryMessage]
@@ -20,7 +22,9 @@ class ContextBundle:
 
 
 class ContextBuilder:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, max_tokens: int = 3000):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.max_tokens = max(100, max_tokens)
 
     def build(
@@ -34,6 +38,7 @@ class ContextBuilder:
         stage_id: str | None = None,
         concept_id: str | None = None,
     ) -> ContextBundle:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         messages = (
             history.messages if isinstance(history, ConversationHistory) else history
         )
@@ -81,6 +86,7 @@ class ContextBuilder:
 
     @staticmethod
     def _message(message: HistoryMessage | dict) -> HistoryMessage:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if isinstance(message, HistoryMessage):
             return message
         return HistoryMessage(
@@ -89,12 +95,14 @@ class ContextBuilder:
 
     @staticmethod
     def _history_text(messages: list[HistoryMessage]) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not messages:
             return "(없음)"
         return "\n".join(f"{message.role}: {message.content}" for message in messages)
 
     @staticmethod
     def _docs_text(documents: list[RetrievedDocument]) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not documents:
             return "(검색 결과 없음)"
         return "\n\n".join(

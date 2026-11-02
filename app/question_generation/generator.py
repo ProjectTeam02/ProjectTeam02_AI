@@ -1,3 +1,4 @@
+# 파일 역할: 문제 생성 대상 데이터와 문제 생성 계획을 관리합니다.
 """Prepare a grounded question-generation draft without calling an LLM.
 
 Node.js remains responsible for persistence, grading, rewards, HP and stage
@@ -13,6 +14,7 @@ from typing import Any, Iterable
 
 @dataclass(frozen=True, slots=True)
 class QuestionGenerationPlan:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     status: str
     concept_code: str
     stage_id: str
@@ -22,6 +24,7 @@ class QuestionGenerationPlan:
     reason: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return {
             "status": self.status,
             "concept_code": self.concept_code,

@@ -1,3 +1,4 @@
+# 파일 역할: PostgreSQL 연결과 SQLAlchemy 데이터 모델을 관리합니다.
 import uuid
 from datetime import datetime
 
@@ -17,10 +18,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     pass
 
 
 class AIConversation(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "ai_conversations"
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -46,6 +49,7 @@ class AIConversation(Base):
 
 
 class AIMessage(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "ai_messages"
     __table_args__ = (
         UniqueConstraint(
@@ -82,6 +86,7 @@ class AIMessage(Base):
 
 
 class AIMessageSource(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "ai_message_sources"
     __table_args__ = (
         UniqueConstraint(
@@ -105,6 +110,7 @@ class AIMessageSource(Base):
 
 
 class AIUserMemory(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "ai_user_memories"
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -119,6 +125,7 @@ class AIUserMemory(Base):
 
 
 class RAGDocument(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "rag_documents"
 
     document_id: Mapped[str] = mapped_column(String(255), primary_key=True)
@@ -150,6 +157,7 @@ class RAGDocument(Base):
 
 
 class RAGChunk(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "rag_document_chunks"
     __table_args__ = (
         UniqueConstraint("document_id", "chunk_id", name="uq_rag_document_chunk"),
@@ -171,6 +179,7 @@ class RAGChunk(Base):
 
 
 class RAGIndexConfiguration(Base):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     __tablename__ = "rag_index_configurations"
 
     collection_name: Mapped[str] = mapped_column(String(255), primary_key=True)

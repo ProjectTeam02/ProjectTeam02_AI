@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import re
@@ -14,6 +15,7 @@ from app.rag.retrieval.types import RetrievedDocument
 
 @dataclass(slots=True)
 class RAGResult:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     conversation_id: str
     answer: str
     citations: list[RetrievedDocument]
@@ -24,6 +26,7 @@ class RAGResult:
 
 
 class MultiTurnRAG:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(
         self,
         history_manager: HistoryManager | None = None,
@@ -33,6 +36,7 @@ class MultiTurnRAG:
         answer_generator: AnswerGenerator | None = None,
         citation_validator: CitationValidator | None = None,
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.history_manager = history_manager or HistoryManager()
         self.query_rewriter = query_rewriter or QueryRewriter()
         self.retriever = retriever or Retriever()
@@ -51,6 +55,7 @@ class MultiTurnRAG:
         concept_id: str | None = None,
         request_id: str | None = None,
     ) -> RAGResult:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if request_id:
             previous = await self.history_manager.find_turn_by_request_id(
                 user_id, request_id
@@ -136,6 +141,7 @@ class MultiTurnRAG:
         concept_codes: list[str] | None = None,
         history_from_seq: int | None = None,
     ) -> RAGResult:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         rewritten_query = await self.query_rewriter.rewrite(message, history)
         documents = await self.retriever.retrieve(
             rewritten_query,

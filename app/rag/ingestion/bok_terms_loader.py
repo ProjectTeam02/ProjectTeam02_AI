@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import hashlib
@@ -31,11 +32,13 @@ REQUIRED_FIELDS = {
 
 
 class BOKDatasetValidationError(ValueError):
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     pass
 
 
 @dataclass(frozen=True, slots=True)
 class BOKDatasetValidation:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     source_count: int
     rag_count: int
     duplicate_ids: tuple[str, ...]
@@ -46,6 +49,7 @@ class BOKDatasetValidation:
 
 
 def _read_source(path: Path) -> list[dict]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     payload = json.loads(path.read_text(encoding="utf-8"))
     rows = payload.get("records") if isinstance(payload, dict) else payload
     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
@@ -54,6 +58,7 @@ def _read_source(path: Path) -> list[dict]:
 
 
 def _read_jsonl(path: Path) -> list[dict]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     rows: list[dict] = []
     lines = path.read_text(encoding="utf-8").splitlines()
     for line_number, line in enumerate(lines, 1):
@@ -79,6 +84,7 @@ def _read_jsonl(path: Path) -> list[dict]:
 
 
 def _duplicates(values: list[str]) -> tuple[str, ...]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     seen: set[str] = set()
     duplicates: set[str] = set()
     for value in values:
@@ -92,6 +98,7 @@ def validate_bok_dataset(
     source_path: Path,
     rag_path: Path,
 ) -> BOKDatasetValidation:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     source_rows = _read_source(source_path)
     rag_rows = _read_jsonl(rag_path)
     source_ids = [str(row.get("id", "")) for row in source_rows]
@@ -170,6 +177,7 @@ def load_bok_terms(
     source_path: Path | None = None,
     approved_only: bool = True,
 ) -> list[IngestDocument]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if source_path is not None:
         validate_bok_dataset(source_path, rag_path)
     rows = _read_jsonl(rag_path)
@@ -207,7 +215,9 @@ def load_bok_terms(
 
 class DocumentDate:
     @staticmethod
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def parse(value):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from datetime import datetime
 
         if not value or isinstance(value, datetime):
@@ -219,11 +229,13 @@ class BOKTermCatalog:
     """Read-only canonical term catalog used by the hybrid retrieval policy."""
 
     def __init__(self, rag_path: Path, approved_status: str = "approved"):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.rag_path = rag_path
         self.approved_status = approved_status
         self._aliases: list[tuple[str, str]] | None = None
 
     def match(self, query: str, limit: int = 3) -> list[str]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         normalized_query = self._normalize(query)
         candidates = [
             (alias, term)
@@ -245,6 +257,7 @@ class BOKTermCatalog:
         return [term for _, term in selected]
 
     def _load_aliases(self) -> list[tuple[str, str]]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if self._aliases is not None:
             return self._aliases
         aliases: dict[tuple[str, str], None] = {}
@@ -261,5 +274,6 @@ class BOKTermCatalog:
 
     @staticmethod
     def _normalize(value: str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         value = unicodedata.normalize("NFKC", value).casefold()
         return re.sub(r"[^0-9a-z가-힣]+", "", value)

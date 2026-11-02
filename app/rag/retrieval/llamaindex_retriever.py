@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import logging
@@ -10,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class LlamaIndexRetriever:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, index_manager=None, settings: Settings | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
         self.index_manager = index_manager
 
@@ -22,6 +25,7 @@ class LlamaIndexRetriever:
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         try:
             manager = self.index_manager
             if manager is None:
@@ -77,6 +81,7 @@ class LlamaIndexRetriever:
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
     ) -> list[RetrievedDocument]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not terms:
             return []
         try:
@@ -114,6 +119,7 @@ class LlamaIndexRetriever:
         stage_id: str | None,
         concept_codes: list[str] | None = None,
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from llama_index.core.vector_stores import FilterOperator, MetadataFilter
 
         filters = [
@@ -137,6 +143,7 @@ class LlamaIndexRetriever:
 
     @staticmethod
     def _document(item, retrieval_method: str) -> RetrievedDocument:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         node = item.node
         metadata = node.metadata or {}
         printed_page = metadata.get("printed_page")

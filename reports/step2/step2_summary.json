@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-10-29T12:05:46.350206+00:00",
+  "status": "STEP2_DESIGN_COMPLETE",
+  "source": "data/bok_terms_2026_rag.jsonl",
+  "source_record_count": 789,
+  "source_review_status_counts": {
+    "approved": 760,
+    "needs_review": 29
+  },
+  "keyword_baseline_candidate_count": 55,
+  "keyword_baseline_labels": {
+    "DIRECT": 41,
+    "EXCLUDE": 1,
+    "INDIRECT": 13
+  },
+  "proposed_mapping_classes": {
+    "context": 11,
+    "core": 9,
+    "exclude": 1,
+    "related": 18,
+    "review": 16
+  },
+  "pilot_identifiers": {
+    "pilot_chapter_label": "인플레이션",
+    "chapter_id": null,
+    "concept_id": null,
+    "concept_code": null,
+    "stage_id": null,
+    "status": "DESIGN_LABEL_ONLY"
+  },
+  "license_status_counts": {
+    "pending_permission_attribution_review": 55
+  },
+  "llm_calls": 0,
+  "db_writes": 0,
+  "source_data_modified": false
+}

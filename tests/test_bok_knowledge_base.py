@@ -1,3 +1,4 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
 from __future__ import annotations
 
 import hashlib
@@ -20,6 +21,7 @@ from app.rag.retrieval.types import RetrievedDocument
 
 @pytest.fixture
 def bok_dataset(tmp_path: Path) -> tuple[Path, Path]:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     def row(
         document_id: str,
         term: str,
@@ -27,6 +29,7 @@ def bok_dataset(tmp_path: Path) -> tuple[Path, Path]:
         review_flags: list[str] | None = None,
         review_status: str = "approved",
     ) -> dict:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         definition = f"{term}의 검증용 정의"
         content = f"용어: {term}\n정의: {definition}"
         return {
@@ -79,6 +82,7 @@ def bok_document(
     related_terms: list[str] | None = None,
     method: str = "vector",
 ) -> RetrievedDocument:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return RetrievedDocument(
         content=f"{term}에 대한 한국은행 정의",
         source="https://www.bok.or.kr/source",
@@ -97,6 +101,7 @@ def bok_document(
 
 
 def test_bok_source_and_rag_dataset_are_consistent(bok_dataset):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     source, rag = bok_dataset
     validation = validate_bok_dataset(source, rag)
     assert validation.source_count == 2
@@ -109,6 +114,7 @@ def test_bok_source_and_rag_dataset_are_consistent(bok_dataset):
 
 
 def test_bok_loader_preserves_metadata_and_excludes_review_records(bok_dataset):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     source, rag = bok_dataset
     documents = load_bok_terms(rag, source)
     assert len(documents) == 1
@@ -124,6 +130,7 @@ def test_bok_loader_preserves_metadata_and_excludes_review_records(bok_dataset):
 
 
 def test_bok_exact_term_catalog_prefers_longest_approved_term(bok_dataset):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     _, rag = bok_dataset
     catalog = BOKTermCatalog(rag)
     assert catalog.match("기준금리가 오르면 대출금리는 어떻게 돼?")[0] == "기준금리"
@@ -132,6 +139,7 @@ def test_bok_exact_term_catalog_prefers_longest_approved_term(bok_dataset):
 
 @pytest.mark.asyncio
 async def test_hybrid_policy_ranks_exact_match_and_expands_related_terms(bok_dataset):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     _, rag = bok_dataset
     base_rate = bok_document(
         "기준금리", "bok800-154", ["환매조건부매매/RP/Repo"], "exact"
@@ -140,10 +148,13 @@ async def test_hybrid_policy_ranks_exact_match_and_expands_related_terms(bok_dat
     semantic = bok_document("금리자유화", "bok800-116")
 
     class Backend:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
         async def retrieve(self, query, top_k, concept_id=None, stage_id=None):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             return [semantic]
 
         async def retrieve_exact(self, terms, top_k, concept_id=None, stage_id=None):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
             mapping = {base_rate.term: base_rate, repo.term: repo}
             return [mapping[term] for term in terms if term in mapping][:top_k]
 
@@ -164,6 +175,7 @@ async def test_hybrid_policy_ranks_exact_match_and_expands_related_terms(bok_dat
 
 @pytest.mark.asyncio
 async def test_three_turn_rewrite_keeps_original_base_rate_topic():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     rewriter = QueryRewriter()
     history = HistoryManager()
     conversation = await history.create("user-1")
@@ -186,5 +198,6 @@ async def test_three_turn_rewrite_keeps_original_base_rate_topic():
 
 
 def test_pipeline_contract_still_exposes_retriever_related_expansion():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     pipeline = MultiTurnRAG()
     assert hasattr(pipeline.retriever, "retrieve_related")

@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import hashlib
@@ -9,6 +10,7 @@ from app.core.config import Settings, get_settings
 
 @dataclass(slots=True)
 class IngestDocument:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     document_id: str
     title: str
     source: str
@@ -37,6 +39,7 @@ class IngestDocument:
 
     @property
     def metadata(self) -> dict:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return {
             "source_id": self.source_id,
             "document_id": self.document_id,
@@ -65,9 +68,11 @@ class IngestDocument:
 
 
 class DocumentIndexer:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(
         self, index_manager=None, settings: Settings | None = None, repository=None
     ):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
         self.index_manager = index_manager
         self.repository = repository
@@ -76,6 +81,7 @@ class DocumentIndexer:
     async def index(
         self, documents: list[IngestDocument | dict], collection: str | None = None
     ) -> int:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from llama_index.core import Document
         from llama_index.core.node_parser import SentenceSplitter
 
@@ -181,10 +187,12 @@ class DocumentIndexer:
 
     @staticmethod
     def _content_hash(content: str) -> str:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
     @staticmethod
     def _normalize(item: IngestDocument | dict) -> IngestDocument:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if isinstance(item, IngestDocument):
             return item
         return IngestDocument(
@@ -221,6 +229,7 @@ class DocumentIndexer:
 
     @staticmethod
     def _datetime(value) -> datetime | None:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if value is None or isinstance(value, datetime):
             return value
         return datetime.fromisoformat(str(value).replace("Z", "+00:00"))

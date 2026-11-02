@@ -1,0 +1,52 @@
+{
+  "status": "DRY_RUN_ONLY_NO_LLM_CALL",
+  "dataset_version": "50047d6bd740671252df664aba2ee0bbac845bbf68addbc4f90d6c5efe8e7d0d",
+  "candidate_pair_count": 143,
+  "valid_candidate_pair_count": 143,
+  "skipped_missing_lineage_count": 0,
+  "input_token_statistics": {
+    "count": 143,
+    "total": 72961,
+    "average": 510.2167832167832,
+    "median": 492,
+    "min": 310,
+    "p25": 391.5,
+    "p75": 597.0,
+    "p95": 809.5,
+    "max": 884
+  },
+  "expected_output_tokens_per_call": 180,
+  "prompt_version": "llm-classification-v1",
+  "rubric_versions": [
+    "inflation-rubric-draft-v1"
+  ],
+  "models": [
+    {
+      "model": "openai/gpt-4o-mini",
+      "input_tokens": 72961,
+      "expected_output_tokens": 25740,
+      "total_tokens": 98701,
+      "input_usd_per_1m_tokens": null,
+      "output_usd_per_1m_tokens": null,
+      "estimated_cost_usd": null,
+      "cost_status": "NOT_CALCULATED_PRICE_UNCONFIRMED",
+      "requests_per_minute_assumption": 30,
+      "estimated_minutes": 4.766666666666667
+    },
+    {
+      "model": "openai/gpt-4.1-mini",
+      "input_tokens": 72961,
+      "expected_output_tokens": 25740,
+      "total_tokens": 98701,
+      "input_usd_per_1m_tokens": null,
+      "output_usd_per_1m_tokens": null,
+      "estimated_cost_usd": null,
+      "cost_status": "NOT_CALCULATED_PRICE_UNCONFIRMED",
+      "requests_per_minute_assumption": 30,
+      "estimated_minutes": 4.766666666666667
+    }
+  ],
+  "price_policy": "Prices remain null unless explicitly confirmed and supplied in configs/eda_config.yaml.",
+  "llm_calls": 0,
+  "api_keys_read": false
+}

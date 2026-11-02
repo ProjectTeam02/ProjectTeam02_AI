@@ -76,8 +76,8 @@ docker compose up --build
 ```bash
 .venv/bin/python -m scripts.ingest_documents --manifest data/manifest.json
 .venv/bin/python -m scripts.ingest_documents \
-  --bok-source data/bok_terms_2026.json \
-  --bok-terms data/bok_terms_2026_rag.jsonl
+  --bok-source data/한국은행/bok_terms_2026.json \
+  --bok-terms data/한국은행/bok_terms_2026_rag.jsonl
 ```
 
 본문 hash, 승인 상태, embedding provider/model/dimension을 확인하며 기존 데이터나 사용자 데이터를 삭제하지 않습니다. 자세한 처리 순서는 [docs/rag_pipeline.md](docs/rag_pipeline.md)를 참고하세요.
@@ -88,6 +88,27 @@ docker compose up --build
 .venv/bin/python -m pytest -q
 .venv/bin/python -m ruff check .
 ```
+
+## 데이터셋 EDA 및 선별 파이프라인
+
+현재 `data/`의 KDI/BOK JSON·JSONL mirror를 중복 집계하지 않고, 원문을 수정하지
+않은 채 EDA·정규화·청크·키워드 후보·LLM 비용 dry-run을 실행합니다.
+
+```bash
+.venv/bin/python -m scripts.run_eda
+.venv/bin/python -m scripts.make_chunks
+.venv/bin/python -m scripts.keyword_filter
+.venv/bin/python -m scripts.estimate_classification_cost
+```
+
+결과는 `reports/pipeline/`, `data/processed/`, `data/labeled/keyword/`에 저장됩니다.
+실제 LLM 호출은 위 명령에 포함되어 있지 않으며, 챕터 설정은
+`configs/chapters.yaml`에서 관리합니다. 현재 설정은 production curriculum이
+없는 상태의 임시 인플레이션 rubric입니다.
+
+원본 파일은 Git에 포함하지 않으므로, 필요한 파일명과 배치 위치는
+[`data/README.md`](data/README.md)를 먼저 확인하세요. 원본 데이터가 없으면
+파이프라인이 빈 결과를 만들지 않고 입력 누락 오류를 표시합니다.
 
 provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E는 검증할 수 없습니다. 이 경우 단위/계약 테스트와 offline/deterministic 설정을 사용하되, 운영 품질이 검증되었다고 간주하지 않습니다.
 

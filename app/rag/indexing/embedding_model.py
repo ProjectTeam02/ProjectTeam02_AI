@@ -1,3 +1,4 @@
+# 파일 역할: LlamaIndex 기반 RAG 검색·생성·메모리·인덱싱 기능을 제공합니다.
 from __future__ import annotations
 
 import hashlib
@@ -18,15 +19,19 @@ class DeterministicEmbedding(BaseEmbedding):
     dimension: int = 1536
 
     def _get_text_embedding(self, text: str) -> list[float]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._embed(text)
 
     def _get_query_embedding(self, query: str) -> list[float]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._embed(query)
 
     async def _aget_query_embedding(self, query: str) -> list[float]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._embed(query)
 
     def _embed(self, text: str) -> list[float]:
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         values = [0.0] * self.dimension
         for token in text.lower().split():
             digest = hashlib.sha256(token.encode("utf-8")).digest()
@@ -48,6 +53,7 @@ class ValidatedOpenAIEmbedding(OpenAIEmbedding):
 
     @staticmethod
     def _validate(vector, expected: int):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if len(vector) != expected:
             raise ConfigurationError(
                 "embedding dimension mismatch: "
@@ -56,31 +62,38 @@ class ValidatedOpenAIEmbedding(OpenAIEmbedding):
         return vector
 
     def _get_text_embedding(self, text):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._validate(
             super()._get_text_embedding(text), self.expected_dimension
         )
 
     def _get_query_embedding(self, query):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._validate(
             super()._get_query_embedding(query), self.expected_dimension
         )
 
     async def _aget_text_embedding(self, text):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._validate(
             await super()._aget_text_embedding(text), self.expected_dimension
         )
 
     async def _aget_query_embedding(self, query):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return self._validate(
             await super()._aget_query_embedding(query), self.expected_dimension
         )
 
 
 class EmbeddingModelFactory:
+    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(self, settings: Settings | None = None):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
 
     def create(self):
+        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if self.settings.embedding_provider == "deterministic":
             return DeterministicEmbedding(
                 model_name="deterministic-local",
