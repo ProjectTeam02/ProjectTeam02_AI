@@ -112,6 +112,25 @@ docker compose up --build
 
 provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E는 검증할 수 없습니다. 이 경우 단위/계약 테스트와 offline/deterministic 설정을 사용하되, 운영 품질이 검증되었다고 간주하지 않습니다.
 
+### 라벨 품질·메타데이터 감사
+
+`라벨링.xlsx`가 제공되면 다음 명령이 원본을 수정하지 않고 중복 ID, 빈 필드,
+평가자 불일치, 골드 비교, 판정 근거, 지정 재검토 용어를 검사합니다.
+
+```bash
+.venv/bin/python scripts/validate_label_quality.py
+.venv/bin/python scripts/audit_metadata.py
+```
+
+현재 저장소에는 `라벨링.xlsx`가 없어 라벨 검사는 `NOT_AVAILABLE`로 기록됩니다.
+요청문에 제시된 160건 수치는 검증되지 않은 참고값으로만 보관합니다. 처리된 청크
+아티팩트가 있는 경우 키워드 후보는 `reports/keyword_candidates.csv`와
+`data/labeled/keyword/`에 저장되며, 후보 점수는 관련도 확률이 아닙니다.
+메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
+`reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
+평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
+`reports/evaluation_plan.md`에 정리되어 있습니다.
+
 ## 프로젝트 구조
 
 ```text

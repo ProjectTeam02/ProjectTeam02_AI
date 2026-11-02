@@ -25,27 +25,39 @@ class Chapter:
     opposite_keywords: tuple[str, ...]
     exclude_keywords: tuple[str, ...]
     rubric_version: str
+    aliases: tuple[str, ...] = ()
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "Chapter":
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+        expansions = value.get("keyword_expansions") or {}
         return cls(
             chapter_id=str(value["chapter_id"]),
             chapter_name=str(value["chapter_name"]),
             chapter_definition=str(value.get("chapter_definition", "")),
             include_criteria=str(value.get("include_criteria", "")),
             exclude_criteria=str(value.get("exclude_criteria", "")),
-            keywords=tuple(str(item) for item in value.get("keywords", [])),
+            keywords=tuple(
+                str(item) for item in value.get("keywords", expansions.get("core", []))
+            ),
             related_keywords=tuple(
-                str(item) for item in value.get("related_keywords", [])
+                str(item)
+                for item in value.get("related_keywords", expansions.get("related", []))
             ),
             opposite_keywords=tuple(
-                str(item) for item in value.get("opposite_keywords", [])
+                str(item)
+                for item in value.get(
+                    "opposite_keywords", expansions.get("opposite", [])
+                )
             ),
             exclude_keywords=tuple(
                 str(item) for item in value.get("exclude_keywords", [])
             ),
             rubric_version=str(value.get("rubric_version", "draft-v1")),
+            aliases=tuple(
+                str(item)
+                for item in value.get("aliases", expansions.get("aliases", []))
+            ),
         )
 
     @property
@@ -56,6 +68,16 @@ class Chapter:
                 [*self.keywords, *self.related_keywords, *self.opposite_keywords]
             )
         )
+
+    @property
+    def keyword_groups(self) -> dict[str, tuple[str, ...]]:
+        """Return groups used for candidate recall without treating them as labels."""
+        return {
+            "core": self.keywords,
+            "alias": self.aliases,
+            "related": self.related_keywords,
+            "opposite": self.opposite_keywords,
+        }
 
 
 def normalize_keyword(value: str) -> str:
@@ -74,18 +96,33 @@ def _evidence(content: str, keyword: str) -> str:
 def classify_chunk_by_keywords(chunk: Chunk, chapter: Chapter) -> dict[str, Any]:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     normalized_content = normalize_keyword(f"{chunk.title} {chunk.content}")
-    matched = [
-        keyword
-        for keyword in chapter.all_keywords
-        if normalize_keyword(keyword) in normalized_content
-    ]
+    weights = {"core": 1.0, "alias": 0.85, "related": 0.55, "opposite": 0.35}
+    matched_details: list[dict[str, Any]] = []
+    for keyword_type, keywords in chapter.keyword_groups.items():
+        for keyword in keywords:
+            if normalize_keyword(keyword) in normalized_content:
+                matched_details.append(
+                    {
+                        "keyword": keyword,
+                        "keyword_type": keyword_type,
+                        "weight": weights[keyword_type],
+                    }
+                )
+    unique_details: list[dict[str, Any]] = []
+    seen_keywords: set[str] = set()
+    for detail in matched_details:
+        normalized = normalize_keyword(detail["keyword"])
+        if normalized not in seen_keywords:
+            seen_keywords.add(normalized)
+            unique_details.append(detail)
+    matched = [detail["keyword"] for detail in unique_details]
     exclusions = [
         keyword
         for keyword in chapter.exclude_keywords
         if normalize_keyword(keyword) in normalized_content
     ]
-    matched = list(dict.fromkeys(matched))
-    score = min(1.0, 0.2 + 0.1 * len(matched)) if matched else 0.0
+    signal = sum(float(detail["weight"]) for detail in unique_details)
+    score = min(1.0, 0.2 + 0.1 * signal) if matched else 0.0
     return {
         "chunk_id": chunk.chunk_id,
         "document_id": chunk.document_id,
@@ -94,7 +131,13 @@ def classify_chunk_by_keywords(chunk: Chunk, chapter: Chapter) -> dict[str, Any]
         "keyword_matched": bool(matched),
         "candidate": bool(matched),
         "keyword_match_score": round(score, 4),
+        "keyword_score_is_not_relevance": True,
+        "keyword_strategy": "weighted_broad_candidate_filter",
         "matched_keywords": matched,
+        "matched_keyword_details": unique_details,
+        "matched_keyword_types": sorted(
+            {detail["keyword_type"] for detail in unique_details}
+        ),
         "exclude_keyword_matches": exclusions,
         "evidence_span": _evidence(chunk.content, matched[0]) if matched else None,
         "review_status": "PENDING",
@@ -113,8 +156,13 @@ def keyword_candidates(
     rows: list[dict[str, Any]] = []
     per_chapter: dict[str, int] = Counter()
     matching_chunk_ids: set[str] = set()
+    seen_pairs: set[tuple[str, str]] = set()
     for chapter in chapters:
         for chunk in chunks:
+            pair = (chapter.chapter_id, chunk.chunk_id)
+            if pair in seen_pairs:
+                continue
+            seen_pairs.add(pair)
             row = classify_chunk_by_keywords(chunk, chapter)
             if row["candidate"]:
                 rows.append(row)

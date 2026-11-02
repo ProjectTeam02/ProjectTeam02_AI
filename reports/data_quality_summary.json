@@ -1,0 +1,19 @@
+{
+  "status": "NOT_AVAILABLE",
+  "input_file": null,
+  "searched_candidate_paths": [
+    "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/라벨링.xlsx",
+    "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/라벨링.xlsx"
+  ],
+  "actual_metrics": null,
+  "reference_metrics_not_verified": {
+    "document_count": 160,
+    "relevance_0": 98,
+    "relevance_1": 55,
+    "relevance_2": 7,
+    "reviewer_b_filled": 49,
+    "reviewer_disagreements": 10,
+    "quality_review_needed": 7
+  },
+  "reason": "라벨링.xlsx를 저장소와 작업 폴더에서 찾지 못했습니다."
+}

@@ -20,8 +20,8 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = list(rows[0]) if rows else ["status"]
-    with path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -52,9 +52,11 @@ def run(
 
         chunks = [Chunk(**row) for row in chunk_rows]
         dataset_version = chunks[0].dataset_version if chunks else "unknown"
+        input_mode = "processed_chunks_artifact"
     else:
         documents, inventory = load_corpus(data_dir)
         dataset_version = inventory["dataset_version"]
+        input_mode = "canonical_source_exports"
         chunks = make_chunks(
             documents,
             tokenizer,
@@ -78,6 +80,7 @@ def run(
             "unmatched_sample_count": len(sample),
             "llm_calls": 0,
             "permanent_deletion": False,
+            "input_mode": input_mode,
         }
     )
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -86,6 +89,8 @@ def run(
     write_json(output_dir / "keyword_summary.json", summary)
     _write_csv(output_dir / "keyword_candidates.csv", candidates)
     _write_csv(output_dir / "unmatched_sample.csv", sample)
+    # 보고서 디렉터리에도 동일한 후보 파일을 남겨 검토자가 쉽게 확인합니다.
+    _write_csv(ROOT / "reports" / "keyword_candidates.csv", candidates)
     return summary
 
 

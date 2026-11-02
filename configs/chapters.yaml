@@ -10,6 +10,17 @@ chapters:
   # 챕터별 정의와 키워드는 Python 코드가 아니라 설정으로 관리합니다.
   - chapter_id: inflation
     chapter_name: 물가와 인플레이션
+    # 아래 챕터는 실제 Leren 커리큘럼 파일이 없으므로 실험용 초안입니다.
+    chapter_description: >-
+      물가와 물가상승률, 인플레이션의 개념·측정·원인·영향·대응 정책을
+      학습하기 위한 후보 범위.
+    core_concepts:
+      - 인플레이션의 개념
+      - 물가 측정 지표
+      - 인플레이션의 원인
+      - 인플레이션의 영향
+      - 인플레이션 대응 정책
+      - 디플레이션 및 디스인플레이션 비교
     chapter_definition: >-
       물가 수준과 물가 상승률, 인플레이션의 측정·원인·종류·기대·정책
       파급을 이해하는 경제 학습 범위.
@@ -51,4 +62,28 @@ chapters:
     exclude_keywords:
       - 인플레이션감축법
       - 인플레이션 감축법
+    # 키워드가 최종 관련도 점수가 아니라 후보 수집 신호임을 명시합니다.
+    keyword_expansions:
+      core:
+        - 인플레이션
+        - 물가 상승
+        - 물가상승
+        - 소비자물가지수
+        - 소비자물가
+        - CPI
+      aliases:
+        - inflation
+        - Consumer Price Index
+        - PPI
+      related:
+        - 생산자물가지수
+        - 근원물가
+        - 구매력
+        - 기대 인플레이션
+        - 통화량
+        - 기준금리
+        - 실질금리
+      opposite:
+        - 디플레이션
+        - 디스인플레이션
     rubric_version: inflation-rubric-draft-v1
