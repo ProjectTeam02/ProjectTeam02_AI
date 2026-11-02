@@ -11,17 +11,21 @@ from typing import Any
 
 from _pipeline_support import write_json
 
+# 모든 입력·출력 경로를 저장소 루트 기준으로 고정합니다.
 ROOT = Path(__file__).resolve().parents[1]
+# FIELD_GROUPS는 반드시 존재해야 하는 정식 필드만 검사합니다.
 FIELD_GROUPS = {
     "keyword": ("keyword",),
     "root_topic": ("root_topic", "rootTopic"),
     "relation_type": ("relation_type", "relationType"),
     "summary": ("summary",),
 }
+# 기존 데이터의 title/content는 정식 필드가 아니므로 별도 참고 정보로만 표시합니다.
 LEGACY_ALIASES = {
     "keyword": ("term", "title"),
     "summary": ("definition", "content", "text"),
 }
+# 현재 저장소에서 실제로 발견될 수 있는 처리 산출물만 감사 대상으로 지정합니다.
 SOURCE_CANDIDATES = (
     ROOT / "data" / "processed" / "normalized_documents.jsonl",
     ROOT / "data" / "processed" / "chunks.jsonl",
@@ -31,6 +35,7 @@ SOURCE_CANDIDATES = (
 
 def read_rows(path: Path) -> list[dict[str, Any]]:
     """Read only supported JSONL/CSV audit inputs."""
+    # JSON/JSONL과 CSV만 읽고, 원본 파일에는 쓰지 않습니다.
     if path.suffix == ".jsonl":
         return [
             json.loads(line)
@@ -43,6 +48,7 @@ def read_rows(path: Path) -> list[dict[str, Any]]:
 
 def audit_file(path: Path) -> dict[str, Any]:
     """Return field coverage without inferring missing metadata."""
+    # 열이 없으면 자동 생성하지 않고 0%로 기록해 실제 부재를 보존합니다.
     rows = read_rows(path)
     available = set().union(*(row.keys() for row in rows)) if rows else set()
     coverage: dict[str, dict[str, Any]] = {}
@@ -71,6 +77,7 @@ def audit_file(path: Path) -> dict[str, Any]:
 
 def metadata_schema() -> dict[str, Any]:
     """Return the proposed schema; this is not a claim about current rows."""
+    # 이 함수의 결과는 현재 데이터가 아니라 향후 저장 구조에 대한 제안입니다.
     return {
         "schema_status": "PROPOSAL_ONLY_UNTIL_HUMAN_REVIEW",
         "concept": {
@@ -113,6 +120,7 @@ def metadata_schema() -> dict[str, Any]:
 
 def chapter_config() -> dict[str, Any]:
     """Return a JSON-readable copy of the draft inflation experiment config."""
+    # production curriculum이 없으므로 DRAFT_NOT_CANONICAL 상태를 명시합니다.
     return {
         "config_version": "draft-2026-11-01",
         "curriculum_status": "DRAFT_NOT_CANONICAL",
@@ -155,7 +163,9 @@ def chapter_config() -> dict[str, Any]:
 
 def run() -> dict[str, Any]:
     """Write the audit, proposed schemas, and chapter configuration."""
+    # 실제 필드 감사와 설계 파일 생성을 한 번에 수행하는 CLI 진입점입니다.
     existing = [audit_file(path) for path in SOURCE_CANDIDATES if path.is_file()]
+    # 한 파일 안에 네 개 정식 필드가 모두 있어야 완전한 메타데이터 원천으로 봅니다.
     all_fields_present = any(
         all(file["coverage"][field]["source_columns"] for field in FIELD_GROUPS)
         for file in existing
@@ -176,9 +186,11 @@ def run() -> dict[str, Any]:
     }
     report_dir = ROOT / "reports"
     report_dir.mkdir(exist_ok=True)
+    # 감사 결과와 제안 스키마를 서로 다른 파일로 저장해 사실과 설계를 구분합니다.
     write_json(report_dir / "data_quality_summary_metadata.json", result)
     write_json(report_dir / "metadata_schema.json", metadata_schema())
     write_json(report_dir / "chapter_config.json", chapter_config())
+    # Markdown 보고서는 교수·멘토가 코드나 JSON을 직접 열지 않아도 읽을 수 있게 합니다.
     lines = [
         "# 경제 용어 메타데이터 구조 감사",
         "",

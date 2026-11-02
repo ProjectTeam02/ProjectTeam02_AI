@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# 스크립트를 어느 현재 디렉터리에서 실행해도 저장소 루트를 기준으로 동작합니다.
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -19,6 +20,7 @@ from app.dataset_pipeline.labels import (  # noqa: E402
 )
 
 REPORT_DIR = ROOT / "reports"
+# 사용자가 제공한 참고값입니다. 실제 파일이 없을 때 결과값으로 사용하지 않습니다.
 REFERENCE_COUNTS = {
     "document_count": 160,
     "relevance_0": 98,
@@ -32,6 +34,7 @@ REFERENCE_COUNTS = {
 
 def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
     """Write UTF-8 CSV while preserving an explicit schema for empty results."""
+    # 결과 행이 0건이어도 헤더를 남겨 후속 검수 도구가 같은 형식으로 읽게 합니다.
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(
@@ -43,6 +46,7 @@ def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None
 
 def unavailable_result(candidates: list[Path]) -> dict[str, Any]:
     """Represent missing input explicitly instead of copying reference numbers."""
+    # 파일 부재를 '문제 없음'으로 오해하지 않도록 실제 지표를 None으로 기록합니다.
     return {
         "status": "NOT_AVAILABLE",
         "input_file": None,
@@ -55,6 +59,7 @@ def unavailable_result(candidates: list[Path]) -> dict[str, Any]:
 
 def report_markdown(result: dict[str, Any]) -> str:
     """Render the quality result for mentor and professor review."""
+    # 멘토 검토 시 실제 실행 결과와 아직 실행하지 못한 항목을 한눈에 구분합니다.
     if result["status"] == "NOT_AVAILABLE":
         return """# 라벨링 데이터 품질 검증 보고서
 
@@ -127,19 +132,23 @@ python scripts/validate_label_quality.py
 
 def run() -> dict[str, Any]:
     """Discover, validate, and write all required label-quality artifacts."""
+    # 입력 탐색 → 검사 → Markdown/JSON/CSV 보고서 생성 순서로 실행합니다.
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     candidates = discover_label_workbook(ROOT)
     if not candidates:
+        # 라벨 파일이 없으면 가짜 통계를 만들지 않고 명시적인 미실행 결과를 기록합니다.
         result = unavailable_result(
             [ROOT / name for name in ("라벨링.xlsx", "data/라벨링.xlsx")]
         )
         disagreements: list[dict[str, Any]] = []
         review_candidates: list[dict[str, Any]] = []
     else:
+        # 동일한 파일이 여러 개라면 정렬된 첫 후보를 사용하고 경로를 보고서에 남깁니다.
         source = candidates[0]
         result = analyze_label_rows(read_xlsx_rows(source), source)
         disagreements = result.pop("disagreements")
         review_candidates = result.pop("manual_review_candidates")
+    # 사람이 읽는 보고서와 기계가 읽는 요약을 동시에 생성합니다.
     (REPORT_DIR / "label_quality_report.md").write_text(
         report_markdown(result), encoding="utf-8"
     )

@@ -21,6 +21,7 @@ from app.dataset_pipeline.labels import analyze_label_rows
 
 
 def test_relevance_policy_is_separate_by_usage() -> None:
+    # 문제 생성과 튜터 검색이 같은 임계값을 쓰지 않는지 확인합니다.
     assert positive_for_use(2, "question_generation") is True
     assert positive_for_use(1, "question_generation") is False
     assert positive_for_use(1, "tutor_retrieval") is True
@@ -28,6 +29,7 @@ def test_relevance_policy_is_separate_by_usage() -> None:
 
 
 def test_relevance_score_rejects_out_of_range_values() -> None:
+    # 관련도는 0·1·2 이외의 값이나 Boolean을 허용하지 않아야 합니다.
     with pytest.raises(ValueError):
         validate_relevance_score(3)
     with pytest.raises(ValueError):
@@ -35,12 +37,14 @@ def test_relevance_score_rejects_out_of_range_values() -> None:
 
 
 def test_metrics_are_only_calculated_from_explicit_gold_values() -> None:
+    # 시스템 예측과 독립 골드 라벨의 조합으로만 평가 지표를 계산합니다.
     matrix = confusion_matrix([True, True, False, False], [True, False, True, False])
     assert matrix == {"tp": 1, "fp": 1, "fn": 1, "tn": 1}
     assert precision_recall_f1(matrix) == {"precision": 0.5, "recall": 0.5, "f1": 0.5}
 
 
 def test_label_audit_finds_duplicates_and_manual_review_term() -> None:
+    # 중복 ID와 지정 수동 검수 용어가 실제 검수 후보로 잡히는지 확인합니다.
     rows = [
         {
             "원문ID": "a",
@@ -73,6 +77,7 @@ def test_label_audit_finds_duplicates_and_manual_review_term() -> None:
 
 
 def test_keyword_alias_and_synonym_are_candidate_signals_only() -> None:
+    # 약어·영문명이 매칭되더라도 결과가 최종 관련도 판정이 아님을 확인합니다.
     chunk = Chunk(
         document_id="doc-1",
         chunk_id="chunk-1",
@@ -108,6 +113,7 @@ def test_keyword_alias_and_synonym_are_candidate_signals_only() -> None:
 
 
 def test_duplicate_chunk_id_is_not_counted_twice() -> None:
+    # JSON과 JSONL 중복 또는 재실행으로 같은 청크가 들어와도 중복 집계하지 않습니다.
     chunk = Chunk(
         document_id="doc-1",
         chunk_id="chunk-1",

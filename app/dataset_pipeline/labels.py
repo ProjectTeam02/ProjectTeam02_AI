@@ -17,7 +17,9 @@ from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree
 
+# 파일명이 팀 환경에 따라 다를 수 있으므로 한국어·영문 후보명을 함께 탐색합니다.
 LABEL_CANDIDATE_NAMES = ("라벨링.xlsx", "labeling.xlsx", "labels.xlsx")
+# 아래 용어는 자동으로 최종 라벨을 확정하지 않고 사람 검수 대상으로 남깁니다.
 MANUAL_REVIEW_TERMS = (
     "기준금리",
     "상품권",
@@ -34,10 +36,12 @@ _PKG_REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 
 def normalize_header(value: object) -> str:
     """Normalize headers for alias matching while preserving source columns."""
+    # 공백·괄호·구분기호를 제거해 '평가자 A'와 '평가자A'를 같은 열로 인식합니다.
     return re.sub(r"[\s_\-:/()（）]+", "", str(value or "").strip().casefold())
 
 
 def _column_index(reference: str) -> int:
+    # XLSX 셀 주소의 알파벳 부분을 0부터 시작하는 열 번호로 변환합니다.
     letters = re.match(r"[A-Z]+", reference.upper())
     if not letters:
         return 0
@@ -48,6 +52,7 @@ def _column_index(reference: str) -> int:
 
 
 def _shared_strings(archive: zipfile.ZipFile) -> list[str]:
+    # 문자열을 sharedStrings.xml에 모아 저장하는 XLSX 파일을 지원합니다.
     try:
         root = ElementTree.fromstring(archive.read("xl/sharedStrings.xml"))
     except KeyError:
@@ -59,6 +64,7 @@ def _shared_strings(archive: zipfile.ZipFile) -> list[str]:
 
 
 def _first_sheet_path(archive: zipfile.ZipFile) -> str:
+    # 라벨링 파일의 첫 번째 시트를 읽기 위한 실제 XML 경로를 찾습니다.
     workbook = ElementTree.fromstring(archive.read("xl/workbook.xml"))
     first_sheet = workbook.find(f"{_XML_NS}sheets/{_XML_NS}sheet")
     if first_sheet is None:
@@ -74,11 +80,13 @@ def _first_sheet_path(archive: zipfile.ZipFile) -> str:
 
 def read_xlsx_rows(path: Path) -> list[dict[str, str]]:
     """Read the first worksheet as dictionaries without modifying the workbook."""
+    # 별도 Excel 편집 라이브러리 없이 표준 ZIP/XML 모듈만 사용합니다.
     if path.suffix.casefold() != ".xlsx":
         raise ValueError("only .xlsx is supported; .xls requires an approved reader")
     with zipfile.ZipFile(path) as archive:
         shared = _shared_strings(archive)
         sheet = ElementTree.fromstring(archive.read(_first_sheet_path(archive)))
+    # 첫 행은 헤더, 나머지 행은 헤더와 연결할 셀 값으로 임시 보관합니다.
     matrix: list[dict[int, str]] = []
     for row in sheet.findall(f".//{_XML_NS}row"):
         values: dict[int, str] = {}
@@ -110,6 +118,7 @@ def read_xlsx_rows(path: Path) -> list[dict[str, str]]:
 
 def discover_label_workbook(root: Path) -> list[Path]:
     """Find likely label workbooks while excluding virtual environments and git."""
+    # 가상환경과 Git 내부 파일은 실제 라벨 데이터가 아니므로 후보에서 제외합니다.
     matches: list[Path] = []
     for path in root.rglob("*"):
         if not path.is_file() or path.parts[-2:-1] in ((".git",), (".venv",)):
@@ -120,6 +129,7 @@ def discover_label_workbook(root: Path) -> list[Path]:
 
 
 def _first_column(headers: list[str], aliases: tuple[str, ...]) -> str | None:
+    # 실제 열 이름이 달라도 미리 정의한 한국어·영문 별칭으로 연결합니다.
     normalized = {normalize_header(header): header for header in headers}
     for alias in aliases:
         if normalize_header(alias) in normalized:
@@ -128,6 +138,7 @@ def _first_column(headers: list[str], aliases: tuple[str, ...]) -> str | None:
 
 
 def _text(value: object) -> str:
+    # 엑셀의 빈 셀·문자열형 결측치를 동일하게 빈 문자열로 통일합니다.
     text = "" if value is None else str(value)
     if text.casefold() in {"nan", "none", "null"}:
         return ""
@@ -135,6 +146,7 @@ def _text(value: object) -> str:
 
 
 def _number(value: object) -> float | None:
+    # 문자 수 열처럼 숫자여야 하는 값만 변환하고, 이상값은 결측으로 남깁니다.
     text = _text(value).replace(",", "")
     if not text:
         return None
@@ -147,6 +159,7 @@ def _number(value: object) -> float | None:
 
 def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[str, Any]:
     """Run deterministic quality checks against dynamically discovered columns."""
+    # 실제 열을 감지하고, 없는 열은 임의로 만들지 않고 검사 불가로 남깁니다.
     headers = list(rows[0]) if rows else []
     columns = {
         "id": _first_column(headers, ("원문ID", "문서ID", "document_id", "id")),
@@ -169,6 +182,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
     }
 
     def values(key: str) -> list[str]:
+        # 열이 없으면 빈 목록을 반환해 '미입력'과 '검사 대상 없음'을 구분합니다.
         column = columns[key]
         return [_text(row.get(column, "")) for row in rows] if column else []
 
@@ -181,6 +195,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
     reviewer_b = values("reviewer_b")
     gold = values("gold")
     reasons = values("reason")
+    # 두 평가자가 모두 입력한 행만 비교하여 빈 칸을 불일치로 세지 않습니다.
     disagreements = [
         {
             "row_number": index + 2,
@@ -193,6 +208,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
     ]
     review_candidates: list[dict[str, Any]] = []
     for index, row in enumerate(rows):
+        # 한 행의 검수 사유를 누적해 사람이 우선순위를 정할 수 있게 합니다.
         title = titles[index] if index < len(titles) else ""
         content = contents[index] if index < len(contents) else ""
         reasons_value = reasons[index] if index < len(reasons) else ""
@@ -205,6 +221,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
             flags.append("empty_content")
         if not source_values or not source_values[index]:
             flags.append("missing_source")
+        # 근거 문장이 본문에 그대로 없다는 것은 오류 확정이 아니라 재검토 신호입니다.
         if (
             reasons_value
             and content
@@ -225,6 +242,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
                 }
             )
 
+    # 정의된 0·1·2 범위를 벗어난 값은 입력 오류 후보로 분리합니다.
     invalid_relevance = [
         value for value in relevance_values if value and value not in {"0", "1", "2"}
     ]
@@ -243,6 +261,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
         for value, count in Counter(contents).items()
         if value and count > 1
     }
+    # 문자 수 열이 실제로 존재할 때만 본문 길이와 비교합니다.
     char_mismatches: list[int] = []
     if columns["char_count"]:
         for index, row in enumerate(rows):
@@ -253,6 +272,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
                 and int(expected) != len(contents[index])
             ):
                 char_mismatches.append(index + 2)
+    # 평가자 A와 B 열이 모두 있을 때만 일치율을 계산합니다.
     agreement = None
     if reviewer_a and reviewer_b:
         comparable = [(a, b) for a, b in zip(reviewer_a, reviewer_b) if a and b]
@@ -266,6 +286,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
                 else None
             ),
         }
+    # 결과는 원본 행을 수정하지 않고, 보고서 생성에 필요한 검사 결과만 반환합니다.
     return {
         "status": "EXECUTED",
         "source_path": str(source_path),

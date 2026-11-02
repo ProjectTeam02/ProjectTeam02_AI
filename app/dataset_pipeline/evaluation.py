@@ -11,13 +11,17 @@ from __future__ import annotations
 from collections import Counter
 from typing import Iterable
 
+# 사람이 합의하는 챕터 관련도는 0·1·2 세 단계만 허용합니다.
+# LLM의 연속형 점수(0~1)와 혼동하지 않도록 별도 값으로 관리합니다.
 VALID_RELEVANCE_SCORES = {0, 1, 2}
 
 
 def validate_relevance_score(value: object) -> int:
     """Validate and return an integer 0/1/2 relevance score."""
+    # True/False는 Python에서 1/0으로 자동 변환될 수 있으므로 먼저 차단합니다.
     if isinstance(value, bool):
         raise ValueError("boolean values are not valid relevance scores")
+    # 엑셀에서 읽은 값이 문자열일 수 있으므로 정수 변환 후 범위를 검사합니다.
     try:
         score = int(value)  # type: ignore[arg-type]
     except (TypeError, ValueError) as exc:
@@ -31,6 +35,7 @@ def validate_relevance_score(value: object) -> int:
 
 def positive_for_use(score: int, usage: str) -> bool:
     """Apply the separate quiz and tutor policies to an approved label."""
+    # 문제 생성은 정밀도 우선, 튜터 검색은 재현율 우선으로 별도 판정합니다.
     score = validate_relevance_score(score)
     if usage == "question_generation":
         return score == 2
@@ -43,11 +48,13 @@ def confusion_matrix(
     predictions: Iterable[bool], gold: Iterable[bool]
 ) -> dict[str, int]:
     """Return TP/FP/FN/TN for equal-length binary sequences."""
+    # Iterator를 list로 바꾸어 예측값과 골드값의 길이·순서를 함께 검증합니다.
     counts = Counter()
     prediction_values = list(predictions)
     gold_values = list(gold)
     if len(prediction_values) != len(gold_values):
         raise ValueError("predictions and gold must have equal lengths")
+    # predicted는 시스템 결과, actual은 독립적으로 승인된 골드 라벨입니다.
     for predicted, actual in zip(prediction_values, gold_values):
         if predicted and actual:
             counts["tp"] += 1
@@ -62,6 +69,7 @@ def confusion_matrix(
 
 def precision_recall_f1(matrix: dict[str, int]) -> dict[str, float]:
     """Calculate metrics from a human-reviewed confusion matrix."""
+    # 평가 표본이 없을 때도 파이프라인이 중단되지 않도록 0으로 처리합니다.
     tp, fp, fn = matrix["tp"], matrix["fp"], matrix["fn"]
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
