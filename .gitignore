@@ -10,3 +10,6 @@ data/*
 !data/.gitkeep
 !data/README.md
 .idea/
+
+# Codex 플러그인에서 제공되는 SKILL.md는 프로젝트 소스에 포함하지 않습니다.
+SKILL.md
