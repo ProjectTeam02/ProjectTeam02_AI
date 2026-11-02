@@ -124,8 +124,9 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 
 현재 저장소에는 `라벨링.xlsx`가 없어 라벨 검사는 `NOT_AVAILABLE`로 기록됩니다.
 요청문에 제시된 160건 수치는 검증되지 않은 참고값으로만 보관합니다. 처리된 청크
-아티팩트가 있는 경우 키워드 후보는 `reports/keyword_candidates.csv`와
-`data/labeled/keyword/`에 저장되며, 후보 점수는 관련도 확률이 아닙니다.
+아티팩트가 있는 경우 키워드 후보 CSV는 로컬의 `reports/keyword_candidates.csv`와
+`data/labeled/keyword/`에 생성되며, 데이터 라이선스와 저장소 용량을 고려해 Git에는
+추적하지 않습니다. 후보 점수는 관련도 확률이 아닙니다.
 메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
 `reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
 평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
