@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import math
 import re
+import unicodedata
 import zipfile
 from collections import Counter
 from pathlib import Path
@@ -37,7 +38,14 @@ _PKG_REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 def normalize_header(value: object) -> str:
     """Normalize headers for alias matching while preserving source columns."""
     # 공백·괄호·구분기호를 제거해 '평가자 A'와 '평가자A'를 같은 열로 인식합니다.
-    return re.sub(r"[\s_\-:/()（）]+", "", str(value or "").strip().casefold())
+    normalized = unicodedata.normalize("NFKC", str(value or "").strip())
+    return re.sub(r"[\s_\-:/()（）]+", "", normalized.casefold())
+
+
+def normalize_filename(value: object) -> str:
+    """Normalize filenames so macOS decomposed Korean names are discoverable."""
+    # macOS에서 생성된 파일은 한글이 자모 단위로 저장될 수 있어 NFC로 통일합니다.
+    return unicodedata.normalize("NFC", str(value or "")).casefold()
 
 
 def _column_index(reference: str) -> int:
@@ -120,10 +128,18 @@ def discover_label_workbook(root: Path) -> list[Path]:
     """Find likely label workbooks while excluding virtual environments and git."""
     # 가상환경과 Git 내부 파일은 실제 라벨 데이터가 아니므로 후보에서 제외합니다.
     matches: list[Path] = []
+    candidate_names = {normalize_filename(name) for name in LABEL_CANDIDATE_NAMES}
     for path in root.rglob("*"):
         if not path.is_file() or path.parts[-2:-1] in ((".git",), (".venv",)):
             continue
-        if path.name.casefold() in {name.casefold() for name in LABEL_CANDIDATE_NAMES}:
+        normalized_name = normalize_filename(path.name)
+        # 정확한 후보명뿐 아니라 '라벨'이 포함된 xlsx도 허용합니다.
+        # 그 외 엑셀 파일은 라벨 원본으로 추정하지 않습니다.
+        is_label_name = normalized_name in candidate_names or (
+            path.suffix.casefold() == ".xlsx"
+            and ("라벨" in normalized_name or "label" in normalized_name)
+        )
+        if is_label_name:
             matches.append(path)
     return sorted(matches)
 
@@ -168,18 +184,44 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
             headers, ("설명", "본문", "내용", "content", "definition")
         ),
         "source": _first_column(headers, ("출처", "자료출처", "source", "source_url")),
+        "source_locator": _first_column(
+            headers, ("원문 위치", "원문위치", "source_locator", "source_url", "url")
+        ),
         "char_count": _first_column(headers, ("문자수", "글자수", "char_count")),
+        "quality_flag": _first_column(
+            headers, ("원본 점검플래그", "원본점검플래그", "quality_flag")
+        ),
         "quality": _first_column(headers, ("원문품질", "자료품질", "품질")),
-        "relevance": _first_column(headers, ("관련도", "relevance_score", "relevance")),
-        "reviewer_a": _first_column(headers, ("평가자A", "평가자A라벨", "reviewer_a")),
-        "reviewer_b": _first_column(headers, ("평가자B", "평가자B라벨", "reviewer_b")),
+        # 확정 골드는 관련도 A/B와 별도인 독립 라벨 열입니다.
+        "relevance": _first_column(
+            headers, ("확정 골드", "확정골드", "관련도", "relevance_score", "relevance")
+        ),
+        "reviewer_a": _first_column(
+            headers, ("관련도 A", "관련도A", "평가자A", "평가자A라벨", "reviewer_a")
+        ),
+        "reviewer_b": _first_column(
+            headers, ("관련도 B", "관련도B", "평가자B", "평가자B라벨", "reviewer_b")
+        ),
         "gold": _first_column(headers, ("확정골드", "골드라벨", "gold_label", "gold")),
         "reason": _first_column(headers, ("판정근거", "판정이유", "근거", "reason")),
         "quiz": _first_column(
             headers, ("문제생성적합", "문제생성용", "quiz_candidate")
         ),
         "tutor": _first_column(headers, ("튜터검색적합", "튜터용", "tutor_candidate")),
+        "keyword": _first_column(headers, ("키워드 분류", "키워드분류", "keyword")),
+        "binary_label": _first_column(
+            headers, ("평가용 이진 라벨", "평가용이진라벨", "binary_label")
+        ),
+        "b_review": _first_column(
+            headers, ("B 재검토 대상", "B재검토대상", "reviewer_b_review")
+        ),
     }
+
+    # 실제 파일에서 '확정 골드' 표기가 공백 포함 형태인지에 관계없이 감지합니다.
+    if columns["gold"] is None:
+        columns["gold"] = _first_column(
+            headers, ("확정 골드", "확정골드", "gold_label", "gold")
+        )
 
     def values(key: str) -> list[str]:
         # 열이 없으면 빈 목록을 반환해 '미입력'과 '검사 대상 없음'을 구분합니다.
@@ -195,6 +237,37 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
     reviewer_b = values("reviewer_b")
     gold = values("gold")
     reasons = values("reason")
+    source_locators = values("source_locator")
+    quality_flags = values("quality_flag")
+    quality_values = values("quality")
+    reviewer_a_scores = [_number(value) for value in reviewer_a]
+    reviewer_b_scores = [_number(value) for value in reviewer_b]
+    gold_scores = [_number(value) for value in values("gold")]
+
+    def meaningful_tokens(value: str) -> set[str]:
+        # 조사와 문장 부호를 제외한 2글자 이상 토큰으로
+        # 근거 겹침을 보수적으로 확인합니다.
+        stopwords = {
+            "해당",
+            "설명",
+            "관련",
+            "판정",
+            "정도",
+            "단원",
+            "학습",
+            "내용",
+            "대해",
+            "있어",
+            "으로",
+        }
+        return {
+            token
+            for token in re.findall(
+                r"[가-힣A-Za-z][가-힣A-Za-z0-9]{1,}", value.casefold()
+            )
+            if token not in stopwords
+        }
+
     # 두 평가자가 모두 입력한 행만 비교하여 빈 칸을 불일치로 세지 않습니다.
     disagreements = [
         {
@@ -221,13 +294,27 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
             flags.append("empty_content")
         if not source_values or not source_values[index]:
             flags.append("missing_source")
-        # 근거 문장이 본문에 그대로 없다는 것은 오류 확정이 아니라 재검토 신호입니다.
+        if not source_locators or not source_locators[index]:
+            flags.append("missing_source_locator")
+        if quality_flags and quality_flags[index]:
+            flags.append("original_quality_flag_present")
+        if quality_values and quality_values[index] and quality_values[index] != "정상":
+            flags.append("non_normal_quality")
+        # 판정 근거가 본문을 그대로 복사했는지는 요구하지 않습니다.
+        # 의미 토큰이 전혀 겹치면 사람 검토 신호로 남깁니다.
         if (
             reasons_value
             and content
-            and normalize_header(reasons_value) not in normalize_header(content)
+            and not (meaningful_tokens(reasons_value) & meaningful_tokens(content))
         ):
-            flags.append("reason_not_found_verbatim_in_content")
+            flags.append("reason_has_no_content_token_overlap")
+        if index < len(reviewer_a_scores) and index < len(reviewer_b_scores):
+            if (
+                reviewer_a_scores[index] is not None
+                and reviewer_b_scores[index] is not None
+            ):
+                if reviewer_a_scores[index] != reviewer_b_scores[index]:
+                    flags.append("reviewer_disagreement")
         if flags:
             review_candidates.append(
                 {
@@ -244,7 +331,7 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
 
     # 정의된 0·1·2 범위를 벗어난 값은 입력 오류 후보로 분리합니다.
     invalid_relevance = [
-        value for value in relevance_values if value and value not in {"0", "1", "2"}
+        value for value in values("gold") if value and value not in {"0", "1", "2"}
     ]
     reason_counts = Counter(reason for reason in reasons if reason)
     repeated_reasons = {
@@ -300,9 +387,14 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
             "empty_title_count": sum(not value for value in titles),
             "empty_content_count": sum(not value for value in contents),
             "missing_source_count": sum(not value for value in source_values),
+            "missing_source_locator_count": sum(not value for value in source_locators),
             "char_count_mismatch_rows": char_mismatches,
             "invalid_relevance_values": invalid_relevance,
-            "quality_flag_missing_count": sum(not value for value in values("quality")),
+            "quality_flag_missing_count": sum(not value for value in quality_values),
+            "original_quality_flag_count": sum(bool(value) for value in quality_flags),
+            "quality_distribution": dict(
+                Counter(value for value in quality_values if value)
+            ),
             "leading_or_trailing_whitespace_cells": sum(
                 value != str(row.get(column, ""))
                 for row in rows
@@ -318,20 +410,45 @@ def analyze_label_rows(rows: list[dict[str, str]], source_path: Path) -> dict[st
             "reviewer_agreement": agreement,
             "disagreement_count": len(disagreements),
             "gold_vs_reviewer_a_mismatch_count": sum(
-                a and g and a != g for a, g in zip(reviewer_a, gold)
+                bool(a and g and a != g) for a, g in zip(reviewer_a, gold)
             ),
             "gold_vs_reviewer_b_mismatch_count": sum(
-                b and g and b != g for b, g in zip(reviewer_b, gold)
+                bool(b and g and b != g) for b, g in zip(reviewer_b, gold)
             ),
-            "relevance_distribution": dict(Counter(relevance_values)),
+            "reviewer_a_distribution": dict(
+                Counter(value for value in reviewer_a if value)
+            ),
+            "reviewer_b_distribution": dict(
+                Counter(value for value in reviewer_b if value)
+            ),
+            "relevance_distribution": dict(
+                Counter(value for value in values("gold") if value)
+            ),
+            "reviewer_a_filled_count": sum(bool(value) for value in reviewer_a),
+            "reviewer_b_filled_count": sum(bool(value) for value in reviewer_b),
+            "gold_filled_count": sum(bool(value) for value in values("gold")),
             "quiz_values_present": bool(values("quiz")),
             "tutor_values_present": bool(values("tutor")),
+            "quiz_policy_mismatch_count": sum(
+                bool(value)
+                and gold_scores[index] is not None
+                and ((value == "적합") != (gold_scores[index] == 2))
+                for index, value in enumerate(values("quiz"))
+                if index < len(gold_scores)
+            ),
+            "tutor_policy_mismatch_count": sum(
+                bool(value)
+                and gold_scores[index] is not None
+                and ((value == "적합") != (gold_scores[index] in {1, 2}))
+                for index, value in enumerate(values("tutor"))
+                if index < len(gold_scores)
+            ),
         },
         "reason_audit": {
             "non_empty_reason_count": sum(bool(value) for value in reasons),
             "repeated_reasons": repeated_reasons,
-            "reason_not_found_candidate_count": sum(
-                "reason_not_found_verbatim_in_content" in row["review_reason"]
+            "reason_without_content_overlap_count": sum(
+                "reason_has_no_content_token_overlap" in row["review_reason"]
                 for row in review_candidates
             ),
         },

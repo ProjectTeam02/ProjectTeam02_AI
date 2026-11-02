@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import json
 import sys
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -102,24 +103,30 @@ python scripts/validate_label_quality.py
 - 빈 표제어: `{integrity["empty_title_count"]}건`
 - 빈 설명: `{integrity["empty_content_count"]}건`
 - 출처 누락: `{integrity["missing_source_count"]}건`
+- 원문 위치 누락: `{integrity["missing_source_locator_count"]}건`
 - 문자 수 불일치: `{len(integrity["char_count_mismatch_rows"])}건`
 - 유효하지 않은 관련도: `{len(integrity["invalid_relevance_values"])}건`
-- 원문 품질 플래그 누락: `{integrity["quality_flag_missing_count"]}건`
+- 자료 품질 분포: `{integrity["quality_distribution"]}`
+- 원본 점검 플래그 입력: `{integrity["original_quality_flag_count"]}건`
 - 대체문자(�) 포함 셀: `{integrity["replacement_character_count"]}건`
 
 ## 라벨 일관성
 
 - 평가자 A·B 비교: `{consistency["reviewer_agreement"]}`
 - 평가자 불일치: `{consistency["disagreement_count"]}건`
+- 평가자 A 입력: `{consistency["reviewer_a_filled_count"]}건`
+- 평가자 B 입력: `{consistency["reviewer_b_filled_count"]}건`
 - 관련도 분포: `{consistency["relevance_distribution"]}`
 - 평가자 A와 골드 불일치: `{consistency["gold_vs_reviewer_a_mismatch_count"]}건`
 - 평가자 B와 골드 불일치: `{consistency["gold_vs_reviewer_b_mismatch_count"]}건`
+- 문제 생성 적합성 정책 불일치: `{consistency["quiz_policy_mismatch_count"]}건`
+- 튜터 검색 적합성 정책 불일치: `{consistency["tutor_policy_mismatch_count"]}건`
 
 ## 판정 근거
 
 - 반복 근거: `{result["reason_audit"]["repeated_reasons"]}`
-- 본문에서 근거 문장을 그대로 찾지 못한 후보:
-  `{result["reason_audit"]["reason_not_found_candidate_count"]}건`
+- 본문과 의미 토큰이 겹치지 않는 근거 후보:
+  `{result["reason_audit"]["reason_without_content_overlap_count"]}건`
 
 ## 검수 원칙
 
@@ -146,6 +153,10 @@ def run() -> dict[str, Any]:
         # 동일한 파일이 여러 개라면 정렬된 첫 후보를 사용하고 경로를 보고서에 남깁니다.
         source = candidates[0]
         result = analyze_label_rows(read_xlsx_rows(source), source)
+        # 보고서와 JSON에 개발자별 절대 경로가 남지 않도록 저장소 상대 경로로 바꿉니다.
+        result["source_path"] = unicodedata.normalize(
+            "NFC", str(source.relative_to(ROOT))
+        )
         disagreements = result.pop("disagreements")
         review_candidates = result.pop("manual_review_candidates")
     # 사람이 읽는 보고서와 기계가 읽는 요약을 동시에 생성합니다.

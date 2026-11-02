@@ -119,14 +119,19 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 
 ```bash
 .venv/bin/python scripts/validate_label_quality.py
+.venv/bin/python scripts/rebuild_precision_pipeline.py
 .venv/bin/python scripts/audit_metadata.py
 ```
 
-현재 저장소에는 `라벨링.xlsx`가 없어 라벨 검사는 `NOT_AVAILABLE`로 기록됩니다.
-요청문에 제시된 160건 수치는 검증되지 않은 참고값으로만 보관합니다. 처리된 청크
-아티팩트가 있는 경우 키워드 후보 CSV는 로컬의 `reports/keyword_candidates.csv`와
-`data/labeled/keyword/`에 생성되며, 데이터 라이선스와 저장소 용량을 고려해 Git에는
-추적하지 않습니다. 후보 점수는 관련도 확률이 아닙니다.
+`rebuild_precision_pipeline.py`는 로컬의 `라벨링.xlsx`를 기준으로 문자 수·토큰 수,
+0/1/2점 분포, 평가자 A/B 일치율, 문제 생성·튜터 검색 정책별 기준선, 기본/확장
+키워드의 Precision·Recall·F1을 계산합니다. LLM API 호출은 수행하지 않으며,
+현재 골드 라벨은 독립 검증 전의 참고 세트로 표시됩니다.
+
+생성된 행 단위 후보·검수 큐 CSV는 원문을 포함할 수 있으므로 로컬의
+`data/labeled/precision/`에만 보관하고 Git에는 추적하지 않습니다. 후보 점수는
+관련도 확률이 아닙니다. 요약 결과는 `reports/precision_pipeline_report.md`와
+`reports/precision_pipeline_summary.json`에서 확인할 수 있습니다.
 메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
 `reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
 평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은

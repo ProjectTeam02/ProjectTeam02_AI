@@ -1,19 +1,109 @@
 {
-  "status": "NOT_AVAILABLE",
-  "input_file": null,
-  "searched_candidate_paths": [
-    "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/라벨링.xlsx",
-    "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/라벨링.xlsx"
+  "status": "EXECUTED",
+  "source_path": "라벨링.xlsx",
+  "row_count": 160,
+  "headers": [
+    "번호",
+    "출처",
+    "원문ID",
+    "용어",
+    "설명",
+    "글자수",
+    "원문 위치",
+    "원본 점검플래그",
+    "청크 분할 검토",
+    "자료 품질",
+    "관련도 A",
+    "관련도 B",
+    "확정 골드",
+    "문제 생성 적합",
+    "튜터 검색 적합",
+    "판정 근거",
+    "키워드 분류",
+    "샘플 추출 계층",
+    "B 재검토 대상",
+    "완료 상태",
+    "평가용 이진 라벨"
   ],
-  "actual_metrics": null,
-  "reference_metrics_not_verified": {
-    "document_count": 160,
-    "relevance_0": 98,
-    "relevance_1": 55,
-    "relevance_2": 7,
-    "reviewer_b_filled": 49,
-    "reviewer_disagreements": 10,
-    "quality_review_needed": 7
+  "detected_columns": {
+    "id": "원문ID",
+    "title": "용어",
+    "content": "설명",
+    "source": "출처",
+    "source_locator": "원문 위치",
+    "char_count": "글자수",
+    "quality_flag": "원본 점검플래그",
+    "quality": "자료 품질",
+    "relevance": "확정 골드",
+    "reviewer_a": "관련도 A",
+    "reviewer_b": "관련도 B",
+    "gold": "확정 골드",
+    "reason": "판정 근거",
+    "quiz": "문제 생성 적합",
+    "tutor": "튜터 검색 적합",
+    "keyword": "키워드 분류",
+    "binary_label": "평가용 이진 라벨",
+    "b_review": "B 재검토 대상"
   },
-  "reason": "라벨링.xlsx를 저장소와 작업 폴더에서 찾지 못했습니다."
+  "integrity": {
+    "duplicate_ids": {},
+    "duplicate_titles": {},
+    "duplicate_contents": {},
+    "empty_title_count": 0,
+    "empty_content_count": 0,
+    "missing_source_count": 0,
+    "missing_source_locator_count": 0,
+    "char_count_mismatch_rows": [],
+    "invalid_relevance_values": [],
+    "quality_flag_missing_count": 0,
+    "original_quality_flag_count": 0,
+    "quality_distribution": {
+      "정상": 153,
+      "검토필요": 7
+    },
+    "leading_or_trailing_whitespace_cells": 0,
+    "replacement_character_count": 0
+  },
+  "label_consistency": {
+    "reviewer_agreement": {
+      "comparable_count": 49,
+      "agree_count": 39,
+      "disagree_count": 10,
+      "agreement_rate": 0.7959183673469388
+    },
+    "disagreement_count": 10,
+    "gold_vs_reviewer_a_mismatch_count": 0,
+    "gold_vs_reviewer_b_mismatch_count": 10,
+    "reviewer_a_distribution": {
+      "0": 98,
+      "2": 7,
+      "1": 55
+    },
+    "reviewer_b_distribution": {
+      "1": 8,
+      "0": 39,
+      "2": 2
+    },
+    "relevance_distribution": {
+      "0": 98,
+      "2": 7,
+      "1": 55
+    },
+    "reviewer_a_filled_count": 160,
+    "reviewer_b_filled_count": 49,
+    "gold_filled_count": 160,
+    "quiz_values_present": true,
+    "tutor_values_present": true,
+    "quiz_policy_mismatch_count": 0,
+    "tutor_policy_mismatch_count": 0
+  },
+  "reason_audit": {
+    "non_empty_reason_count": 160,
+    "repeated_reasons": {
+      "해당 용어의 설명이 인플레이션 단원 학습 내용과 관련이 없어 0점으로 판정함.": 98,
+      "설명에 인플레이션 및 물가 핵심 개념이 포함되어 있어 2점(직접 관련)으로 판정함.": 7,
+      "금리, 통화 등 거시경제 지표로서 인플레이션 이해에 간접적 도움을 주므로 1점으로 판정함.": 55
+    },
+    "reason_without_content_overlap_count": 150
+  }
 }
