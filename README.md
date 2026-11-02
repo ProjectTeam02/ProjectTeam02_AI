@@ -132,6 +132,11 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 `data/labeled/precision/`에만 보관하고 Git에는 추적하지 않습니다. 후보 점수는
 관련도 확률이 아닙니다. 요약 결과는 `reports/precision_pipeline_report.md`와
 `reports/precision_pipeline_summary.json`에서 확인할 수 있습니다.
+
+멘토·교수님에게 실험 과정을 순서대로 보여줄 때는
+[`notebook/precision_eda.ipynb`](notebook/precision_eda.ipynb)를 실행합니다.
+Notebook은 기존 파이프라인 모듈을 호출해 같은 결과를 재현하고, 골드 분포와
+전략별 Precision·Recall을 표와 그래프로 확인할 수 있습니다.
 메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
 `reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
 평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
