@@ -42,5 +42,6 @@
 
 - `reports/metadata_schema.json`
 - `reports/chapter_config.json`
+- `reports/keyword_dictionary.json`
 
 인플레이션 챕터는 현재 `DRAFT_NOT_CANONICAL` 상태이며 멘토·교수 확정 전까지 최종 기준으로 사용하지 않습니다.

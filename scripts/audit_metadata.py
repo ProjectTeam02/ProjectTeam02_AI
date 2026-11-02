@@ -161,6 +161,77 @@ def chapter_config() -> dict[str, Any]:
     }
 
 
+def keyword_dictionary() -> dict[str, Any]:
+    """Return the draft inflation keyword groups used by the offline filter."""
+    # 키워드 자체와 챕터 관련도 판단을 분리하기 위해 그룹별 역할을 기록합니다.
+    # aliases는 원문 근거가 확인되기 전까지 자동 확정하지 않습니다.
+    return {
+        "dictionary_status": "DRAFT_CANDIDATE_DICTIONARY",
+        "curriculum_status": "DRAFT_NOT_CANONICAL",
+        "chapter_id": "inflation",
+        "rubric_version": "inflation-rubric-draft-v1",
+        "groups": {
+            "core": {
+                "purpose": "챕터 핵심 개념을 넓게 찾는 후보 신호",
+                "keywords": [
+                    "인플레이션",
+                    "물가 상승",
+                    "물가상승",
+                    "물가 상승률",
+                    "물가상승률",
+                    "물가 수준",
+                    "물가수준",
+                    "소비자물가지수",
+                    "소비자물가",
+                    "CPI",
+                ],
+                "review_status": "PENDING_HUMAN_REVIEW",
+            },
+            "aliases": {
+                "purpose": "한글 표제어의 영문명·약어 후보",
+                "keywords": ["inflation", "Consumer Price Index", "PPI"],
+                "review_status": "PENDING_HUMAN_REVIEW",
+                "source_rule": "원문 또는 공식 출처 확인 전에는 정답 동의어로 취급하지 않음",
+            },
+            "related": {
+                "purpose": "원인·영향·측정·정책을 이해하는 데 연결되는 간접 후보",
+                "keywords": [
+                    "생산자물가지수",
+                    "근원인플레이션",
+                    "근원물가",
+                    "구매력",
+                    "화폐 가치",
+                    "기대인플레이션",
+                    "통화량",
+                    "기준금리",
+                    "실질금리",
+                    "스태그플레이션",
+                    "수요견인 인플레이션",
+                    "비용인상 인플레이션",
+                ],
+                "review_status": "PENDING_HUMAN_REVIEW",
+                "warning": "단순 등장만으로 직접 관련 또는 문제 생성 허용으로 판정하지 않음",
+            },
+            "opposite": {
+                "purpose": "챕터 경계와 비교 설명을 찾는 후보 신호",
+                "keywords": ["디플레이션", "디스인플레이션", "물가 하락"],
+                "review_status": "PENDING_HUMAN_REVIEW",
+            },
+            "exclude": {
+                "purpose": "동일 문자열이지만 경제 학습과 무관할 가능성이 높은 표현",
+                "keywords": ["인플레이션감축법", "인플레이션 감축법"],
+                "review_status": "PENDING_HUMAN_REVIEW",
+            },
+        },
+        "matching_policy": {
+            "normalization": "공백 제거 및 영문 casefold",
+            "candidate_only": True,
+            "final_relevance_from_keyword_count": False,
+            "unmatched_chunks_deleted": False,
+        },
+    }
+
+
 def run() -> dict[str, Any]:
     """Write the audit, proposed schemas, and chapter configuration."""
     # 실제 필드 감사와 설계 파일 생성을 한 번에 수행하는 CLI 진입점입니다.
@@ -190,6 +261,7 @@ def run() -> dict[str, Any]:
     write_json(report_dir / "data_quality_summary_metadata.json", result)
     write_json(report_dir / "metadata_schema.json", metadata_schema())
     write_json(report_dir / "chapter_config.json", chapter_config())
+    write_json(report_dir / "keyword_dictionary.json", keyword_dictionary())
     # Markdown 보고서는 교수·멘토가 코드나 JSON을 직접 열지 않아도 읽을 수 있게 합니다.
     lines = [
         "# 경제 용어 메타데이터 구조 감사",
@@ -228,6 +300,7 @@ def run() -> dict[str, Any]:
         "",
         "- `reports/metadata_schema.json`",
         "- `reports/chapter_config.json`",
+        "- `reports/keyword_dictionary.json`",
         "",
         "인플레이션 챕터는 현재 `DRAFT_NOT_CANONICAL` 상태이며 멘토·교수 확정 전까지 최종 기준으로 사용하지 않습니다.",
     ]
