@@ -110,6 +110,11 @@ docker compose up --build
 [`data/README.md`](data/README.md)를 먼저 확인하세요. 원본 데이터가 없으면
 파이프라인이 빈 결과를 만들지 않고 입력 누락 오류를 표시합니다.
 
+현재 로컬에 KDI 2,750건과 한국은행 789건이 있으며, 전체 EDA는 두 기관을 함께
+읽습니다. `data/`와 저장소 루트에 기관별 미러 파일이 나뉘어 있어도 같은 기관·확장자
+파일을 중복 선택하지 않도록 처리합니다. 단, 현재 독립 Gold 라벨은 별도
+`라벨링.xlsx` 160건이므로 BOK 문서의 최종 성능 지표는 아직 산출하지 않습니다.
+
 provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E는 검증할 수 없습니다. 이 경우 단위/계약 테스트와 offline/deterministic 설정을 사용하되, 운영 품질이 검증되었다고 간주하지 않습니다.
 
 ### 라벨 품질·메타데이터 감사
@@ -158,11 +163,58 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 현재 Excel 골드는 독립 평가셋이 아니므로 파일럿 결과만으로 Precision·Recall을
 주장하지 않습니다.
 Notebook은 기존 파이프라인 모듈을 호출해 같은 결과를 재현하고, 골드 분포와
-전략별 Precision·Recall을 표와 그래프로 확인할 수 있습니다.
+전략별 Precision·Recall을 표로 확인할 수 있습니다.
+
+Notebook의 전체 데이터셋 셀은 다음과 같은 오프라인 결과를 갱신합니다.
+
+- KDI 2,750건 + BOK 789건 = 고유 문서 3,539건
+- 청크 3,545건
+- `gpt-4o-mini` 기준 평균 217.75토큰, 총 770,607토큰
+- 인플레이션 후보 청크 148건(4.17%)
+- 상세 결과: `reports/pipeline/eda_report.md`, `reports/pipeline/dataset_statistics.json`
 메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,
 `reports/metadata_schema.json`, `reports/chapter_config.json`에서 확인할 수 있습니다.
 평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
 `reports/evaluation_plan.md`에 정리되어 있습니다.
+
+### 세 가지 분류 방법 비교
+
+Keyword-only, LLM-only, Keyword+LLM Hybrid 비교는 다음 명령으로 실행합니다.
+독립 Gold Set이 없으면 외부 API를 호출하거나 성능 수치를 만들지 않고 준비 상태만
+기록합니다.
+
+```bash
+.venv/bin/python -m scripts.compare_precision_methods
+```
+
+독립 검수 큐는 다음 명령으로 생성합니다. 기존 엑셀의 라벨을 복사하지 않고
+원문·Document ID·Content Hash를 보존하며 개발셋과 테스트셋을 안정적으로 나눕니다.
+
+```bash
+.venv/bin/python -m scripts.prepare_independent_gold_review
+```
+
+검수 큐는 `data/labeled/precision/independent_gold_review_queue.csv`에 생성되고,
+현재는 `NOT_EVALUATED` 상태로 남습니다. 키워드 미매칭 분석은
+`reports/keyword_miss_analysis.md`에서 확인할 수 있으며, 참고 라벨 기반 진단을
+최종 테스트셋 튜닝에 사용하지 않습니다.
+
+독립 검수 완료 CSV가 준비된 뒤에만 최종 비교를 실행합니다. CSV의 필수 상태값은
+`gold_set_status=INDEPENDENT_APPROVED`, `review_status=APPROVED`이며, `content_hash`,
+`source_group`, `split`, `reviewer_count`, `review_mode`도 필요합니다. 구조는
+`configs/independent_gold_schema.json`에서 확인할 수 있습니다.
+
+```bash
+.venv/bin/python -m scripts.compare_precision_methods \
+  --gold reports/independent_gold_test.csv
+```
+
+결과는 `reports/method_comparison_result.json`에 저장하며, 독립 Gold Set이 준비되면
+동일 평가셋의 Precision·Recall·F1, FP/FN 오류 파일, 비용·지연시간 집계와 비교
+그래프를 함께 생성합니다. 행 단위 CSV와 원문 포함 결과는 Git에 추적하지 않는
+`data/labeled/precision/`에 저장합니다. 모든 LLM 결과는 사람 검수 전 `PENDING`입니다.
+독립 Gold가 있어도 세 방법 중 하나라도 평가 문서 전체를 예측하지 못하면
+`NOT_EVALUATED_INCOMPLETE_PREDICTIONS`로 유지하고 지표·그래프를 생성하지 않습니다.
 
 ## 프로젝트 구조
 
