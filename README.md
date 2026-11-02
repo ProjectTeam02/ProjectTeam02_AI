@@ -135,6 +135,28 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 
 멘토·교수님에게 실험 과정을 순서대로 보여줄 때는
 [`notebook/precision_eda.ipynb`](notebook/precision_eda.ipynb)를 실행합니다.
+
+### 소규모 LLM 정밀 분류 파일럿
+
+`precision_eda.ipynb`의 LLM 파일럿 셀은 현재 모델의 기존 결과가 있으면 이를
+재사용하고, 결과가 없을 때만 10건의 소규모 호출을 실행합니다. 매번 새로
+호출하려면 Notebook의 `FORCE_RERUN_LLM = True`를 사용합니다. 먼저 비용과
+입력 토큰을 확인하려면 다음 명령을 실행합니다.
+
+```bash
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10
+```
+
+실제 OpenRouter 호출은 소규모 샘플에 대해서만 명시적으로 `--execute`를 붙여
+실행합니다. 결과 원문은 Git에 올리지 않는 `data/labeled/precision/`에 저장됩니다.
+
+```bash
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10 --execute
+```
+
+모델 결과의 `review_status`는 자동 승인하지 않고 항상 `PENDING`으로 저장합니다.
+현재 Excel 골드는 독립 평가셋이 아니므로 파일럿 결과만으로 Precision·Recall을
+주장하지 않습니다.
 Notebook은 기존 파이프라인 모듈을 호출해 같은 결과를 재현하고, 골드 분포와
 전략별 Precision·Recall을 표와 그래프로 확인할 수 있습니다.
 메타데이터 감사 결과와 제안 스키마는 `reports/taxonomy_audit.md`,

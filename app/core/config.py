@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str | None = None
     openai_api_key: str | None = None
     llm_provider: str = "openrouter"
-    llm_model: str = "openai/gpt-4o-mini"
+    llm_model: str = "openai/gpt-5.6-sol"
     embedding_provider: str = "openrouter"
     embedding_model: str = "openai/text-embedding-3-small"
     llm_base_url: str | None = None

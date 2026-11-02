@@ -17,7 +17,7 @@ classification:
   requests_per_minute_assumption: 30
   models:
     # 가격이 확인되기 전까지는 비용을 숫자로 계산하지 않습니다.
-    - model: openai/gpt-4o-mini
+    - model: openai/gpt-5.6-sol
       input_usd_per_1m_tokens: null
       output_usd_per_1m_tokens: null
       price_status: UNCONFIRMED_CONFIG_REQUIRED
