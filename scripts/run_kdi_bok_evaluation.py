@@ -1,11 +1,12 @@
 # ruff: noqa: E501
 
-"""Run the offline KDI/BOK 320-document classification experiment.
+"""Run the KDI/BOK 320-document classification experiment.
 
-The default command never calls an external model.  It reuses the existing
-keyword pipeline and the already stored, pending 10-row LLM pilot only as a
-diagnostic overlap.  Independent Gold metrics remain blocked until the Gold
-Review workflow produces an approved, provenance-checked test set.
+The default command never calls an external model and reuses stored LLM pilot
+results for diagnostic overlap. ``--execute-llm`` explicitly runs a
+KDI/BOK-balanced pilot capped at 20 requests. Independent Gold metrics remain
+blocked until the Gold Review workflow produces an approved,
+provenance-checked test set.
 """
 
 from __future__ import annotations
