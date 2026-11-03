@@ -29,13 +29,13 @@ BOK의 A/B 불일치와 `B 재검토 대상=Y`는 별도 필드이며 동일한 
 ## 4. 실험 방법
 
 - Keyword-only: 기존 `classify_chunk_by_keywords`의 제목+본문 검색과 가중 후보 점수를 사용한다. 점수는 관련도 확률이 아니며 후보 신호다.
-- LLM-only: 기존 LLM 파일럿 JSONL을 재사용해 10건만 진단했다. 신규 API 호출은 0건이며 미실행 문서는 빈 예측으로 남겼다.
+- LLM-only: REUSED_EXECUTED_LLM_PILOT; 관측 결과만 사용하며 신규 API 호출은 0건이다. 미실행 문서는 빈 예측으로 남겼다.
 - Hybrid: Keyword 후보만 LLM 입력 대상으로 삼고, 비후보는 명시적 음성으로 남긴다. 후보인데 LLM 결과가 없으면 보류한다.
 
 ## 5. 결과 및 평가 상태
 
 - Keyword: 320건 전체 실행, 후보 51건
-- LLM: 기존 파일럿 10건 재사용, 신규 호출 0건
+- LLM: 관측 20건, 신규 호출 0건
 - Hybrid: 파일럿·비후보를 합친 관측 결과만 저장; 전체 후보가 채워지지 않아 최종 평가 불가
 - 독립 Gold: 0건, 상태 `NOT_READY`; 따라서 최종 Precision/Recall/F1은 산출하지 않았다.
 - 아래 proxy 지표는 Excel 명시 라벨 또는 A/B 합의 proxy와의 일치도이며 독립 Gold 성능이 아니다.
@@ -43,8 +43,8 @@ BOK의 A/B 불일치와 `B 재검토 대상=Y`는 별도 필드이며 동일한 
 | 방법 | 상태 | 전체 모집단 | 예측/관측 수 |
 |---|---|---:|---:|
 | keyword_only | EXECUTED_OFFLINE | 320 | 320 |
-| llm_only | DRY_RUN_INCOMPLETE_PILOT | 320 | 10 |
-| hybrid | DRY_RUN_INCOMPLETE_PILOT | 320 | 274 |
+| llm_only | EXECUTED_LLM_PILOT | 320 | 20 |
+| hybrid | EXECUTED_LLM_PILOT | 320 | 279 |
 
 ## 6. 오분류가 아닌 판정 불일치 분석
 
@@ -54,7 +54,7 @@ Keyword 후보와 reference label이 충돌하는 사례는 11건이며, 독립 
 ## 7. 한계 및 후속 작업
 
 1. 기존 320건 라벨은 개발·예비 분석 자료이며 독립 Gold가 아니다.
-2. LLM 파일럿은 10건이고 모델 호출·비용·지연 값은 저장된 파일럿 범위만 반영한다. 가격 설정이 없어 비용은 확인하지 않았다.
+2. LLM 파일럿은 20건이고 신규 호출 0건(기록된 API 호출 20건) 범위만 반영한다. 가격 설정이 없어 비용은 확인하지 않았다.
 3. KDI/BOK의 원문 표현과 출처 메타데이터가 다르므로 기관별 결과를 전체 성능으로 일반화하지 않는다.
 4. Gold Review에서 독립 검수와 합의가 끝난 test set이 준비되면 기존 `compare_precision_methods.py`에 연결해 P/R/F1과 FP/FN 그래프를 생성한다.
 

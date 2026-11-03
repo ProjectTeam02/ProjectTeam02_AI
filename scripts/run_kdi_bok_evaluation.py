@@ -41,6 +41,7 @@ from app.dataset_pipeline.keywords import (  # noqa: E402
 from app.dataset_pipeline.tokenizer import ExactTokenizer  # noqa: E402
 from scripts._pipeline_support import load_yaml  # noqa: E402
 from scripts.compare_precision_methods import _load_llm_results  # noqa: E402
+from scripts.precision_llm_pilot import run as run_llm_pilot  # noqa: E402
 from scripts.rebuild_precision_pipeline import _make_chunk  # noqa: E402
 
 DEFAULT_OUTPUT_DIR = ROOT / "reports" / "evaluation"
@@ -176,6 +177,7 @@ def _pilot_row(
         "status": row.get("status", "UNKNOWN"),
         "review_status": row.get("review_status", "PENDING"),
         "evidence_span_valid": row.get("evidence_span_valid"),
+        "execution_mode": row.get("execution_mode", "STORED_PILOT"),
     }
 
 
@@ -205,7 +207,13 @@ def run_llm_predictions(
             "evidence_quote": pilot["evidence_quote"] if pilot else "",
             "evidence_span_valid": pilot["evidence_span_valid"] if pilot else None,
             "review_status": pilot["review_status"] if pilot else "NOT_EXECUTED",
-            "prediction_status": "PILOT_REUSED_PENDING" if pilot else "NOT_EXECUTED",
+            "prediction_status": (
+                "LLM_EXECUTED_PENDING"
+                if pilot and pilot.get("execution_mode") == "API_EXECUTED"
+                else "PILOT_REUSED_PENDING"
+                if pilot
+                else "NOT_EXECUTED"
+            ),
         }
         output.append(base)
     return output
@@ -225,7 +233,10 @@ def run_hybrid_predictions(
             status = "COMPLETED_KEYWORD_NEGATIVE"
             predicted_label = 0
             score = None
-        elif llm["prediction_status"] == "PILOT_REUSED_PENDING":
+        elif llm["prediction_status"] in {
+            "PILOT_REUSED_PENDING",
+            "LLM_EXECUTED_PENDING",
+        }:
             status = "PILOT_REUSED_PENDING"
             predicted_label = llm["predicted_label"]
             score = llm["relevance_score"]
@@ -304,6 +315,7 @@ def _method_predictions(
     keyword_rows: list[dict[str, Any]],
     llm_rows: list[dict[str, Any]],
     hybrid_rows: list[dict[str, Any]],
+    llm_execution_status: str = "REUSED_EXISTING_LLM_PILOT",
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     source_by_id = rows_by_id(rows)
     keyword_map = {row["document_id"]: row["keyword_candidate"] for row in keyword_rows}
@@ -329,7 +341,12 @@ def _method_predictions(
             "tutor_retrieval": _proxy_metrics(keyword_map, rows, "tutor_retrieval"),
         },
         "llm_only": {
-            "status": "DRY_RUN_INCOMPLETE_PILOT",
+            "status": (
+                "EXECUTED_LLM_PILOT"
+                if llm_execution_status
+                in {"EXECUTED_LLM_PILOT", "REUSED_EXECUTED_LLM_PILOT"}
+                else "DRY_RUN_INCOMPLETE_PILOT"
+            ),
             "coverage_count": len(llm_map),
             "population_count": len(rows),
             "threshold": LLM_THRESHOLD,
@@ -337,7 +354,12 @@ def _method_predictions(
             "tutor_retrieval": _proxy_metrics(llm_map, rows, "tutor_retrieval"),
         },
         "hybrid": {
-            "status": "DRY_RUN_INCOMPLETE_PILOT",
+            "status": (
+                "EXECUTED_LLM_PILOT"
+                if llm_execution_status
+                in {"EXECUTED_LLM_PILOT", "REUSED_EXECUTED_LLM_PILOT"}
+                else "DRY_RUN_INCOMPLETE_PILOT"
+            ),
             "coverage_count": len(hybrid_map),
             "population_count": len(rows),
             "rule": "Keyword candidates go to LLM; non-candidates remain explicit negative; missing candidate LLM results remain pending.",
@@ -623,7 +645,12 @@ def _report_markdown(
     plot_paths: dict[str, str],
     keyword_count: int,
     llm_count: int,
+    api_execution: dict[str, Any] | None = None,
 ) -> str:
+    api_execution = api_execution or {}
+    api_calls = int(api_execution.get("llm_calls", 0))
+    recorded_api_calls = int(api_execution.get("recorded_api_calls", api_calls))
+    llm_status = api_execution.get("status", "NOT_EXECUTED")
     source_counts = summary["source_row_counts"]
     lines = [
         "# Leren KDI/BOK Classification Evaluation Report",
@@ -668,13 +695,13 @@ def _report_markdown(
             "## 4. 실험 방법",
             "",
             "- Keyword-only: 기존 `classify_chunk_by_keywords`의 제목+본문 검색과 가중 후보 점수를 사용한다. 점수는 관련도 확률이 아니며 후보 신호다.",
-            "- LLM-only: 기존 LLM 파일럿 JSONL을 재사용해 10건만 진단했다. 신규 API 호출은 0건이며 미실행 문서는 빈 예측으로 남겼다.",
+            f"- LLM-only: {llm_status}; 관측 결과만 사용하며 신규 API 호출은 {api_calls}건이다. 미실행 문서는 빈 예측으로 남겼다.",
             "- Hybrid: Keyword 후보만 LLM 입력 대상으로 삼고, 비후보는 명시적 음성으로 남긴다. 후보인데 LLM 결과가 없으면 보류한다.",
             "",
             "## 5. 결과 및 평가 상태",
             "",
             f"- Keyword: 320건 전체 실행, 후보 {keyword_count}건",
-            f"- LLM: 기존 파일럿 {llm_count}건 재사용, 신규 호출 0건",
+            f"- LLM: 관측 {llm_count}건, 신규 호출 {api_calls}건",
             "- Hybrid: 파일럿·비후보를 합친 관측 결과만 저장; 전체 후보가 채워지지 않아 최종 평가 불가",
             "- 독립 Gold: 0건, 상태 `NOT_READY`; 따라서 최종 Precision/Recall/F1은 산출하지 않았다.",
             "- 아래 proxy 지표는 Excel 명시 라벨 또는 A/B 합의 proxy와의 일치도이며 독립 Gold 성능이 아니다.",
@@ -699,7 +726,7 @@ def _report_markdown(
             "## 7. 한계 및 후속 작업",
             "",
             "1. 기존 320건 라벨은 개발·예비 분석 자료이며 독립 Gold가 아니다.",
-            "2. LLM 파일럿은 10건이고 모델 호출·비용·지연 값은 저장된 파일럿 범위만 반영한다. 가격 설정이 없어 비용은 확인하지 않았다.",
+            f"2. LLM 파일럿은 {llm_count}건이고 신규 호출 {api_calls}건(기록된 API 호출 {recorded_api_calls}건) 범위만 반영한다. 가격 설정이 없어 비용은 확인하지 않았다.",
             "3. KDI/BOK의 원문 표현과 출처 메타데이터가 다르므로 기관별 결과를 전체 성능으로 일반화하지 않는다.",
             "4. Gold Review에서 독립 검수와 합의가 끝난 test set이 준비되면 기존 `compare_precision_methods.py`에 연결해 P/R/F1과 FP/FN 그래프를 생성한다.",
             "",
@@ -722,8 +749,10 @@ def _precision_eda_summary(
     hybrid_rows: list[dict[str, Any]],
     plot_paths: dict[str, str],
     errors: list[dict[str, Any]],
+    api_execution: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create the notebook-facing summary without inventing Gold metrics."""
+    api_execution = api_execution or {}
     label_distributions: dict[str, dict[str, dict[str, int]]] = {}
     for source in ("KDI", "BOK", "ALL"):
         source_rows = rows if source == "ALL" else [row for row in rows if row["source"] == source]
@@ -860,7 +889,8 @@ def _precision_eda_summary(
             "path": display_path(DEFAULT_GOLD),
         },
         "final_metrics_policy": "NOT_EVALUATED_UNTIL_INDEPENDENT_GOLD_APPROVED",
-        "new_api_calls": 0,
+        "new_api_calls": int(api_execution.get("llm_calls", 0)),
+        "llm_execution": api_execution,
         "reference_disagreement_count": len(errors),
         "plots": plot_paths,
         "artifacts": {
@@ -928,7 +958,7 @@ def _precision_eda_report(summary: dict[str, Any]) -> str:
             "## 6. 한계 및 다음 개발",
             "",
             f"- Keyword/reference 판정 불일치 사례: {summary['reference_disagreement_count']}건; 독립 Gold 전에는 오분류로 확정하지 않는다.",
-            f"- 신규 API 호출: {summary['new_api_calls']}건; 저장된 파일럿만 재사용했다.",
+            f"- LLM 실행 상태: `{summary.get('llm_execution', {}).get('status', 'NOT_EXECUTED')}`; 신규 API 호출: {summary['new_api_calls']}건; 기록된 API 호출: {summary.get('llm_execution', {}).get('recorded_api_calls', summary['new_api_calls'])}건.",
             "- 독립 Gold 승인 후 동일한 평가 모수로 두 목적별 TP/FP/FN/TN과 P/R/F1을 산출한다.",
             "- 키워드 미적중 문서, 품질 검토필요 문서, A/B 불일치 문서를 독립 검수 표본에 포함한다.",
             "",
@@ -1039,16 +1069,63 @@ def run(
     chapter_path: Path = ROOT / "configs" / "chapters.yaml",
     kdi_workbook: Path | None = None,
     bok_workbook: Path | None = None,
+    execute_llm: bool = False,
+    llm_sample_size: int = 20,
 ) -> dict[str, Any]:
     rows, summary = build_combined_dataset(data_dir, kdi_workbook, bok_workbook)
     chapter = load_chapter(chapter_path)
     tokenizer = ExactTokenizer(TOKENIZER_NAME)
+    pilot_execution: dict[str, Any]
+    if execute_llm:
+        if not 1 <= llm_sample_size <= 20:
+            raise ValueError("--llm-sample-size must be between 1 and 20")
+        selected_workbooks = [
+            Path(summary["workbooks"][source]["selected"]["absolute_path"])
+            for source in ("KDI", "BOK")
+        ]
+        pilot_execution = run_llm_pilot(
+            chapter_path=chapter_path,
+            output_path=pilot_path,
+            sample_size=llm_sample_size,
+            execute=True,
+            workbook_paths=selected_workbooks,
+        )
+        pilot_execution["status"] = "EXECUTED_LLM_PILOT"
+        pilot_execution["recorded_api_calls"] = pilot_execution.get("llm_calls", 0)
+    else:
+        pilot_results = _load_llm_results(pilot_path)
+        stored_api_rows = [
+            row
+            for row in pilot_results.values()
+            if row.get("execution_mode") == "API_EXECUTED"
+        ]
+        pilot_execution = {
+            "status": (
+                "REUSED_EXECUTED_LLM_PILOT"
+                if stored_api_rows
+                else "REUSED_EXISTING_LLM_PILOT"
+                if pilot_results
+                else "NOT_EXECUTED"
+            ),
+            "llm_calls": 0,
+            "recorded_api_calls": sum(
+                int(row.get("llm_call_count", 0)) for row in stored_api_rows
+            ),
+            "sample_size": len(pilot_results),
+            "output_path": display_path(pilot_path),
+        }
     pilot_results = _load_llm_results(pilot_path)
     keyword_rows = run_keyword_predictions(rows, chapter, tokenizer)
     llm_rows = run_llm_predictions(rows, pilot_results)
     hybrid_rows = run_hybrid_predictions(rows, keyword_rows, llm_rows)
     agreement = label_agreement_report(rows)
-    methods, overlap = _method_predictions(rows, keyword_rows, llm_rows, hybrid_rows)
+    methods, overlap = _method_predictions(
+        rows,
+        keyword_rows,
+        llm_rows,
+        hybrid_rows,
+        llm_execution_status=pilot_execution["status"],
+    )
     errors = _error_rows(rows, keyword_rows)
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1096,15 +1173,20 @@ def run(
     write_csv(output_dir / "llm_predictions.csv", llm_rows, list(llm_rows[0]))
     write_csv(output_dir / "hybrid_predictions.csv", hybrid_rows, list(hybrid_rows[0]))
     method_result = {
-        "status": "DRY_RUN_AI_REFERENCE",
+        "status": "EXECUTED_LLM_PILOT"
+        if execute_llm
+        else "DRY_RUN_AI_REFERENCE",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "independent_gold": {
             "status": "NOT_READY",
             "count": 0,
             "path": display_path(DEFAULT_GOLD),
         },
-        "new_api_calls": 0,
-        "existing_pilot_rows_reused": len(pilot_results),
+        "new_api_calls": pilot_execution.get("llm_calls", 0)
+        if execute_llm
+        else 0,
+        "existing_pilot_rows_reused": 0 if execute_llm else len(pilot_results),
+            "llm_execution": pilot_execution,
         "model": sorted({row["model"] for row in llm_rows if row["model"]}),
         "prompt_versions": sorted(
             {row["prompt_version"] for row in llm_rows if row["prompt_version"]}
@@ -1159,6 +1241,7 @@ def run(
         hybrid_rows,
         plot_paths,
         errors,
+        api_execution=pilot_execution,
     )
     write_json(output_dir / "precision_eda_summary.json", precision_eda_summary)
     (output_dir / "precision_eda_report.md").write_text(
@@ -1211,7 +1294,8 @@ def run(
         errors,
         plot_paths,
         sum(row["keyword_candidate"] for row in keyword_rows),
-        sum(row["prediction_status"] == "PILOT_REUSED_PENDING" for row in llm_rows),
+        sum(row["prediction_status"] != "NOT_EXECUTED" for row in llm_rows),
+        api_execution=pilot_execution,
     )
     (output_dir / "evaluation_report.md").write_text(report, encoding="utf-8")
     (ROOT / "Leren_KDI_BOK_Classification_Report.md").write_text(
@@ -1236,6 +1320,17 @@ def main() -> None:
     parser.add_argument("--pilot", type=Path, default=DEFAULT_PILOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--combined", type=Path, default=DEFAULT_COMBINED)
+    parser.add_argument(
+        "--execute-llm",
+        action="store_true",
+        help="KDI/BOK 균형 표본에 대해 최대 20건의 외부 LLM 호출을 명시적으로 실행합니다.",
+    )
+    parser.add_argument(
+        "--llm-sample-size",
+        type=int,
+        default=20,
+        help="API 파일럿 요청 수(1~20). 전체 320건 호출은 이 옵션으로 허용하지 않습니다.",
+    )
     args = parser.parse_args()
     result = run(
         args.output_dir,
@@ -1245,6 +1340,8 @@ def main() -> None:
         ROOT / "configs" / "chapters.yaml",
         args.kdi_workbook,
         args.bok_workbook,
+        args.execute_llm,
+        args.llm_sample_size,
     )
     print(
         json.dumps(

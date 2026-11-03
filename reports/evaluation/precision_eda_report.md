@@ -32,8 +32,8 @@ B 재검토 대상: 전체 71건 (KDI 50건, BOK 21건), 그중 A/B 불일치: �
 | 방법 | 상태 | 평가 문서 | 주요 결과 |
 |---|---|---:|---|
 | Keyword-only | EXECUTED_OFFLINE | 320 | 후보 51건 (15.9%) |
-| LLM-only | DRY_RUN_INCOMPLETE_PILOT | 10 | 파일럿 커버리지 3.1% |
-| Hybrid | DRY_RUN_INCOMPLETE_PILOT | 274 | 관측 예측 274건 |
+| LLM-only | EXECUTED_LLM_PILOT | 20 | 파일럿 커버리지 6.2% |
+| Hybrid | EXECUTED_LLM_PILOT | 279 | 관측 예측 279건 |
 
 ## 5. Precision / Recall / F1
 
@@ -43,7 +43,7 @@ B 재검토 대상: 전체 71건 (KDI 50건, BOK 21건), 그중 A/B 불일치: �
 ## 6. 한계 및 다음 개발
 
 - Keyword/reference 판정 불일치 사례: 11건; 독립 Gold 전에는 오분류로 확정하지 않는다.
-- 신규 API 호출: 0건; 저장된 파일럿만 재사용했다.
+- LLM 실행 상태: `REUSED_EXECUTED_LLM_PILOT`; 신규 API 호출: 0건; 기록된 API 호출: 20건.
 - 독립 Gold 승인 후 동일한 평가 모수로 두 목적별 TP/FP/FN/TN과 P/R/F1을 산출한다.
 - 키워드 미적중 문서, 품질 검토필요 문서, A/B 불일치 문서를 독립 검수 표본에 포함한다.
 

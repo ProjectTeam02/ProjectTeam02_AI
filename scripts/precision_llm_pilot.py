@@ -15,7 +15,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -116,19 +116,27 @@ def _load_experiment_rows(
     workbook_path: Path | None,
     chapter_path: Path,
     sample_size: int,
+    workbook_paths: Sequence[Path] | None = None,
 ) -> tuple[list[dict[str, Any]], Chapter, ExactTokenizer, Path]:
     """Load a balanced pilot sample without exposing gold labels to the prompt."""
     if sample_size <= 0:
         raise ValueError("sample_size must be greater than zero")
+    workbooks = list(workbook_paths or [])
     workbook = workbook_path
-    if workbook is None:
+    if not workbooks and workbook is None:
         candidates = discover_label_workbook(ROOT)
         if not candidates:
             raise FileNotFoundError("라벨링.xlsx 또는 라벨 파일을 찾지 못했습니다.")
         workbook = candidates[0]
-    rows = read_xlsx_rows(workbook)
-    analysis = analyze_label_rows(rows, workbook)
-    records = _records(rows, analysis["detected_columns"])
+    if not workbooks:
+        workbooks = [workbook]  # type: ignore[list-item]
+
+    records: list[dict[str, Any]] = []
+    for current_workbook in workbooks:
+        rows = read_xlsx_rows(current_workbook)
+        analysis = analyze_label_rows(rows, current_workbook)
+        records.extend(_records(rows, analysis["detected_columns"]))
+    workbook = workbooks[0]
 
     payload = load_yaml(chapter_path)
     chapters = payload.get("chapters", [])
@@ -151,22 +159,28 @@ def _load_experiment_rows(
             }
         )
 
-    # 후보와 비후보를 함께 넣어 LLM의 오탐·누락 가능성을 확인합니다.
-    candidates = sorted(
-        [item for item in prepared if item["keyword_candidate"]],
-        key=lambda item: item["sampling_key"],
-    )
-    non_candidates = sorted(
-        [item for item in prepared if not item["keyword_candidate"]],
-        key=lambda item: item["sampling_key"],
-    )
-    candidate_count = min(len(candidates), max(1, sample_size // 2))
-    selected = candidates[:candidate_count]
-    remaining = sample_size - len(selected)
-    selected.extend(non_candidates[:remaining])
-    if len(selected) < sample_size:
-        selected.extend(candidates[len(selected) : sample_size])
-    selected = selected[:sample_size]
+    # KDI/BOK와 후보/비후보를 모두 포함하는 결정적 층화 표본을 사용합니다.
+    # 라벨 값은 이 단계에서 프롬프트에 전달하지 않습니다.
+    groups: dict[tuple[str, bool], list[dict[str, Any]]] = {}
+    for item in prepared:
+        source = (
+            item["record"].get("source_group")
+            or item["record"].get("source")
+            or "UNKNOWN"
+        )
+        groups.setdefault((source, bool(item["keyword_candidate"])), []).append(item)
+    for group in groups.values():
+        group.sort(key=lambda item: item["sampling_key"])
+    selected: list[dict[str, Any]] = []
+    while len(selected) < sample_size and groups:
+        for key in sorted(list(groups)):
+            group = groups.get(key, [])
+            if group:
+                selected.append(group.pop(0))
+            if not group:
+                groups.pop(key, None)
+            if len(selected) >= sample_size:
+                break
 
     result: list[dict[str, Any]] = []
     for item in selected:
@@ -247,11 +261,19 @@ def run(
     sample_size: int = DEFAULT_SAMPLE_SIZE,
     execute: bool = False,
     llm: Any | None = None,
+    workbook_paths: Sequence[Path] | None = None,
 ) -> dict[str, Any]:
     """Prepare a dry-run or execute an explicitly enabled small LLM pilot."""
-    rows, chapter, tokenizer, workbook = _load_experiment_rows(
-        workbook_path, chapter_path, sample_size
-    )
+    if execute and sample_size > 20:
+        raise ValueError("External LLM pilot is capped at 20 documents per run")
+    if workbook_paths is None:
+        rows, chapter, tokenizer, workbook = _load_experiment_rows(
+            workbook_path, chapter_path, sample_size
+        )
+    else:
+        rows, chapter, tokenizer, workbook = _load_experiment_rows(
+            workbook_path, chapter_path, sample_size, workbook_paths=workbook_paths
+        )
     settings = get_settings()
     prompt_version = "llm-v1"
     results: list[dict[str, Any]] = []
@@ -278,6 +300,9 @@ def run(
         base = {
             "chunk_id": chunk.chunk_id,
             "document_id": chunk.document_id,
+            "source": chunk.source,
+            "title": chunk.title,
+            "content_hash": chunk.text_hash,
             "chapter_id": chapter.chapter_id,
             "keyword_candidate": item["keyword_candidate"],
             "matched_keywords": item["matched_keywords"],
@@ -288,6 +313,7 @@ def run(
             "input_tokens_estimated": estimated_input,
             "review_status": "PENDING",
             "classified_at": datetime.now(timezone.utc).isoformat(),
+            "execution_mode": "API_EXECUTED" if execute else "DRY_RUN_NOT_CALLED",
         }
         if not execute:
             results.append(
@@ -366,6 +392,7 @@ def run(
     return {
         "status": "EXECUTED_LLM_PILOT" if execute else "DRY_RUN_ONLY_NO_LLM_CALL",
         "input_file": _display_path(workbook),
+        "input_files": [_display_path(path) for path in (workbook_paths or [workbook])],
         "chapter_id": chapter.chapter_id,
         "sample_size": len(rows),
         "candidate_sample_count": sum(item["keyword_candidate"] for item in rows),
