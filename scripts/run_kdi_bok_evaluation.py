@@ -240,7 +240,7 @@ def run_hybrid_predictions(
             "PILOT_REUSED_PENDING",
             "LLM_EXECUTED_PENDING",
         }:
-            status = "PILOT_REUSED_PENDING"
+            status = "LLM_OBSERVED_PENDING_REVIEW"
             predicted_label = llm["predicted_label"]
             score = llm["relevance_score"]
         else:
@@ -332,6 +332,12 @@ def _method_predictions(
         for row in hybrid_rows
         if row["tutor_retrieval_positive"] is not None
     }
+    hybrid_status_counts = Counter(row["prediction_status"] for row in hybrid_rows)
+    keyword_candidate_count = sum(keyword_map.values())
+    candidate_observed_count = hybrid_status_counts.get(
+        "LLM_OBSERVED_PENDING_REVIEW", 0
+    )
+    candidate_missing_count = hybrid_status_counts.get("NOT_EXECUTED_LLM_MISSING", 0)
     methods = {
         "keyword_only": {
             "status": "EXECUTED_OFFLINE",
@@ -366,6 +372,13 @@ def _method_predictions(
             "coverage_count": len(hybrid_map),
             "population_count": len(rows),
             "rule": "Keyword candidates go to LLM; non-candidates remain explicit negative; missing candidate LLM results remain pending.",
+            "keyword_negative_docs": hybrid_status_counts.get(
+                "COMPLETED_KEYWORD_NEGATIVE", 0
+            ),
+            "keyword_candidate_docs": keyword_candidate_count,
+            "candidate_llm_observed_docs": candidate_observed_count,
+            "candidate_llm_not_observed_docs": candidate_missing_count,
+            "pending_docs": candidate_missing_count,
             "question_generation": _proxy_metrics(
                 {key: value for key, value in hybrid_map.items()},
                 rows,
@@ -877,8 +890,15 @@ def _precision_eda_summary(
                 "status": methods["hybrid"]["status"],
                 "evaluated_docs": methods["hybrid"]["coverage_count"],
                 "observed_prediction_docs": len(hybrid_observed),
-                "keyword_candidate_docs": len(keyword_candidates),
-                "keyword_miss_llm_not_run_docs": sum(not row["keyword_candidate"] for row in keyword_rows),
+                "population_docs": len(rows),
+                "keyword_negative_docs": methods["hybrid"]["keyword_negative_docs"],
+                "keyword_candidate_docs": methods["hybrid"]["keyword_candidate_docs"],
+                "candidate_llm_observed_docs": methods["hybrid"]["candidate_llm_observed_docs"],
+                "candidate_llm_not_observed_docs": methods["hybrid"]["candidate_llm_not_observed_docs"],
+                "pending_docs": methods["hybrid"]["pending_docs"],
+                "prediction_status_counts": dict(
+                    Counter(row["prediction_status"] for row in hybrid_rows)
+                ),
                 "proxy_question": methods["hybrid"]["question_generation"],
                 "proxy_tutor": methods["hybrid"]["tutor_retrieval"],
             },
@@ -948,7 +968,7 @@ def _precision_eda_report(summary: dict[str, Any]) -> str:
             "|---|---|---:|---|",
             f"| Keyword-only | {methods['keyword_only']['status']} | {methods['keyword_only']['evaluated_docs']} | 후보 {methods['keyword_only']['candidate_docs']}건 ({methods['keyword_only']['candidate_rate']:.1%}) |",
             f"| LLM-only | {methods['llm_only']['status']} | {methods['llm_only']['evaluated_docs']} | 파일럿 커버리지 {methods['llm_only']['coverage_rate']:.1%} |",
-            f"| Hybrid | {methods['hybrid']['status']} | {methods['hybrid']['evaluated_docs']} | 관측 예측 {methods['hybrid']['observed_prediction_docs']}건 |",
+            f"| Hybrid | {methods['hybrid']['status']} | {methods['hybrid']['evaluated_docs']} | 관측 {methods['hybrid']['observed_prediction_docs']}건; 미관측 후보 {methods['hybrid']['candidate_llm_not_observed_docs']}건 |",
             "",
             "## 5. Precision / Recall / F1",
             "",
@@ -1218,6 +1238,7 @@ def run(
                 "status": item["status"],
                 "population_count": item["population_count"],
                 "coverage_count": item["coverage_count"],
+                "pending_count": item.get("pending_docs", 0),
                 "question_proxy_f1": (item["question_generation"]["metrics"] or {}).get(
                     "f1"
                 ),

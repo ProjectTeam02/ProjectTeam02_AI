@@ -30,13 +30,13 @@ BOK의 A/B 불일치와 `B 재검토 대상=Y`는 별도 필드이며 동일한 
 
 - Keyword-only: 기존 `classify_chunk_by_keywords`의 제목+본문 검색과 가중 후보 점수를 사용한다. 점수는 관련도 확률이 아니며 후보 신호다.
 - LLM-only: REUSED_EXECUTED_LLM_PILOT; 관측 결과만 사용하며 신규 API 호출은 0건이다. 미실행 문서는 빈 예측으로 남겼다.
-- Hybrid: Keyword 후보만 LLM 입력 대상으로 삼고, 비후보는 명시적 음성으로 남긴다. 후보인데 LLM 결과가 없으면 보류한다.
+- Hybrid: Keyword 후보만 LLM 입력 대상으로 삼고, 비후보 269건은 명시적 음성으로 남긴다. 후보 51건 중 LLM 관측은 10건이고, 41건은 `NOT_EXECUTED_LLM_MISSING`으로 분리한다.
 
 ## 5. 결과 및 평가 상태
 
 - Keyword: 320건 전체 실행, 후보 51건
 - LLM: 관측 20건, 신규 호출 0건
-- Hybrid: 파일럿·비후보를 합친 관측 결과만 저장; 전체 후보가 채워지지 않아 최종 평가 불가
+- Hybrid: 관측 예측 279건(비후보 269 + 후보 LLM 관측 10), 미관측 후보 41건; 전체 320건 예측이 채워지지 않아 최종 평가 불가
 - 독립 Gold: 0건, 상태 `NOT_READY`; 따라서 최종 Precision/Recall/F1은 산출하지 않았다.
 - 아래 proxy 지표는 Excel 명시 라벨 또는 A/B 합의 proxy와의 일치도이며 독립 Gold 성능이 아니다.
 

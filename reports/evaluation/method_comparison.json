@@ -1,6 +1,6 @@
 {
   "status": "DRY_RUN_AI_REFERENCE",
-  "generated_at": "2026-11-03T05:04:31.088062+00:00",
+  "generated_at": "2026-11-03T15:25:55.136885+00:00",
   "independent_gold": {
     "status": "NOT_READY",
     "count": 0,
@@ -120,6 +120,11 @@
       "coverage_count": 279,
       "population_count": 320,
       "rule": "Keyword candidates go to LLM; non-candidates remain explicit negative; missing candidate LLM results remain pending.",
+      "keyword_negative_docs": 269,
+      "keyword_candidate_docs": 51,
+      "candidate_llm_observed_docs": 10,
+      "candidate_llm_not_observed_docs": 41,
+      "pending_docs": 41,
       "question_generation": {
         "status": "DRY_RUN_AI_REFERENCE",
         "population_count": 208,

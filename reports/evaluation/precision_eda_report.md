@@ -33,7 +33,7 @@ B 재검토 대상: 전체 71건 (KDI 50건, BOK 21건), 그중 A/B 불일치: �
 |---|---|---:|---|
 | Keyword-only | EXECUTED_OFFLINE | 320 | 후보 51건 (15.9%) |
 | LLM-only | EXECUTED_LLM_PILOT | 20 | 파일럿 커버리지 6.2% |
-| Hybrid | EXECUTED_LLM_PILOT | 279 | 관측 예측 279건 |
+| Hybrid | EXECUTED_LLM_PILOT | 279 | 관측 279건; 미관측 후보 41건 |
 
 ## 5. Precision / Recall / F1
 

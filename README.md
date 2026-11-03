@@ -145,19 +145,19 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 ### 소규모 LLM 정밀 분류 파일럿
 
 `precision_eda.ipynb`의 LLM 파일럿 셀은 현재 모델의 기존 결과가 있으면 이를
-재사용하고, 결과가 없을 때만 10건의 소규모 호출을 실행합니다. 매번 새로
-호출하려면 Notebook의 `FORCE_RERUN_LLM = True`를 사용합니다. 먼저 비용과
+재사용하고, 결과가 없을 때만 KDI/BOK 균형 최대 20건의 소규모 호출을 실행합니다.
+매번 새로 호출하려면 Notebook의 `RUN_LLM_API = True`를 사용합니다. 먼저 비용과
 입력 토큰을 확인하려면 다음 명령을 실행합니다.
 
 ```bash
-.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 20
 ```
 
 실제 OpenRouter 호출은 소규모 샘플에 대해서만 명시적으로 `--execute`를 붙여
 실행합니다. 결과 원문은 Git에 올리지 않는 `data/labeled/precision/`에 저장됩니다.
 
 ```bash
-.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10 --execute
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 20 --execute
 ```
 
 모델 결과의 `review_status`는 자동 승인하지 않고 항상 `PENDING`으로 저장합니다.
@@ -228,8 +228,9 @@ Keyword 전수 실행 및 기존 LLM 파일럿의 예비 비교를 한 번에 �
 ### 로컬 사람 검수 도구
 
 Streamlit은 현재 의존성에 포함되어 있지 않으므로, 새 패키지를 추가하지 않고
-표준 Python CLI 검수 도구를 제공합니다. 이 도구는 KDI 160건과 BOK 205건의
-검수 템플릿에서 제목·원문·출처만 보여주고, 기존 AI 예측과 과거 라벨은 화면에
+표준 Python CLI 검수 도구를 제공합니다. 기본 입력은 현재 고정된 KDI 160건과
+BOK 160건, 총 320건의 독립 검수 큐입니다. 과거 KDI 160건+BOK 205건 템플릿은
+레거시 점검용으로만 보존하며 현재 평가와 혼용하지 않습니다. CLI는 제목·원문·출처만 보여주고, 기존 AI 예측과 과거 라벨은 화면에
 표시하지 않습니다. 입력한 판정은 원본 템플릿을 수정하지 않고 append-only JSONL로
 저장합니다.
 
@@ -253,6 +254,17 @@ Streamlit은 현재 의존성에 포함되어 있지 않으므로, 새 패키지
 .venv/bin/python scripts/gold_review_cli.py \
   --reviewer-id auditor --validate-only
 ```
+
+현재 큐와 과거 템플릿의 행 수·기관별 출처·중복 ID는 다음 명령으로 확인합니다.
+
+```bash
+.venv/bin/python scripts/reconcile_gold_inputs.py
+```
+
+Hybrid 결과에서 키워드 비후보 문서는 명시적인 음성 예측으로 기록되지만,
+키워드 후보 중 LLM 결과가 없는 문서는 `NOT_EXECUTED_LLM_MISSING` 상태로 남아
+관측 예측에 포함하지 않습니다. 따라서 `279/320`은 완료율이 아니라 현재 관측
+가능한 예측 수이며, 미관측 후보 수를 별도로 보고합니다.
 
 검수 이력은 `data/labeled/precision/gold_review_history.jsonl`, 현재 검수 결과
 내보내기는 `gold_review_current.csv/jsonl`, 검증 결과는

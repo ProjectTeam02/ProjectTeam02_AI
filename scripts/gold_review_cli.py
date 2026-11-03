@@ -24,6 +24,9 @@ if str(ROOT) not in sys.path:
 # 모듈 상수는 실행 경로와 무관하게 프로젝트 기준으로 고정합니다.
 from app.dataset_pipeline import gold_review  # noqa: E402
 
+DEFAULT_QUEUE = ROOT / "data/labeled/precision/independent_gold_review_queue.csv"
+# Legacy template paths remain available only when explicitly supplied. They are
+# not the current 320-document review population.
 DEFAULT_KDI = ROOT / "reports/step3/kdi_independent_gold_review_template.csv"
 DEFAULT_BOK = ROOT / "reports/step3/bok_independent_gold_review_template.csv"
 DEFAULT_HISTORY = ROOT / "data/labeled/precision/gold_review_history.jsonl"
@@ -59,6 +62,33 @@ def _write_json(path: Path, value: dict[str, Any]) -> None:
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+
+
+def _load_review_rows(args: argparse.Namespace) -> list[dict[str, str]]:
+    """Load the canonical 320-row queue unless legacy inputs are explicit."""
+    queue_path = getattr(args, "queue", None)
+    if queue_path is not None:
+        rows = gold_review.load_template_rows([queue_path])
+        for row in rows:
+            # Older locally generated queues did not contain all reviewer
+            # lineage fields. Fill only structural defaults; never copy labels.
+            row["source"] = row.get("source") or row.get("source_group", "")
+            row["source_group"] = row.get("source_group") or row["source"]
+            row["chunk_id"] = row.get("chunk_id") or (
+                f"LABELING_XLSX:{row.get('document_id', '')}:chunk-0000"
+            )
+            row["chapter_id"] = row.get("chapter_id") or "inflation"
+            row["dataset_version"] = (
+                row.get("dataset_version") or "labeling-xlsx-current"
+            )
+            row["rubric_version"] = (
+                row.get("rubric_version") or DEFAULT_RUBRIC
+            )
+            row["sampling_bucket"] = row.get("sampling_bucket") or row.get(
+                "sampling_stratum", ""
+            )
+        return rows
+    return gold_review.load_template_rows([args.kdi, args.bok])
 
 
 def _display_document(row: dict[str, str], index: int, total: int) -> None:
@@ -260,7 +290,7 @@ def _adjudication_loop(
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
-    all_rows = gold_review.load_template_rows([args.kdi, args.bok])
+    all_rows = _load_review_rows(args)
     rows = list(all_rows)
     if args.source != "ALL":
         rows = [row for row in rows if row.get("source") == args.source]
@@ -328,14 +358,34 @@ def main() -> None:
     parser.add_argument("--include-reviewed", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--rubric-version", default=DEFAULT_RUBRIC)
-    parser.add_argument("--kdi", type=Path, default=DEFAULT_KDI)
-    parser.add_argument("--bok", type=Path, default=DEFAULT_BOK)
+    parser.add_argument(
+        "--queue",
+        type=Path,
+        default=DEFAULT_QUEUE,
+        help="현재 KDI 160+BOK 160 독립 Gold 검수 큐(기본값).",
+    )
+    parser.add_argument(
+        "--kdi",
+        type=Path,
+        default=None,
+        help="레거시 템플릿을 명시적으로 검증할 때만 사용합니다.",
+    )
+    parser.add_argument(
+        "--bok",
+        type=Path,
+        default=None,
+        help="레거시 템플릿을 명시적으로 검증할 때만 사용합니다.",
+    )
     parser.add_argument("--history", type=Path, default=DEFAULT_HISTORY)
     parser.add_argument("--export-csv", type=Path, default=DEFAULT_EXPORT_CSV)
     parser.add_argument("--export-jsonl", type=Path, default=DEFAULT_EXPORT_JSONL)
     parser.add_argument("--status", type=Path, default=DEFAULT_STATUS)
     parser.add_argument("--disagreements", type=Path, default=DEFAULT_DISAGREEMENTS)
     args = parser.parse_args()
+    if args.kdi is not None or args.bok is not None:
+        if args.kdi is None or args.bok is None:
+            parser.error("--kdi와 --bok는 레거시 템플릿 검증 시 함께 지정해야 합니다.")
+        args.queue = None
     run(args)
 
 

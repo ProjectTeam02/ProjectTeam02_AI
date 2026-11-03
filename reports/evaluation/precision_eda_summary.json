@@ -1,6 +1,6 @@
 {
   "status": "EXECUTED_NOTEBOOK_BACKING_ARTIFACTS",
-  "generated_at": "2026-11-03T05:04:31.763183+00:00",
+  "generated_at": "2026-11-03T15:25:55.894752+00:00",
   "notebook": "notebook/precision_eda.ipynb",
   "random_seed": 20261029,
   "chapter": {
@@ -446,8 +446,17 @@
       "status": "EXECUTED_LLM_PILOT",
       "evaluated_docs": 279,
       "observed_prediction_docs": 279,
+      "population_docs": 320,
+      "keyword_negative_docs": 269,
       "keyword_candidate_docs": 51,
-      "keyword_miss_llm_not_run_docs": 269,
+      "candidate_llm_observed_docs": 10,
+      "candidate_llm_not_observed_docs": 41,
+      "pending_docs": 41,
+      "prediction_status_counts": {
+        "COMPLETED_KEYWORD_NEGATIVE": 269,
+        "LLM_OBSERVED_PENDING_REVIEW": 10,
+        "NOT_EXECUTED_LLM_MISSING": 41
+      },
       "proxy_question": {
         "status": "DRY_RUN_AI_REFERENCE",
         "population_count": 208,

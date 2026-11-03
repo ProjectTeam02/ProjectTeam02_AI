@@ -6,16 +6,21 @@
 독립 검수와 합의가 완료되지 않았으므로 Precision·Recall·F1을 계산하지
 않습니다.
 
-| 기관 | 검수 템플릿 행 | 핵심 상태 |
+| 기관 | 현재 검수 큐 행 | 핵심 상태 |
 |---|---:|---|
-| KDI | 160 | A/B 불일치 92건, 품질 재검토 10건 |
-| BOK | 205 | 현재 데이터 기준 55 후보+50 경계+100 무작위로 재생성 |
+| KDI | 160 | 현재 320건 큐의 development/test 표본 |
+| BOK | 160 | 현재 320건 큐의 development/test 표본 |
 
-## BOK 표본 버전 주의
+현재 평가 기준은 `data/labeled/precision/independent_gold_review_queue.csv`의
+KDI 160건+BOK 160건이다. 과거 `reports/step3`의 KDI 160건+BOK 205건
+템플릿은 레거시로 보존하지만 현재 큐·Gold 조립·평가에 혼용하지 않는다.
 
-기존 `reports/step3`의 205건 표본은 현재 canonical export와 source hash 및
-문서 ID가 다르므로 재사용하지 않았습니다. 이전 행의 라벨이나 승인 상태를
-현재 데이터에 복사하지 않았습니다.
+## 과거 표본 버전 주의
+
+기존 `reports/step3`의 160/205건 템플릿은 현재 canonical export와 source
+구성이 다르므로 재사용하지 않았습니다. 이전 행의 라벨이나 승인 상태를 현재
+데이터에 복사하지 않았습니다. 상세 대조 결과는
+`reports/gold_template_reconciliation.md`에서 확인합니다.
 
 ## 사람이 해야 할 일
 
