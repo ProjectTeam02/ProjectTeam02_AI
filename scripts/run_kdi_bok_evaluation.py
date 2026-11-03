@@ -179,6 +179,7 @@ def _pilot_row(
         "review_status": row.get("review_status", "PENDING"),
         "evidence_span_valid": row.get("evidence_span_valid"),
         "execution_mode": row.get("execution_mode", "STORED_PILOT"),
+        "json_parse_failed": bool(row.get("json_parse_failed", False)),
     }
 
 
@@ -207,6 +208,7 @@ def run_llm_predictions(
             "reason": pilot["reason"] if pilot else "",
             "evidence_quote": pilot["evidence_quote"] if pilot else "",
             "evidence_span_valid": pilot["evidence_span_valid"] if pilot else None,
+            "json_parse_failed": pilot["json_parse_failed"] if pilot else None,
             "review_status": pilot["review_status"] if pilot else "NOT_EXECUTED",
             "prediction_status": (
                 "LLM_EXECUTED_PENDING"
@@ -788,10 +790,7 @@ def _precision_eda_summary(
 
     llm_observed = [row for row in llm_rows if row["prediction_status"] != "NOT_EXECUTED"]
     latencies = [row["latency_ms"] for row in llm_observed if row["latency_ms"] is not None]
-    parse_failures = sum(
-        row.get("llm_status", "UNKNOWN") not in {"COMPLETED", "PENDING", "UNKNOWN"}
-        for row in llm_observed
-    )
+    parse_failures = sum(row.get("json_parse_failed") is True for row in llm_observed)
     evidence_failures = sum(row["evidence_span_valid"] is False for row in llm_observed)
 
     b_review_rows = [row for row in rows if row["b_review"] == "Y"]
@@ -1075,6 +1074,11 @@ def run(
 ) -> dict[str, Any]:
     rows, summary = build_combined_dataset(data_dir, kdi_workbook, bok_workbook)
     chapter = load_chapter(chapter_path)
+    summary["chapter"] = {
+        "id": chapter.chapter_id,
+        "status": load_yaml(chapter_path).get("curriculum_status"),
+        "rubric_version": chapter.rubric_version,
+    }
     tokenizer = ExactTokenizer(TOKENIZER_NAME)
     pilot_execution: dict[str, Any]
     if execute_llm:
@@ -1136,11 +1140,7 @@ def run(
         {
             **summary,
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "chapter": {
-                "id": chapter.chapter_id,
-                "status": load_yaml(chapter_path).get("curriculum_status"),
-                "rubric_version": chapter.rubric_version,
-            },
+            "chapter": summary["chapter"],
         },
     )
     write_json(output_dir / "label_agreement_report.json", agreement)

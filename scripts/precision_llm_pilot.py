@@ -330,12 +330,17 @@ def run(
             llm = LLMFactory(settings).create()
         started = time.perf_counter()
         raw_text: str | None = None
+        json_parse_failed = False
         try:
             response = llm.complete(prompt)
             raw_text = _response_text(response)
             usage = _response_usage(response)
             provider_response_model = _response_model(response)
-            parsed = _json_object(raw_text)
+            try:
+                parsed = _json_object(raw_text)
+            except Exception:
+                json_parse_failed = True
+                raise
             validated = validate_classification_output(
                 parsed, chunk.chunk_id, chapter.chapter_id
             )
@@ -371,6 +376,7 @@ def run(
                     "evidence_span_valid": evidence_valid,
                     "model_review_status": model_review_status,
                     "provider_response_model": provider_response_model,
+                    "json_parse_failed": json_parse_failed,
                 }
             )
             call_count += 1
@@ -384,6 +390,7 @@ def run(
                     "error_type": type(exc).__name__,
                     "error": str(exc),
                     "raw_response": locals().get("raw_text"),
+                    "json_parse_failed": json_parse_failed,
                 }
             )
             call_count += 1

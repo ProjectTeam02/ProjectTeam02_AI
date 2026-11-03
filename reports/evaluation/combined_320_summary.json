@@ -3278,10 +3278,10 @@
   "independent_gold_count": 0,
   "gold_status": "NOT_READY",
   "gold_policy": "Workbook labels and A/B consensus are reference/proxy only; no independent Gold was created.",
-  "generated_at": "2026-11-03T04:04:40.573992+00:00",
   "chapter": {
     "id": "inflation",
     "status": "DRAFT_NOT_CANONICAL",
     "rubric_version": "inflation-rubric-draft-v1"
-  }
+  },
+  "generated_at": "2026-11-03T05:04:31.079713+00:00"
 }

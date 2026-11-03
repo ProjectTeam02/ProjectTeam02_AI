@@ -1,9 +1,13 @@
 {
   "status": "EXECUTED_NOTEBOOK_BACKING_ARTIFACTS",
-  "generated_at": "2026-11-03T04:04:41.234584+00:00",
+  "generated_at": "2026-11-03T05:04:31.763183+00:00",
   "notebook": "notebook/precision_eda.ipynb",
   "random_seed": 20261029,
-  "chapter": {},
+  "chapter": {
+    "id": "inflation",
+    "status": "DRAFT_NOT_CANONICAL",
+    "rubric_version": "inflation-rubric-draft-v1"
+  },
   "dataset": {
     "canonical_document_count": 3539,
     "canonical_document_count_by_source": {
@@ -429,7 +433,7 @@
       "prompt_versions": [
         "llm-v1"
       ],
-      "json_parse_failure_count": 2,
+      "json_parse_failure_count": 0,
       "evidence_validation_failure_count": 2,
       "latency_ms_mean": 3312.3,
       "latency_ms_p95": 4401.0,
