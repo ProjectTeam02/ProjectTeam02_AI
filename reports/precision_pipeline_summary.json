@@ -1,40 +1,38 @@
 {
   "status": "EXECUTED_OFFLINE_PRECISION_EDA",
-  "generated_at": "2026-11-02T13:33:41.867562+00:00",
-  "input_file": "라벨링.xlsx",
+  "generated_at": "2026-11-02T17:33:17.357260+00:00",
+  "input_file": "data/BOK_라벨링.xlsx",
   "row_count": 160,
   "chapter_id": "inflation",
   "chapter_config_status": "DRAFT_NOT_CANONICAL",
   "source_distribution": {
-    "KDI": 160
+    "BOK": 160
   },
   "gold_distribution": {
-    "0": 98,
-    "1": 55,
-    "2": 7
+    "None": 160
   },
   "text_eda": {
     "character_count": {
       "count": 160,
-      "total": 52135,
-      "average": 325.84375,
-      "median": 279.5,
-      "min": 37,
-      "p25": 174.5,
-      "p75": 446.25,
-      "p95": 690.15,
-      "max": 1000
+      "total": 80120,
+      "average": 500.75,
+      "median": 492.5,
+      "min": 154,
+      "p25": 360.5,
+      "p75": 610.5,
+      "p95": 830.4499999999998,
+      "max": 1053
     },
     "token_count": {
       "count": 160,
-      "total": 30901,
-      "average": 193.13125,
-      "median": 169.5,
-      "min": 22,
-      "p25": 103.75,
-      "p75": 269.75,
-      "p95": 404.15,
-      "max": 594,
+      "total": 47720,
+      "average": 298.25,
+      "median": 293.5,
+      "min": 98,
+      "p25": 213.0,
+      "p75": 361.75,
+      "p95": 493.19999999999993,
+      "max": 636,
       "tokenizer": "gpt-4o-mini",
       "encoding": "o200k_base"
     },
@@ -51,48 +49,48 @@
     }
   },
   "label_quality": {
-    "reviewer_comparable_count": 49,
-    "reviewer_agreement_rate": 0.7959183673469388,
-    "reviewer_disagreement_count": 10,
-    "quality_review_count": 7,
+    "reviewer_comparable_count": 160,
+    "reviewer_agreement_rate": 0.425,
+    "reviewer_disagreement_count": 92,
+    "quality_review_count": 10,
     "quiz_policy_mismatch_count": 0,
     "tutor_policy_mismatch_count": 0,
-    "reason_without_content_overlap_count": 150,
-    "keyword_label_filled_count": 0,
+    "reason_without_content_overlap_count": 0,
+    "keyword_label_filled_count": 160,
     "binary_label_filled_count": 0
   },
   "policy_evaluation": {
     "question_generation": {
       "usage": "question_generation",
       "field": "quiz_suitable",
-      "comparable_count": 160,
+      "comparable_count": 0,
       "matrix": {
-        "tp": 7,
+        "tp": 0,
         "fp": 0,
         "fn": 0,
-        "tn": 153
+        "tn": 0
       },
       "metrics": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
       },
       "interpretation": "workbook suitability consistency, not an independent model score"
     },
     "tutor_retrieval": {
       "usage": "tutor_retrieval",
       "field": "tutor_suitable",
-      "comparable_count": 160,
+      "comparable_count": 0,
       "matrix": {
-        "tp": 62,
+        "tp": 0,
         "fp": 0,
         "fn": 0,
-        "tn": 98
+        "tn": 0
       },
       "metrics": {
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
       },
       "interpretation": "workbook suitability consistency, not an independent model score"
     }
@@ -101,77 +99,77 @@
     "basic_core": {
       "question_generation": {
         "usage": "question_generation",
-        "candidate_count": 4,
-        "population_count": 160,
-        "candidate_rate": 0.025,
+        "candidate_count": 0,
+        "population_count": 0,
+        "candidate_rate": 0.0,
         "matrix": {
-          "tp": 4,
+          "tp": 0,
           "fp": 0,
-          "fn": 3,
-          "tn": 153
+          "fn": 0,
+          "tn": 0
         },
         "metrics": {
-          "precision": 1.0,
-          "recall": 0.5714285714285714,
-          "f1": 0.7272727272727273
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
         }
       },
       "tutor_retrieval": {
         "usage": "tutor_retrieval",
-        "candidate_count": 4,
-        "population_count": 160,
-        "candidate_rate": 0.025,
+        "candidate_count": 0,
+        "population_count": 0,
+        "candidate_rate": 0.0,
         "matrix": {
-          "tp": 4,
+          "tp": 0,
           "fp": 0,
-          "fn": 58,
-          "tn": 98
+          "fn": 0,
+          "tn": 0
         },
         "metrics": {
-          "precision": 1.0,
-          "recall": 0.06451612903225806,
-          "f1": 0.12121212121212122
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
         }
       }
     },
     "expanded": {
       "question_generation": {
         "usage": "question_generation",
-        "candidate_count": 5,
-        "population_count": 160,
-        "candidate_rate": 0.03125,
+        "candidate_count": 0,
+        "population_count": 0,
+        "candidate_rate": 0.0,
         "matrix": {
-          "tp": 5,
+          "tp": 0,
           "fp": 0,
-          "fn": 2,
-          "tn": 153
+          "fn": 0,
+          "tn": 0
         },
         "metrics": {
-          "precision": 1.0,
-          "recall": 0.7142857142857143,
-          "f1": 0.8333333333333333
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
         }
       },
       "tutor_retrieval": {
         "usage": "tutor_retrieval",
-        "candidate_count": 5,
-        "population_count": 160,
-        "candidate_rate": 0.03125,
+        "candidate_count": 0,
+        "population_count": 0,
+        "candidate_rate": 0.0,
         "matrix": {
-          "tp": 5,
+          "tp": 0,
           "fp": 0,
-          "fn": 57,
-          "tn": 98
+          "fn": 0,
+          "tn": 0
         },
         "metrics": {
-          "precision": 1.0,
-          "recall": 0.08064516129032258,
-          "f1": 0.1492537313432836
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
         }
       }
     }
   },
-  "review_queue_count": 94,
+  "review_queue_count": 120,
   "candidate_csv": "data/labeled/precision/precision_keyword_candidates.csv",
   "review_queue_csv": "data/labeled/precision/precision_review_queue.csv",
   "llm_calls": 0,

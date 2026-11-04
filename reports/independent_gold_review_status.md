@@ -5,10 +5,10 @@
 - 평가 상태: **`NOT_EVALUATED`**
 - 사유: 독립 합의 Gold가 아직 생성되지 않았습니다.
 - 검수 큐: `data/labeled/precision/independent_gold_review_queue.csv`
-- 검수 행 수: **160건**
-- 개발셋/테스트셋: `{'test': 27, 'development': 133}`
-- 출처 그룹: `['KDI']`
-- 현재 입력의 BOK 포함 여부: **False**
+- 검수 행 수: **320건**
+- 개발셋/테스트셋: `{'development': 270, 'test': 50}`
+- 출처 그룹: `['BOK', 'KDI']`
+- 현재 입력의 BOK 포함 여부: **True**
 
 ## 독립성 보호 규칙
 
@@ -21,5 +21,5 @@
 ## 검수 전 차단 상태
 
 독립 Gold가 생성되기 전까지 세 방법의 Precision·Recall·F1과
-Confusion Matrix는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
+최종 성능 지표는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
 빠진 경우에도 교집합만으로 지표를 계산하지 않습니다.

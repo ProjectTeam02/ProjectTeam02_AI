@@ -20,7 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.dataset_pipeline.keywords import Chapter, classify_chunk_by_keywords  # noqa: E402
+from app.dataset_pipeline.keywords import (  # noqa: E402
+    Chapter,
+    classify_chunk_by_keywords,
+)
 from app.dataset_pipeline.labels import (  # noqa: E402
     analyze_label_rows,
     discover_label_workbook,
@@ -133,10 +136,15 @@ def _queue_rows(
             {
                 "document_id": record["document_id"],
                 "content_hash": content_hash,
+                "chunk_id": f"LABELING_XLSX:{record['document_id']}:chunk-0000",
+                "source": source_group,
                 "source_group": source_group,
                 "source_locator": record["source_locator"],
                 "title": record["title"],
                 "content": record["content"],
+                "chapter_id": "inflation",
+                "dataset_version": "labeling-xlsx-current",
+                "rubric_version": "inflation-rubric-draft-v1",
                 "split": _split_for_review(
                     source_group, record["document_id"], content_hash
                 ),
@@ -347,7 +355,7 @@ def _status_markdown(status: dict[str, Any]) -> str:
 ## 검수 전 차단 상태
 
 독립 Gold가 생성되기 전까지 세 방법의 Precision·Recall·F1과
-Confusion Matrix는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
+최종 성능 지표는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
 빠진 경우에도 교집합만으로 지표를 계산하지 않습니다.
 """
 

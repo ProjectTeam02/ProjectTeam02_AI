@@ -1,21 +1,26 @@
 {
   "status": "NOT_EVALUATED",
   "reason": "독립 합의 Gold가 아직 생성되지 않았습니다.",
-  "queue_row_count": 160,
+  "queue_row_count": 320,
   "split_counts": {
-    "test": 27,
-    "development": 133
+    "development": 270,
+    "test": 50
   },
   "source_split_counts": {
+    "BOK": {
+      "development": 137,
+      "test": 23
+    },
     "KDI": {
       "test": 27,
       "development": 133
     }
   },
   "source_groups_supported_by_queue": [
+    "BOK",
     "KDI"
   ],
-  "bok_present_in_current_input": false,
+  "bok_present_in_current_input": true,
   "duplicate_document_ids": [],
   "duplicate_content_hashes": [],
   "diagnostic_report": "reports/keyword_miss_analysis.json",

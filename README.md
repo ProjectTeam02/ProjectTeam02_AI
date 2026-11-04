@@ -99,6 +99,7 @@ docker compose up --build
 .venv/bin/python -m scripts.make_chunks
 .venv/bin/python -m scripts.keyword_filter
 .venv/bin/python -m scripts.estimate_classification_cost
+.venv/bin/python scripts/validate_full_dataset_gold_inputs.py
 ```
 
 결과는 `reports/pipeline/`, `data/processed/`, `data/labeled/keyword/`에 저장됩니다.
@@ -144,19 +145,19 @@ provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E
 ### 소규모 LLM 정밀 분류 파일럿
 
 `precision_eda.ipynb`의 LLM 파일럿 셀은 현재 모델의 기존 결과가 있으면 이를
-재사용하고, 결과가 없을 때만 10건의 소규모 호출을 실행합니다. 매번 새로
-호출하려면 Notebook의 `FORCE_RERUN_LLM = True`를 사용합니다. 먼저 비용과
+재사용하고, 결과가 없을 때만 KDI/BOK 균형 최대 20건의 소규모 호출을 실행합니다.
+매번 새로 호출하려면 Notebook의 `RUN_LLM_API = True`를 사용합니다. 먼저 비용과
 입력 토큰을 확인하려면 다음 명령을 실행합니다.
 
 ```bash
-.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 20
 ```
 
 실제 OpenRouter 호출은 소규모 샘플에 대해서만 명시적으로 `--execute`를 붙여
 실행합니다. 결과 원문은 Git에 올리지 않는 `data/labeled/precision/`에 저장됩니다.
 
 ```bash
-.venv/bin/python scripts/precision_llm_pilot.py --sample-size 10 --execute
+.venv/bin/python scripts/precision_llm_pilot.py --sample-size 20 --execute
 ```
 
 모델 결과의 `review_status`는 자동 승인하지 않고 항상 `PENDING`으로 저장합니다.
@@ -177,6 +178,10 @@ Notebook의 전체 데이터셋 셀은 다음과 같은 오프라인 결과를 �
 평가 지표 산출 전 독립 골드 라벨을 확보해야 하며, 계획은
 `reports/evaluation_plan.md`에 정리되어 있습니다.
 
+전체 데이터셋 검증 결과는 `reports/full_dataset_validation_report.md`에서
+확인합니다. 검수용 CSV는 원문을 포함하므로 Git에 추적하지 않는 로컬 산출물로
+유지합니다.
+
 ### 세 가지 분류 방법 비교
 
 Keyword-only, LLM-only, Keyword+LLM Hybrid 비교는 다음 명령으로 실행합니다.
@@ -186,6 +191,27 @@ Keyword-only, LLM-only, Keyword+LLM Hybrid 비교는 다음 명령으로 실행�
 ```bash
 .venv/bin/python -m scripts.compare_precision_methods
 ```
+
+KDI 160건과 BOK 160건의 실제 라벨링 Excel을 통합해 원문 대조, A/B 합의 감사,
+Keyword 전수 실행 및 기존 LLM 파일럿의 예비 비교를 한 번에 재현하려면 다음
+명령을 사용합니다. 기본 실행은 외부 API를 호출하지 않으며 독립 Gold가 없을 때
+최종 Precision·Recall·F1을 차단합니다.
+
+```bash
+.venv/bin/python scripts/run_kdi_bok_evaluation.py
+```
+
+산출물은 `reports/evaluation/`과 `data/processed/evaluation/combined_320.jsonl`에
+생성됩니다. 원문 대조·파일 해시·Excel 21열 검증·A/B 불일치는 보고서에 보존되며,
+`확정 골드=완료`는 숫자 라벨로 변환하지 않습니다.
+
+통합 결과만 빠르게 다시 확인하려면 실행 결과를 읽는
+[`reports/evaluation/evaluation_eda.ipynb`](reports/evaluation/evaluation_eda.ipynb)을
+사용합니다. 기존 전체 코퍼스 EDA와 320건 통합 EDA를 함께 보려면
+[`notebook/precision_eda.ipynb`](notebook/precision_eda.ipynb)을 실행합니다.
+실행 요약과 Notebook 전용 보고서는 각각
+`reports/evaluation/precision_eda_summary.json`과
+`reports/evaluation/precision_eda_report.md`에 저장됩니다.
 
 독립 검수 큐는 다음 명령으로 생성합니다. 기존 엑셀의 라벨을 복사하지 않고
 원문·Document ID·Content Hash를 보존하며 개발셋과 테스트셋을 안정적으로 나눕니다.
@@ -198,6 +224,65 @@ Keyword-only, LLM-only, Keyword+LLM Hybrid 비교는 다음 명령으로 실행�
 현재는 `NOT_EVALUATED` 상태로 남습니다. 키워드 미매칭 분석은
 `reports/keyword_miss_analysis.md`에서 확인할 수 있으며, 참고 라벨 기반 진단을
 최종 테스트셋 튜닝에 사용하지 않습니다.
+
+### 로컬 사람 검수 도구
+
+Streamlit은 현재 의존성에 포함되어 있지 않으므로, 새 패키지를 추가하지 않고
+표준 Python CLI 검수 도구를 제공합니다. 기본 입력은 현재 고정된 KDI 160건과
+BOK 160건, 총 320건의 독립 검수 큐입니다. 과거 KDI 160건+BOK 205건 템플릿은
+레거시 점검용으로만 보존하며 현재 평가와 혼용하지 않습니다. CLI는 제목·원문·출처만 보여주고, 기존 AI 예측과 과거 라벨은 화면에
+표시하지 않습니다. 입력한 판정은 원본 템플릿을 수정하지 않고 append-only JSONL로
+저장합니다.
+
+```bash
+# 전체 미검수 큐를 이어서 검수
+.venv/bin/python scripts/gold_review_cli.py --reviewer-id jihoon
+
+# 기관·분할을 제한하여 검수
+.venv/bin/python scripts/gold_review_cli.py \
+  --reviewer-id jihoon --source BOK --split development
+
+# 같은 평가자의 이전 판정을 새 이벤트로 남기며 수정
+.venv/bin/python scripts/gold_review_cli.py \
+  --reviewer-id jihoon --include-reviewed
+
+# 두 명 이상의 독립 검수 뒤 최종 합의
+.venv/bin/python scripts/gold_review_cli.py \
+  --reviewer-id adjudicator --adjudicate
+
+# 이력·원문 근거·데이터 버전·split 누출 검증만 실행
+.venv/bin/python scripts/gold_review_cli.py \
+  --reviewer-id auditor --validate-only
+```
+
+현재 큐와 과거 템플릿의 행 수·기관별 출처·중복 ID는 다음 명령으로 확인합니다.
+
+```bash
+.venv/bin/python scripts/reconcile_gold_inputs.py
+```
+
+Hybrid 결과에서 키워드 비후보 문서는 명시적인 음성 예측으로 기록되지만,
+키워드 후보 중 LLM 결과가 없는 문서는 `NOT_EXECUTED_LLM_MISSING` 상태로 남아
+관측 예측에 포함하지 않습니다. 따라서 `279/320`은 완료율이 아니라 현재 관측
+가능한 예측 수이며, 미관측 후보 수를 별도로 보고합니다.
+
+검수 이력은 `data/labeled/precision/gold_review_history.jsonl`, 현재 검수 결과
+내보내기는 `gold_review_current.csv/jsonl`, 검증 결과는
+`reports/gold_review_validation.json`, 평가자 불일치는
+`reports/gold_review_disagreements.json`에 저장됩니다. 이 파일들은 원문과 사람의
+라벨을 포함할 수 있어 Git 추적에서 제외됩니다. `SINGLE_REVIEWED`는 개인 검수
+결과일 뿐이며 최종 Gold가 아닙니다. `ADJUDICATED` 합의가 끝난 행만 기존
+비교 파이프라인 입력으로 투영됩니다. 출처 검토, 라이선스 검토, 문제 생성
+적합성은 관련도 점수와 별도의 상태로 기록되며, 기본값은 자동 승인되지 않는
+`PENDING`입니다.
+
+사람의 합의가 끝난 뒤에는 검수 이력을 기존 템플릿 계약에 연결하여 독립 Gold를
+조립합니다. 미완료 행이 하나라도 있으면 `NOT_READY` 상태를 유지합니다.
+
+```bash
+.venv/bin/python scripts/assemble_independent_gold.py \
+  --history data/labeled/precision/gold_review_history.jsonl
+```
 
 독립 검수 완료 CSV가 준비된 뒤에만 최종 비교를 실행합니다. CSV의 필수 상태값은
 `gold_set_status=INDEPENDENT_APPROVED`, `review_status=APPROVED`이며, `content_hash`,

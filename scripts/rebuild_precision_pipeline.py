@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.dataset_pipeline.chunks import Chunk  # noqa: E402
 from app.dataset_pipeline.evaluation import (  # noqa: E402
-    confusion_matrix,
+    classification_counts,
     positive_for_use,
     precision_recall_f1,
 )
@@ -151,13 +151,13 @@ def _policy_metrics(
     ]
     predictions = [prediction for prediction, _ in pairs]
     gold = [positive_for_use(score, usage) for _, score in pairs]
-    matrix = confusion_matrix(predictions, gold)
+    counts = classification_counts(predictions, gold)
     return {
         "usage": usage,
         "field": field,
         "comparable_count": len(pairs),
-        "matrix": matrix,
-        "metrics": precision_recall_f1(matrix),
+        "counts": counts,
+        "metrics": precision_recall_f1(counts),
         "interpretation": (
             "workbook suitability consistency, not an independent model score"
         ),
@@ -169,14 +169,14 @@ def _keyword_metrics(rows: list[dict[str, Any]], usage: str) -> dict[str, Any]:
     comparable = [row for row in rows if row["gold_score"] is not None]
     predictions = [bool(row["candidate"]) for row in comparable]
     gold = [positive_for_use(row["gold_score"], usage) for row in comparable]
-    matrix = confusion_matrix(predictions, gold)
+    counts = classification_counts(predictions, gold)
     return {
         "usage": usage,
         "candidate_count": sum(predictions),
         "population_count": len(comparable),
         "candidate_rate": sum(predictions) / len(predictions) if predictions else 0.0,
-        "matrix": matrix,
-        "metrics": precision_recall_f1(matrix),
+        "counts": counts,
+        "metrics": precision_recall_f1(counts),
     }
 
 
@@ -565,13 +565,13 @@ def run(
                 record["quality"] == "검토필요" for record in records
             ),
             "quiz_policy_mismatch_count": policy_metrics["question_generation"][
-                "matrix"
+                "counts"
             ]["fp"]
-            + policy_metrics["question_generation"]["matrix"]["fn"],
-            "tutor_policy_mismatch_count": policy_metrics["tutor_retrieval"]["matrix"][
+            + policy_metrics["question_generation"]["counts"]["fn"],
+            "tutor_policy_mismatch_count": policy_metrics["tutor_retrieval"]["counts"][
                 "fp"
             ]
-            + policy_metrics["tutor_retrieval"]["matrix"]["fn"],
+            + policy_metrics["tutor_retrieval"]["counts"]["fn"],
             "reason_without_content_overlap_count": analysis["reason_audit"][
                 "reason_without_content_overlap_count"
             ],

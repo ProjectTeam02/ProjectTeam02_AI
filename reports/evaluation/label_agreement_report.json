@@ -1,0 +1,31 @@
+{
+  "status": "EXECUTED_REFERENCE_LABEL_AUDIT",
+  "by_source": {
+    "KDI": {
+      "comparable_count": 49,
+      "agree_count": 39,
+      "disagree_count": 10,
+      "agreement_rate": 0.7959183673469388,
+      "cohen_kappa": 0.542910447761194,
+      "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
+    },
+    "BOK": {
+      "comparable_count": 160,
+      "agree_count": 68,
+      "disagree_count": 92,
+      "agreement_rate": 0.425,
+      "cohen_kappa": 0.13589668329909008,
+      "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
+    },
+    "ALL": {
+      "comparable_count": 209,
+      "agree_count": 107,
+      "disagree_count": 102,
+      "agreement_rate": 0.5119617224880383,
+      "cohen_kappa": 0.2579106763671807,
+      "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
+    }
+  },
+  "human_inter_rater_agreement_status": "NOT_COMPUTED_REVIEWER_PROVENANCE_MISSING",
+  "note": "A/B agreement and kappa are descriptive workbook checks, not verified human inter-rater reliability."
+}

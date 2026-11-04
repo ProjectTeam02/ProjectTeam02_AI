@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "canonical_input": {
+    "path": "data/labeled/precision/independent_gold_review_queue.csv",
+    "row_count": 320,
+    "source_counts": {
+      "BOK": 160,
+      "KDI": 160
+    },
+    "unique_document_id_count": 320,
+    "duplicate_document_ids": []
+  },
+  "canonical_policy": "KDI160+BOK160=320; current queue only",
+  "legacy_inputs": {
+    "kdi_template": {
+      "path": "reports/step3/kdi_independent_gold_review_template.csv",
+      "row_count": 160,
+      "source_counts": {
+        "BOK": 160
+      },
+      "unique_document_id_count": 160,
+      "duplicate_document_ids": [],
+      "status": "LEGACY_EXCLUDED_SOURCE_MISMATCH"
+    },
+    "bok_template": {
+      "path": "reports/step3/bok_independent_gold_review_template.csv",
+      "row_count": 205,
+      "source_counts": {
+        "BOK": 205
+      },
+      "unique_document_id_count": 205,
+      "duplicate_document_ids": [],
+      "status": "LEGACY_EXCLUDED"
+    }
+  },
+  "mixing_prevented": true,
+  "gold_labels_copied_or_approved": false,
+  "notes": [
+    "과거 KDI 160+BOK 205 템플릿은 현재 320건 평가 입력에서 제외한다.",
+    "레거시 KDI 템플릿의 실제 source가 BOK로 기록된 경우 source mismatch로 표시한다.",
+    "독립 검수 승인 전에는 최종 Gold 및 P/R/F1을 생성하지 않는다."
+  ]
+}

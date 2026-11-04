@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.dataset_pipeline.chunks import Chunk
 from app.dataset_pipeline.keywords import Chapter
 from app.dataset_pipeline.tokenizer import ExactTokenizer
@@ -153,3 +155,12 @@ def test_load_existing_pilot_reuses_matching_model_without_call(tmp_path) -> Non
     assert result["status"] == "REUSED_EXISTING_LLM_PILOT"
     assert result["llm_calls"] == 1
     assert precision_llm_pilot.load_existing_pilot(output, "openai/gpt-4o-mini") is None
+
+
+def test_external_pilot_is_capped_at_twenty_documents(tmp_path) -> None:
+    with pytest.raises(ValueError, match="capped at 20"):
+        precision_llm_pilot.run(
+            output_path=tmp_path / "pilot.jsonl",
+            sample_size=21,
+            execute=True,
+        )
