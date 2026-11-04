@@ -25,13 +25,16 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.dataset_pipeline.evaluation import (  # noqa: E402
-    confusion_matrix,
+    classification_counts,
     positive_for_use,
     precision_recall_f1,
     validate_relevance_score,
 )
 from app.dataset_pipeline.io import load_corpus  # noqa: E402
-from app.dataset_pipeline.keywords import Chapter, classify_chunk_by_keywords  # noqa: E402
+from app.dataset_pipeline.keywords import (  # noqa: E402
+    Chapter,
+    classify_chunk_by_keywords,
+)
 from app.dataset_pipeline.labels import (  # noqa: E402
     analyze_label_rows,
     discover_label_workbook,
@@ -275,7 +278,7 @@ def _binary_metrics(
         return {
             "status": "NOT_EVALUATED_INCOMPLETE_PREDICTIONS",
             "population_count": 0,
-            "matrix": None,
+            "counts": None,
             "metrics": None,
             "missing_prediction_count": len(missing_ids),
             "missing_prediction_ids": missing_ids[:100],
@@ -289,12 +292,12 @@ def _binary_metrics(
     gold_values = [
         positive_for_use(gold_rows[document_id], usage) for document_id in joined_ids
     ]
-    matrix = confusion_matrix(predicted_values, gold_values)
+    counts = classification_counts(predicted_values, gold_values)
     return {
         "status": "EVALUATED",
         "population_count": len(joined_ids),
-        "matrix": matrix,
-        "metrics": precision_recall_f1(matrix),
+        "counts": counts,
+        "metrics": precision_recall_f1(counts),
         "missing_prediction_count": len(set(gold_rows) - set(predictions)),
         "extra_prediction_count": len(set(predictions) - set(gold_rows)),
         "extra_prediction_ids": extra_ids[:100],

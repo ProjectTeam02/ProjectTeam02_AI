@@ -62,7 +62,6 @@ Keyword 후보와 reference label이 충돌하는 사례는 11건이며, 독립 
 
 - `dataset_counts`: `reports/evaluation/dataset_counts.png`
 - `label_distributions`: `reports/evaluation/label_distributions.png`
-- `label_confusion_matrix`: `reports/evaluation/label_confusion_matrix.png`
 - `label_agreement`: `reports/evaluation/label_agreement.png`
 - `method_distributions`: `reports/evaluation/method_distributions.png`
 - `method_agreement`: `reports/evaluation/method_agreement.png`

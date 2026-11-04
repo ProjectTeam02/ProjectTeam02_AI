@@ -7,26 +7,6 @@
       "disagree_count": 10,
       "agreement_rate": 0.7959183673469388,
       "cohen_kappa": 0.542910447761194,
-      "confusion_matrix": {
-        "rows": {
-          "0": {
-            "0": 31,
-            "1": 0,
-            "2": 0
-          },
-          "1": {
-            "0": 8,
-            "1": 6,
-            "2": 0
-          },
-          "2": {
-            "0": 0,
-            "1": 2,
-            "2": 2
-          }
-        },
-        "comparable_count": 49
-      },
       "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
     },
     "BOK": {
@@ -35,26 +15,6 @@
       "disagree_count": 92,
       "agreement_rate": 0.425,
       "cohen_kappa": 0.13589668329909008,
-      "confusion_matrix": {
-        "rows": {
-          "0": {
-            "0": 24,
-            "1": 9,
-            "2": 12
-          },
-          "1": {
-            "0": 22,
-            "1": 25,
-            "2": 18
-          },
-          "2": {
-            "0": 9,
-            "1": 22,
-            "2": 19
-          }
-        },
-        "comparable_count": 160
-      },
       "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
     },
     "ALL": {
@@ -63,26 +23,6 @@
       "disagree_count": 102,
       "agreement_rate": 0.5119617224880383,
       "cohen_kappa": 0.2579106763671807,
-      "confusion_matrix": {
-        "rows": {
-          "0": {
-            "0": 55,
-            "1": 9,
-            "2": 12
-          },
-          "1": {
-            "0": 30,
-            "1": 31,
-            "2": 18
-          },
-          "2": {
-            "0": 9,
-            "1": 24,
-            "2": 21
-          }
-        },
-        "comparable_count": 209
-      },
       "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified"
     }
   },

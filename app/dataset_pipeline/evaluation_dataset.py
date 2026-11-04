@@ -416,24 +416,6 @@ def build_combined_dataset(
     return rows, summary
 
 
-def contingency(
-    rows: Iterable[dict[str, Any]], left: str, right: str
-) -> dict[str, Any]:
-    """Return a stable 0/1/2 contingency table for two numeric label columns."""
-    table = {
-        str(left_value): {str(right_value): 0 for right_value in range(3)}
-        for left_value in range(3)
-    }
-    comparable = 0
-    for row in rows:
-        left_value = row.get(left)
-        right_value = row.get(right)
-        if left_value in {0, 1, 2} and right_value in {0, 1, 2}:
-            table[str(left_value)][str(right_value)] += 1
-            comparable += 1
-    return {"rows": table, "comparable_count": comparable}
-
-
 def cohen_kappa(rows: Iterable[dict[str, Any]], left: str, right: str) -> float | None:
     """Calculate Cohen's kappa; return None when no comparable labels exist."""
     values = [
@@ -478,7 +460,6 @@ def label_agreement_report(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "disagree_count": len(comparable) - agree,
             "agreement_rate": agree / len(comparable) if comparable else None,
             "cohen_kappa": cohen_kappa(subset, "label_a", "label_b"),
-            "confusion_matrix": contingency(subset, "label_a", "label_b"),
             "interpretation": "AI_REVIEW_AGREEMENT; reviewer identity/type is not independently verified",
         }
     return {

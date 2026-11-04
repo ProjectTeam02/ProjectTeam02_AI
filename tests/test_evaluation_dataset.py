@@ -2,7 +2,6 @@ import pytest
 
 from app.dataset_pipeline.evaluation_dataset import (
     cohen_kappa,
-    contingency,
     label_agreement_report,
     score,
 )
@@ -27,11 +26,10 @@ def test_agreement_recomputes_bok_style_92_disagreements() -> None:
     assert report["human_inter_rater_agreement_status"].startswith("NOT_COMPUTED")
 
 
-def test_confusion_and_kappa_are_stable_for_three_class_labels() -> None:
+def test_kappa_is_stable_for_three_class_labels() -> None:
     rows = [
         {"label_a": 0, "label_b": 0},
         {"label_a": 1, "label_b": 1},
         {"label_a": 2, "label_b": 1},
     ]
-    assert contingency(rows, "label_a", "label_b")["comparable_count"] == 3
     assert cohen_kappa(rows, "label_a", "label_b") == pytest.approx(0.5)

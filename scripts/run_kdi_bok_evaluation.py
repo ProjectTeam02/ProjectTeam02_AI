@@ -27,7 +27,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.dataset_pipeline.evaluation import (  # noqa: E402
-    confusion_matrix,
+    classification_counts,
     positive_for_use,
     precision_recall_f1,
 )
@@ -286,16 +286,16 @@ def _proxy_metrics(
             "status": "NOT_EVALUATED_NO_REFERENCE_LABEL",
             "population_count": 0,
             "metrics": None,
-            "matrix": None,
+            "counts": None,
         }
     actual = [positive_for_use(reference[document_id], usage) for document_id in common]
     predicted = [predictions[document_id] for document_id in common]
-    matrix = confusion_matrix(predicted, actual)
+    counts = classification_counts(predicted, actual)
     return {
         "status": "DRY_RUN_AI_REFERENCE",
         "population_count": len(common),
-        "metrics": precision_recall_f1(matrix),
-        "matrix": matrix,
+        "metrics": precision_recall_f1(counts),
+        "counts": counts,
         "reference_label_provenance_counts": dict(
             Counter(
                 rows_by_id(rows, common)[document_id]["label_provenance"]
@@ -528,36 +528,6 @@ def _write_plot_files(
     fig.savefig(path, dpi=160)
     plt.close(fig)
     paths["label_distributions"] = display_path(path)
-
-    comparable = [
-        row for row in rows if row["label_a"] is not None and row["label_b"] is not None
-    ]
-    matrix = [
-        [
-            sum(
-                row["label_a"] == actual and row["label_b"] == predicted
-                for row in comparable
-            )
-            for predicted in range(3)
-        ]
-        for actual in range(3)
-    ]
-    fig, axis = plt.subplots(figsize=(5, 4))
-    image = axis.imshow(matrix, cmap="Blues")
-    for actual in range(3):
-        for predicted in range(3):
-            axis.text(
-                predicted, actual, matrix[actual][predicted], ha="center", va="center"
-            )
-    axis.set_xlabel("관련도 B")
-    axis.set_ylabel("관련도 A")
-    axis.set_title("A/B 교차표")
-    fig.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
-    fig.tight_layout()
-    path = output_dir / "label_confusion_matrix.png"
-    fig.savefig(path, dpi=160)
-    plt.close(fig)
-    paths["label_confusion_matrix"] = display_path(path)
 
     agreement_rates = []
     agreement_labels = []

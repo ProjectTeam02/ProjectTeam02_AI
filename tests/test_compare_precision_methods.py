@@ -110,8 +110,8 @@ def test_gold_metrics_use_separate_quiz_and_tutor_policies() -> None:
     gold = {"doc-1": 2, "doc-2": 1, "doc-3": 0}
     quiz = _binary_metrics(predictions, gold, "question_generation")
     tutor = _binary_metrics(predictions, gold, "tutor_retrieval")
-    assert quiz["matrix"] == {"tp": 1, "fp": 1, "fn": 0, "tn": 1}
-    assert tutor["matrix"] == {"tp": 1, "fp": 1, "fn": 1, "tn": 0}
+    assert quiz["counts"] == {"tp": 1, "fp": 1, "fn": 0, "tn": 1}
+    assert tutor["counts"] == {"tp": 1, "fp": 1, "fn": 1, "tn": 0}
 
 
 def test_threshold_prediction_does_not_auto_approve_results() -> None:

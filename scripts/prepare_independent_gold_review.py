@@ -355,7 +355,7 @@ def _status_markdown(status: dict[str, Any]) -> str:
 ## 검수 전 차단 상태
 
 독립 Gold가 생성되기 전까지 세 방법의 Precision·Recall·F1과
-Confusion Matrix는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
+최종 성능 지표는 `NOT_EVALUATED`로 유지됩니다. 일부 방법의 예측이
 빠진 경우에도 교집합만으로 지표를 계산하지 않습니다.
 """
 

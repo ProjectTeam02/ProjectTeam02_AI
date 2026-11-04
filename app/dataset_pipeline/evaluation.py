@@ -44,10 +44,10 @@ def positive_for_use(score: int, usage: str) -> bool:
     raise ValueError("usage must be question_generation or tutor_retrieval")
 
 
-def confusion_matrix(
+def classification_counts(
     predictions: Iterable[bool], gold: Iterable[bool]
 ) -> dict[str, int]:
-    """Return TP/FP/FN/TN for equal-length binary sequences."""
+    """Return TP/FP/FN/TN counts for equal-length binary sequences."""
     # Iterator를 list로 바꾸어 예측값과 골드값의 길이·순서를 함께 검증합니다.
     counts = Counter()
     prediction_values = list(predictions)
@@ -67,10 +67,10 @@ def confusion_matrix(
     return {key: counts[key] for key in ("tp", "fp", "fn", "tn")}
 
 
-def precision_recall_f1(matrix: dict[str, int]) -> dict[str, float]:
-    """Calculate metrics from a human-reviewed confusion matrix."""
+def precision_recall_f1(counts: dict[str, int]) -> dict[str, float]:
+    """Calculate metrics from human-reviewed binary classification counts."""
     # 평가 표본이 없을 때도 파이프라인이 중단되지 않도록 0으로 처리합니다.
-    tp, fp, fn = matrix["tp"], matrix["fp"], matrix["fn"]
+    tp, fp, fn = counts["tp"], counts["fp"], counts["fn"]
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0

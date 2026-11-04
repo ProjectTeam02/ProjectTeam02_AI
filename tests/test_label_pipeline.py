@@ -7,7 +7,6 @@ import pytest
 
 from app.dataset_pipeline.chunks import Chunk
 from app.dataset_pipeline.evaluation import (
-    confusion_matrix,
     positive_for_use,
     precision_recall_f1,
     validate_relevance_score,
@@ -38,9 +37,8 @@ def test_relevance_score_rejects_out_of_range_values() -> None:
 
 def test_metrics_are_only_calculated_from_explicit_gold_values() -> None:
     # 시스템 예측과 독립 골드 라벨의 조합으로만 평가 지표를 계산합니다.
-    matrix = confusion_matrix([True, True, False, False], [True, False, True, False])
-    assert matrix == {"tp": 1, "fp": 1, "fn": 1, "tn": 1}
-    assert precision_recall_f1(matrix) == {"precision": 0.5, "recall": 0.5, "f1": 0.5}
+    counts = {"tp": 1, "fp": 1, "fn": 1, "tn": 1}
+    assert precision_recall_f1(counts) == {"precision": 0.5, "recall": 0.5, "f1": 0.5}
 
 
 def test_label_audit_finds_duplicates_and_manual_review_term() -> None:
