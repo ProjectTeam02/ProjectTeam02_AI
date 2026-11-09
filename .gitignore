@@ -5,6 +5,10 @@ __pycache__/
 .venv/
 .env
 .env.example
+*.tfvars
+*.tfvars.json
+.terraform/
+terraform.tfstate*
 .ipynb_checkpoints/
 data/*
 !data/.gitkeep

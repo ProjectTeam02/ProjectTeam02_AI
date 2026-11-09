@@ -1,0 +1,15 @@
+aws_region              = "ap-northeast-2"
+project_name            = "projectteam02-ai"
+environment             = "production"
+container_cpu           = 512
+container_memory        = 1024
+desired_count           = 1
+database_instance_class = "db.t3.micro"
+
+# Do not commit the real value. Pass it through an untracked tfvars file or
+# TF_VAR_openrouter_api_key in the deployment environment.
+openrouter_api_key = "replace-me"
+
+# Use the same value in the Node.js backend. Leave null to generate one and
+# retrieve it from Terraform's sensitive output.
+internal_api_token = null
