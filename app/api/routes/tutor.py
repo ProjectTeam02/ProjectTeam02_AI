@@ -1,12 +1,6 @@
-from fastapi import APIRouter
+# 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
+"""Compatibility import for the pre-v1 router path."""
 
-from app.schemas.tutor import TutorRequest, TutorResponse
-from app.services.tutor_service import TutorService
+from app.api.v1.routers.tutor import chat, internal_answer, internal_router, router
 
-router = APIRouter(prefix="/tutor", tags=["tutor"])
-_service = TutorService()
-
-
-@router.post("/chat", response_model=TutorResponse)
-async def chat(request: TutorRequest) -> TutorResponse:
-    return await _service.answer(request)
+__all__ = ["chat", "internal_answer", "internal_router", "router"]

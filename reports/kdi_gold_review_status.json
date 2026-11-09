@@ -1,0 +1,10 @@
+{
+  "input_path": "data/BOK_라벨링.xlsx",
+  "workbook_row_count": 160,
+  "template_row_count": 160,
+  "reviewer_a_b_disagreement_count": 92,
+  "source_quality_review_count": 10,
+  "missing_from_current_corpus": [],
+  "gold_values_copied_from_workbook": false,
+  "status": "READY_FOR_HUMAN_REVIEW"
+}

@@ -4,6 +4,29 @@ __pycache__/
 .ruff_cache/
 .venv/
 .env
+.env.example
 .ipynb_checkpoints/
 data/*
 !data/.gitkeep
+!data/README.md
+.idea/
+
+# Codex 플러그인에서 제공되는 SKILL.md는 프로젝트 소스에 포함하지 않습니다.
+SKILL.md
+
+# 원본·라벨링 파일과 생성된 행 단위 결과는 로컬에서만 보관합니다.
+*.xlsx
+*.xls
+/kdi 시사경제용어/
+/한국은행/
+reports/**/*.csv
+data/**/*.csv
+# 사람 검수 진행·불일치·조립 결과에는 라벨과 검수 메타데이터가 포함될 수 있습니다.
+reports/gold_review_validation.json
+reports/gold_review_disagreements.json
+reports/independent_gold_assembly_status.json
+reports/ai_label_proposal_report.json
+data/labeled/precision/ai_label_proposals.jsonl
+data/labeled/precision/ai_label_review_queue.csv
+# 실행 중간 확인용 전체 데이터셋 출력은 canonical reports/pipeline만 사용합니다.
+/reports/pipeline_full/

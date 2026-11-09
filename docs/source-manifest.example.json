@@ -1,0 +1,18 @@
+{
+  "documents": [
+    {
+      "path": "approved/base-rate.md",
+      "source_id": "SOURCE-STABLE-ID",
+      "document_id": "DOCUMENT-STABLE-ID",
+      "document_version": "2026-01",
+      "title": "검수된 문서 제목",
+      "source_url": "https://official.example/document",
+      "concept_id": "concept-001",
+      "stage_id": "stage-001",
+      "review_status": "approved",
+      "published_at": "2026-01-01T00:00:00+09:00",
+      "updated_at": "2026-01-01T00:00:00+09:00",
+      "license": "검토한 실제 라이선스 식별자"
+    }
+  ]
+}

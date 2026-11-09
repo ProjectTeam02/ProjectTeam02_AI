@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Leren Independent Gold Test Set",
+  "description": "독립 검수 완료 후 세 가지 챕터 분류 방식을 동일하게 평가하기 위한 CSV 행 구조입니다.",
+  "type": "object",
+  "required": [
+    "document_id",
+    "content_hash",
+    "source_group",
+    "split",
+    "gold_score",
+    "gold_set_status",
+    "review_status",
+    "reviewer_count",
+    "review_mode"
+  ],
+  "properties": {
+    "document_id": {
+      "type": "string",
+      "description": "원문 또는 청크의 고유 ID"
+    },
+    "gold_score": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "챕터 관련도: 0 없음, 1 간접, 2 직접"
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "검수 대상 원문 또는 청크의 SHA-256 해시"
+    },
+    "source_group": {
+      "type": "string",
+      "description": "KDI, BOK 등 원천 기관 그룹"
+    },
+    "split": {
+      "enum": ["development", "test"],
+      "description": "라벨·프롬프트 조정용 개발셋과 독립 최종 테스트셋"
+    },
+    "gold_set_status": {
+      "const": "INDEPENDENT_APPROVED",
+      "description": "현재 라벨링.xlsx와 독립적으로 합의된 평가셋임을 나타내는 명시적 표식"
+    },
+    "review_status": {
+      "const": "APPROVED",
+      "description": "사람 검수 및 합의가 완료된 행만 평가에 사용"
+    },
+    "review_mode": {
+      "enum": ["ADJUDICATED_CONSENSUS", "THIRD_PARTY_REVIEW"],
+      "description": "독립 검수 방식. 합의 검수는 2명 이상, 제3자 검수는 1명 이상 필요"
+    },
+    "reviewer_count": {
+      "type": "integer",
+      "minimum": 2,
+      "description": "독립 검수에 참여한 평가자 수"
+    },
+    "chapter_id": {
+      "type": "string",
+      "const": "inflation"
+    },
+    "review_note": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

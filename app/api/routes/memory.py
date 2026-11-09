@@ -1,11 +1,6 @@
-from fastapi import APIRouter
+# 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
+"""Compatibility import for the pre-v1 router path."""
 
-from app.schemas.memory import MemoryResponse
+from app.api.v1.routers.memory import list_memories, router
 
-router = APIRouter(prefix="/memory", tags=["memory"])
-
-
-@router.get("/{user_id}", response_model=list[MemoryResponse])
-async def list_memories(user_id: str) -> list[MemoryResponse]:
-    # TODO: connect the memory repository.
-    return []
+__all__ = ["router", "list_memories"]

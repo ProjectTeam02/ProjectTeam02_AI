@@ -1,0 +1,519 @@
+{
+  "status": "REFERENCE_DIAGNOSTIC_ONLY",
+  "warning": "현재 확정 골드는 독립 Gold가 아니므로 성능·테스트 튜닝에 사용하지 않음",
+  "total_documents": 320,
+  "keyword_candidate_count": 51,
+  "keyword_candidate_rate": 0.159375,
+  "reference_positive_misses_count": 57,
+  "reference_positive_misses_by_score": {
+    "2": 2,
+    "1": 55
+  },
+  "miss_categories": {
+    "core_or_alias_missing": 2,
+    "related_concept_or_chapter_boundary": 40,
+    "chapter_boundary_or_reference_label_review": 15
+  },
+  "proposed_terms_from_missed_titles": [
+    {
+      "term": "기준금리",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "상품권",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "다우지수",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "총통화",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "투자세액공제",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "주택채권입찰제",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "파일럿 샵",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "유로존",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "생산자잉여",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "가지급금",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "금태환",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "센트 마케팅",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "프라임레이트",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "탈동조화",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "별정통신사업자",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "복리이자",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "양허성수준",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "바쿠가이",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "형식주의",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "국민부담률",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "채권최고액",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "행복지수",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "관세",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "보복관세",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "외환보유액",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "반독점법",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "콜금리",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "발생주의회계ㆍ현금주의회계",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "환리스크",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    },
+    {
+      "term": "온디맨드 경제",
+      "count": 1,
+      "status": "HUMAN_REVIEW_REQUIRED"
+    }
+  ],
+  "source_distribution": {
+    "BOK": 160,
+    "KDI": 160
+  },
+  "reviewer_disagreement_count": 102,
+  "quality_review_row_count": 17,
+  "miss_examples": [
+    {
+      "document_id": "kdi_dic_723",
+      "title": "기준금리",
+      "reference_score_for_diagnostic_only": 2,
+      "category": "core_or_alias_missing"
+    },
+    {
+      "document_id": "kdi_dic_1390",
+      "title": "상품권",
+      "reference_score_for_diagnostic_only": 2,
+      "category": "core_or_alias_missing"
+    },
+    {
+      "document_id": "kdi_dic_838",
+      "title": "다우지수",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2478",
+      "title": "총통화",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2656",
+      "title": "투자세액공제",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2317",
+      "title": "주택채권입찰제",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2703",
+      "title": "파일럿 샵",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1972",
+      "title": "유로존",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1402",
+      "title": "생산자잉여",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_300",
+      "title": "가지급금",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_687",
+      "title": "금태환",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1463",
+      "title": "센트 마케팅",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2771",
+      "title": "프라임레이트",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2604",
+      "title": "탈동조화",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1200",
+      "title": "별정통신사업자",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1220",
+      "title": "복리이자",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_1751",
+      "title": "양허성수준",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1123",
+      "title": "바쿠가이",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2890",
+      "title": "형식주의",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_562",
+      "title": "국민부담률",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2431",
+      "title": "채권최고액",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2857",
+      "title": "행복지수",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_502",
+      "title": "관세",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_1205",
+      "title": "보복관세",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_1899",
+      "title": "외환보유액",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1129",
+      "title": "반독점법",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2562",
+      "title": "콜금리",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1135",
+      "title": "발생주의회계ㆍ현금주의회계",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2919",
+      "title": "환리스크",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1876",
+      "title": "온디맨드 경제",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2451",
+      "title": "청약예금",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2628",
+      "title": "통신판매",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1739",
+      "title": "약정금리",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1165",
+      "title": "벌룬 론",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2335",
+      "title": "중앙은행",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_465",
+      "title": "공유가치창출",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_895",
+      "title": "대출채권담보부증권",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2806",
+      "title": "하이브리드채권",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_923",
+      "title": "동아시아 외환위기",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2680",
+      "title": "특수은행",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_1832",
+      "title": "영점기준예산",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2168",
+      "title": "재할인율정책",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2509",
+      "title": "취업자",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_736",
+      "title": "긴급수입제한조치",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2443",
+      "title": "처분 가능소득",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2965",
+      "title": "사회적경제",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "chapter_boundary_or_reference_label_review"
+    },
+    {
+      "document_id": "kdi_dic_2861",
+      "title": "허니문 랠리",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1465",
+      "title": "셀피",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_915",
+      "title": "독점",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_287",
+      "title": "가산금리",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1343",
+      "title": "사적재",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2299",
+      "title": "주가지수옵션거래",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2327",
+      "title": "중국 B주시장",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1484",
+      "title": "소비자 잉여",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_2853",
+      "title": "햇살론",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_1788",
+      "title": "엥겔지수",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    },
+    {
+      "document_id": "kdi_dic_927",
+      "title": "듀레이션 미스매치",
+      "reference_score_for_diagnostic_only": 1,
+      "category": "related_concept_or_chapter_boundary"
+    }
+  ]
+}

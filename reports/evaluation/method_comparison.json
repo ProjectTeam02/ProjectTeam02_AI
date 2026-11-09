@@ -1,0 +1,433 @@
+{
+  "status": "DRY_RUN_AI_REFERENCE",
+  "generated_at": "2026-11-04T04:38:16.387315+00:00",
+  "independent_gold": {
+    "status": "NOT_READY",
+    "count": 0,
+    "path": "reports/independent_gold_test.csv"
+  },
+  "new_api_calls": 0,
+  "existing_pilot_rows_reused": 20,
+  "llm_execution": {
+    "status": "REUSED_EXECUTED_LLM_PILOT",
+    "llm_calls": 0,
+    "recorded_api_calls": 20,
+    "sample_size": 20,
+    "output_path": "data/labeled/precision/llm_pilot_results.jsonl"
+  },
+  "model": [
+    "openai/gpt-5.6-sol"
+  ],
+  "prompt_versions": [
+    "llm-v1"
+  ],
+  "llm_threshold": 0.7,
+  "methods": {
+    "keyword_only": {
+      "status": "EXECUTED_OFFLINE",
+      "coverage_count": 320,
+      "population_count": 320,
+      "binary_policy": "candidate=true for both diagnostic policies",
+      "question_generation": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 228,
+        "metrics": {
+          "precision": 0.64,
+          "recall": 0.6153846153846154,
+          "f1": 0.6274509803921569
+        },
+        "counts": {
+          "tp": 16,
+          "fp": 9,
+          "fn": 10,
+          "tn": 193
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 68,
+          "EXPLICIT_WORKBOOK_LABEL": 160
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      },
+      "tutor_retrieval": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 228,
+        "metrics": {
+          "precision": 0.96,
+          "recall": 0.22641509433962265,
+          "f1": 0.366412213740458
+        },
+        "counts": {
+          "tp": 24,
+          "fp": 1,
+          "fn": 82,
+          "tn": 121
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 68,
+          "EXPLICIT_WORKBOOK_LABEL": 160
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      }
+    },
+    "llm_only": {
+      "status": "EXECUTED_LLM_PILOT",
+      "coverage_count": 20,
+      "population_count": 320,
+      "threshold": 0.7,
+      "question_generation": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 11,
+        "metrics": {
+          "precision": 1.0,
+          "recall": 0.4,
+          "f1": 0.5714285714285715
+        },
+        "counts": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 3,
+          "tn": 6
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 1,
+          "EXPLICIT_WORKBOOK_LABEL": 10
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      },
+      "tutor_retrieval": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 11,
+        "metrics": {
+          "precision": 1.0,
+          "recall": 0.2857142857142857,
+          "f1": 0.4444444444444445
+        },
+        "counts": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 5,
+          "tn": 4
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 1,
+          "EXPLICIT_WORKBOOK_LABEL": 10
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      }
+    },
+    "hybrid": {
+      "status": "EXECUTED_LLM_PILOT",
+      "coverage_count": 279,
+      "population_count": 320,
+      "rule": "Keyword candidates go to LLM; non-candidates remain explicit negative; missing candidate LLM results remain pending.",
+      "keyword_negative_docs": 269,
+      "keyword_candidate_docs": 51,
+      "candidate_llm_observed_docs": 10,
+      "candidate_llm_not_observed_docs": 41,
+      "pending_docs": 41,
+      "question_generation": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 208,
+        "metrics": {
+          "precision": 1.0,
+          "recall": 0.26666666666666666,
+          "f1": 0.4210526315789474
+        },
+        "counts": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 11,
+          "tn": 193
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 48,
+          "EXPLICIT_WORKBOOK_LABEL": 160
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      },
+      "tutor_retrieval": {
+        "status": "DRY_RUN_AI_REFERENCE",
+        "population_count": 208,
+        "metrics": {
+          "precision": 1.0,
+          "recall": 0.04597701149425287,
+          "f1": 0.08791208791208792
+        },
+        "counts": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 83,
+          "tn": 121
+        },
+        "reference_label_provenance_counts": {
+          "REVIEWER_AB_CONSENSUS_PROXY": 48,
+          "EXPLICIT_WORKBOOK_LABEL": 160
+        },
+        "interpretation": "Proxy agreement against workbook labels/AB consensus; not independent Gold performance."
+      }
+    },
+    "pairwise_overlap": {
+      "keyword_llm_count": 20,
+      "keyword_llm_agreement": 0.75,
+      "keyword_hybrid_count": 20,
+      "llm_hybrid_agreement": 0.9
+    }
+  },
+  "pilot_overlap": [
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0030",
+      "title": "경제 서프라이즈 지수",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0077",
+      "title": "국민대차대조표",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0209",
+      "title": "디스인플레이션",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": true,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 2,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0247",
+      "title": "미달러화페그제도",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0336",
+      "title": "성장기여도",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0343",
+      "title": "소득대체율",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0347",
+      "title": "소비자물가지수(CPI)",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": true,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 2,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0406",
+      "title": "실질임금",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": true,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 2,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0528",
+      "title": "자연독점",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 1,
+      "reference_label_provenance": "REVIEWER_AB_CONSENSUS_PROXY",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "BOK",
+      "document_id": "bok2026-0544",
+      "title": "재정정책",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": null,
+      "reference_label_provenance": "REVIEWER_AB_DISAGREEMENT_PENDING",
+      "comparison_status": "NO_REFERENCE_LABEL"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_1401",
+      "title": "생산자물가지수",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": true,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 2,
+      "reference_label": 2,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_2416",
+      "title": "차이메리카",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 2,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_2731",
+      "title": "평가손익",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 0,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_2732",
+      "title": "평가절하/절상",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 1,
+      "reference_label": 2,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_2855",
+      "title": "행동주의 펀드",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 0,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_300",
+      "title": "가지급금",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 1,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_592",
+      "title": "국제피셔효과",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 1,
+      "reference_label": 2,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_641",
+      "title": "근로자파견법",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 0,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_853",
+      "title": "단체행동권",
+      "keyword_candidate": false,
+      "llm_positive_at_threshold": false,
+      "hybrid_positive_at_threshold": false,
+      "llm_predicted_label": 0,
+      "reference_label": 0,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    },
+    {
+      "source": "KDI",
+      "document_id": "kdi_dic_998",
+      "title": "리플레이션",
+      "keyword_candidate": true,
+      "llm_positive_at_threshold": true,
+      "hybrid_positive_at_threshold": true,
+      "llm_predicted_label": 2,
+      "reference_label": 2,
+      "reference_label_provenance": "EXPLICIT_WORKBOOK_LABEL",
+      "comparison_status": "REFERENCE_DISAGREEMENT_ONLY"
+    }
+  ],
+  "cost": {
+    "status": "UNCONFIRMED_CONFIG_REQUIRED",
+    "estimated_cost_usd": null
+  },
+  "gold_metric_plots": {
+    "status": "NOT_GENERATED_INDEPENDENT_GOLD_REQUIRED",
+    "precision": "reports/evaluation/precision_comparison.png",
+    "recall": "reports/evaluation/recall_comparison.png",
+    "f1": "reports/evaluation/f1_comparison.png"
+  },
+  "policy": {
+    "question_generation_positive": "label == 2",
+    "tutor_retrieval_positive": "label in {1,2}",
+    "automatic_gold_approval": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "previous_manifest_status": "READY_FOR_HUMAN_REVIEW",
+  "previous_source_sha256": "1af26782060923348847d96f96140558b45773b39f728bb13187144cf2b5b055",
+  "previous_population_count": 789,
+  "previous_review_count": 205,
+  "current_candidate_document_count": 64,
+  "current_candidate_sample_count": 55,
+  "current_boundary_sample_count": 50,
+  "current_random_sample_count": 100,
+  "current_combined_review_count": 205,
+  "current_source_sha256": "f80c85cd65665c55538a4eeb50388950920db615e19512c4d6a0afef51369f84",
+  "status": "REBUILT_CURRENT_DATASET",
+  "reason": "기존 205건 표본의 source hash/ID가 현재 canonical BOK export와 다르면 기존 행을 재사용하지 않고 동일한 표본 설계로 다시 생성합니다.",
+  "previous_source_matches_current": false,
+  "current_template_id_sha256": "fb97a18ed20fc68f32c5d199d6c7742f76b47566a1cbbf3437a43071ae1b4d25",
+  "source_review_status": "NOT_CONFIRMED_IN_CURRENT_EXPORT",
+  "license_status": "UNCONFIRMED_IN_CURRENT_EXPORT"
+}

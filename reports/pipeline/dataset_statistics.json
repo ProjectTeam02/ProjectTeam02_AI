@@ -1,0 +1,310 @@
+{
+  "generated_by": "scripts/run_eda.py",
+  "analysis_status": "EXECUTED_LOCAL_DATA",
+  "tokenizer": {
+    "kind": "tiktoken",
+    "model_alias": "gpt-4o-mini",
+    "encoding": "o200k_base",
+    "exact": true
+  },
+  "inventory": {
+    "data_dir": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI",
+    "file_count": 4,
+    "files": [
+      {
+        "source": "BOK",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
+        "format": "json",
+        "record_count": 789,
+        "file_sha256": "c9fef5ecbb42b30abac59639b61a9e2228bad0522ceed8e2b9e48e3b04cca633",
+        "is_canonical": false
+      },
+      {
+        "source": "BOK",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
+        "format": "jsonl",
+        "record_count": 789,
+        "file_sha256": "f80c85cd65665c55538a4eeb50388950920db615e19512c4d6a0afef51369f84",
+        "is_canonical": true
+      },
+      {
+        "source": "KDI",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
+        "format": "json",
+        "record_count": 2750,
+        "file_sha256": "f28e8007b1e42e17804d0ad8c75363b2ce30358d67fb960fc4ba0caf40c13624",
+        "is_canonical": false
+      },
+      {
+        "source": "KDI",
+        "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
+        "format": "jsonl",
+        "record_count": 2750,
+        "file_sha256": "603523cd38a2a2ef7ac8b4f3332c7a4f6aa02f5d307142ed338c384f791de5bb",
+        "is_canonical": true
+      }
+    ],
+    "duplicate_audit": [
+      {
+        "source": "BOK",
+        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
+        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
+        "canonical_records": 789,
+        "alternate_records": 789,
+        "same_id_count": 789,
+        "same_id_and_content_count": 789,
+        "id_only_mismatch_count": 0
+      },
+      {
+        "source": "KDI",
+        "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
+        "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
+        "canonical_records": 2750,
+        "alternate_records": 2750,
+        "same_id_count": 2750,
+        "same_id_and_content_count": 2750,
+        "id_only_mismatch_count": 0
+      }
+    ],
+    "document_count": 3539,
+    "document_count_by_source": {
+      "BOK": 789,
+      "KDI": 2750
+    },
+    "cross_source_same_content_count": 0,
+    "dataset_version": "50047d6bd740671252df664aba2ee0bbac845bbf68addbc4f90d6c5efe8e7d0d",
+    "canonical_counting_rule": "JSONL is canonical when both JSON and JSONL exist for a source; the alternate export is audit-only. Cross-source records are not merged."
+  },
+  "corpus": {
+    "unique_document_count": 3539,
+    "document_count_by_source": {
+      "BOK": 789,
+      "KDI": 2750
+    },
+    "text_length_chars": {
+      "count": 3539,
+      "total": 1291332,
+      "average": 364.88612602430067,
+      "median": 329,
+      "min": 27,
+      "p25": 201.0,
+      "p75": 491.5,
+      "p95": 745.0999999999999,
+      "max": 1405
+    },
+    "token_count": {
+      "count": 3539,
+      "total": 770607,
+      "average": 217.74710370161063,
+      "median": 195,
+      "min": 13,
+      "p25": 119.0,
+      "p75": 295.0,
+      "p95": 449.0,
+      "max": 904
+    },
+    "source_stats": {
+      "BOK": {
+        "document_count": 789,
+        "text_length_chars": {
+          "count": 789,
+          "total": 402382,
+          "average": 509.9898605830165,
+          "median": 499,
+          "min": 84,
+          "p25": 386.0,
+          "p75": 622.0,
+          "p95": 822.5999999999999,
+          "max": 1405
+        },
+        "token_count": {
+          "count": 789,
+          "total": 239491,
+          "average": 303.53738910012675,
+          "median": 298,
+          "min": 50,
+          "p25": 226.0,
+          "p75": 370.0,
+          "p95": 485.5999999999999,
+          "max": 904
+        },
+        "paragraph_count": {
+          "count": 789,
+          "total": 789,
+          "average": 1.0,
+          "median": 1,
+          "min": 1,
+          "p25": 1.0,
+          "p75": 1.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "chunk_count": 791
+      },
+      "KDI": {
+        "document_count": 2750,
+        "text_length_chars": {
+          "count": 2750,
+          "total": 888950,
+          "average": 323.25454545454545,
+          "median": 275.0,
+          "min": 27,
+          "p25": 179.0,
+          "p75": 427.0,
+          "p95": 710.5499999999997,
+          "max": 1320
+        },
+        "token_count": {
+          "count": 2750,
+          "total": 531116,
+          "average": 193.1330909090909,
+          "median": 163.0,
+          "min": 13,
+          "p25": 106.0,
+          "p75": 255.0,
+          "p95": 424.0,
+          "max": 798
+        },
+        "paragraph_count": {
+          "count": 2750,
+          "total": 2750,
+          "average": 1.0,
+          "median": 1.0,
+          "min": 1,
+          "p25": 1.0,
+          "p75": 1.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "chunk_count": 2754
+      }
+    },
+    "duplicate_counting_note": "JSON and JSONL mirrors are not added together; cross-source same content is not merged."
+  },
+  "chunks": {
+    "document_count": 3539,
+    "chunk_count": 3545,
+    "documents_with_multiple_chunks": 6,
+    "token_count": {
+      "count": 3545,
+      "total": 770577,
+      "average": 217.3700987306065,
+      "median": 195,
+      "min": 13,
+      "p25": 119.0,
+      "p75": 295.0,
+      "p95": 449.0,
+      "max": 700
+    },
+    "settings": {
+      "max_tokens": 700,
+      "overlap_tokens": 100
+    }
+  },
+  "keyword_frequency": {
+    "인플레이션": 77,
+    "물가 상승": 63,
+    "물가상승": 63,
+    "물가 상승률": 33,
+    "물가상승률": 33,
+    "소비자물가": 21,
+    "물가 수준": 16,
+    "물가수준": 16,
+    "소비자물가지수": 13,
+    "화폐 가치": 12,
+    "화폐가치": 12,
+    "디플레이션": 12,
+    "CPI": 9,
+    "기대인플레이션": 8,
+    "실질 금리": 7,
+    "실질금리": 7,
+    "생산자물가지수": 5,
+    "물가 하락": 4,
+    "물가하락": 4,
+    "수요견인 인플레이션": 3,
+    "스태그플레이션": 3,
+    "근원인플레이션": 2,
+    "디스인플레이션": 2,
+    "비용인상 인플레이션": 2
+  },
+  "quality": {
+    "rows": [
+      {
+        "issue_type": "missing_document_id",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "missing_title",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "missing_content",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "missing_source_url",
+        "count": 789,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "missing_source_locator",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "missing_text_hash",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "unknown_source_review_status",
+        "count": 3539,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "unconfirmed_license_status",
+        "count": 3539,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "empty_content",
+        "count": 0,
+        "status": "PASS"
+      },
+      {
+        "issue_type": "replacement_character",
+        "count": 0,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "very_short_under_20_tokens",
+        "count": 7,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "longer_than_chunk_limit",
+        "count": 6,
+        "status": "REVIEW"
+      },
+      {
+        "issue_type": "duplicate_document_id_within_source",
+        "count": 0,
+        "status": "FAIL"
+      },
+      {
+        "issue_type": "duplicate_content_hash_within_source",
+        "count": 1,
+        "status": "FAIL"
+      }
+    ],
+    "issue_count": 7881
+  },
+  "chapter_config_status": "DRAFT_NOT_CANONICAL",
+  "visualizations": {
+    "status": "GENERATED",
+    "directory": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/reports/pipeline/figures"
+  }
+}

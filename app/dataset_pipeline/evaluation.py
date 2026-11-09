@@ -1,0 +1,77 @@
+# 파일 역할: 챕터 관련도 라벨을 용도별 이진 평가 지표로 변환합니다.
+"""Offline evaluation helpers for human-approved relevance labels.
+
+The functions in this module deliberately refuse to call a prediction a gold
+label.  Metrics are meaningful only after an independent human review set is
+provided.
+"""
+
+from __future__ import annotations
+
+from collections import Counter
+from typing import Iterable
+
+# 사람이 합의하는 챕터 관련도는 0·1·2 세 단계만 허용합니다.
+# LLM의 연속형 점수(0~1)와 혼동하지 않도록 별도 값으로 관리합니다.
+VALID_RELEVANCE_SCORES = {0, 1, 2}
+
+
+def validate_relevance_score(value: object) -> int:
+    """Validate and return an integer 0/1/2 relevance score."""
+    # True/False는 Python에서 1/0으로 자동 변환될 수 있으므로 먼저 차단합니다.
+    if isinstance(value, bool):
+        raise ValueError("boolean values are not valid relevance scores")
+    # 엑셀에서 읽은 값이 문자열일 수 있으므로 정수 변환 후 범위를 검사합니다.
+    try:
+        score = int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"invalid relevance score: {value!r}") from exc
+    if score not in VALID_RELEVANCE_SCORES or str(value).strip() != str(score):
+        raise ValueError(
+            f"relevance score must be one of {sorted(VALID_RELEVANCE_SCORES)}"
+        )
+    return score
+
+
+def positive_for_use(score: int, usage: str) -> bool:
+    """Apply the separate quiz and tutor policies to an approved label."""
+    # 문제 생성은 정밀도 우선, 튜터 검색은 재현율 우선으로 별도 판정합니다.
+    score = validate_relevance_score(score)
+    if usage == "question_generation":
+        return score == 2
+    if usage == "tutor_retrieval":
+        return score in {1, 2}
+    raise ValueError("usage must be question_generation or tutor_retrieval")
+
+
+def classification_counts(
+    predictions: Iterable[bool], gold: Iterable[bool]
+) -> dict[str, int]:
+    """Return TP/FP/FN/TN counts for equal-length binary sequences."""
+    # Iterator를 list로 바꾸어 예측값과 골드값의 길이·순서를 함께 검증합니다.
+    counts = Counter()
+    prediction_values = list(predictions)
+    gold_values = list(gold)
+    if len(prediction_values) != len(gold_values):
+        raise ValueError("predictions and gold must have equal lengths")
+    # predicted는 시스템 결과, actual은 독립적으로 승인된 골드 라벨입니다.
+    for predicted, actual in zip(prediction_values, gold_values):
+        if predicted and actual:
+            counts["tp"] += 1
+        elif predicted and not actual:
+            counts["fp"] += 1
+        elif not predicted and actual:
+            counts["fn"] += 1
+        else:
+            counts["tn"] += 1
+    return {key: counts[key] for key in ("tp", "fp", "fn", "tn")}
+
+
+def precision_recall_f1(counts: dict[str, int]) -> dict[str, float]:
+    """Calculate metrics from human-reviewed binary classification counts."""
+    # 평가 표본이 없을 때도 파이프라인이 중단되지 않도록 0으로 처리합니다.
+    tp, fp, fn = counts["tp"], counts["fp"], counts["fn"]
+    precision = tp / (tp + fp) if tp + fp else 0.0
+    recall = tp / (tp + fn) if tp + fn else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    return {"precision": precision, "recall": recall, "f1": f1}

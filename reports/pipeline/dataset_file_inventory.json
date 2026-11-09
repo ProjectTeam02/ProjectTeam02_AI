@@ -1,0 +1,68 @@
+{
+  "data_dir": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI",
+  "file_count": 4,
+  "files": [
+    {
+      "source": "BOK",
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
+      "format": "json",
+      "record_count": 789,
+      "file_sha256": "c9fef5ecbb42b30abac59639b61a9e2228bad0522ceed8e2b9e48e3b04cca633",
+      "is_canonical": false
+    },
+    {
+      "source": "BOK",
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
+      "format": "jsonl",
+      "record_count": 789,
+      "file_sha256": "f80c85cd65665c55538a4eeb50388950920db615e19512c4d6a0afef51369f84",
+      "is_canonical": true
+    },
+    {
+      "source": "KDI",
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
+      "format": "json",
+      "record_count": 2750,
+      "file_sha256": "f28e8007b1e42e17804d0ad8c75363b2ce30358d67fb960fc4ba0caf40c13624",
+      "is_canonical": false
+    },
+    {
+      "source": "KDI",
+      "path": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
+      "format": "jsonl",
+      "record_count": 2750,
+      "file_sha256": "603523cd38a2a2ef7ac8b4f3332c7a4f6aa02f5d307142ed338c384f791de5bb",
+      "is_canonical": true
+    }
+  ],
+  "duplicate_audit": [
+    {
+      "source": "BOK",
+      "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026_rag.jsonl",
+      "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/bok_terms_2026.json",
+      "canonical_records": 789,
+      "alternate_records": 789,
+      "same_id_count": 789,
+      "same_id_and_content_count": 789,
+      "id_only_mismatch_count": 0
+    },
+    {
+      "source": "KDI",
+      "canonical_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.jsonl",
+      "alternate_file": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/kdi_terms.json",
+      "canonical_records": 2750,
+      "alternate_records": 2750,
+      "same_id_count": 2750,
+      "same_id_and_content_count": 2750,
+      "id_only_mismatch_count": 0
+    }
+  ],
+  "document_count": 3539,
+  "document_count_by_source": {
+    "BOK": 789,
+    "KDI": 2750
+  },
+  "cross_source_same_content_count": 0,
+  "dataset_version": "50047d6bd740671252df664aba2ee0bbac845bbf68addbc4f90d6c5efe8e7d0d",
+  "canonical_counting_rule": "JSONL is canonical when both JSON and JSONL exist for a source; the alternate export is audit-only. Cross-source records are not merged."
+}

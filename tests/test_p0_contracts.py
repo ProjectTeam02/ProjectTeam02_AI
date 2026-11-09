@@ -1,0 +1,347 @@
+# 파일 역할: 프로젝트 기능과 데이터 계약을 자동으로 검증하는 테스트 코드입니다.
+from __future__ import annotations
+
+import json
+import uuid
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.api.dependencies import get_tutor_service, require_internal_api
+from app.core.config import Settings
+from app.evaluation.rag_metrics import compare_runs, evaluate_retrieval
+from app.ingestion.document_loader import load_manifest
+from app.main import app
+from app.rag.grounding.citation_validator import CitationValidator
+from app.rag.llamaindex.indexer import DocumentIndexer, IngestDocument
+from app.rag.memory.history_manager import HistoryManager
+from app.rag.pipelines.multiturn_rag import MultiTurnRAG
+from app.rag.query.query_rewriter import QueryRewriter
+from app.rag.retrieval.retriever import InMemoryRetriever, Retriever
+from app.rag.retrieval.types import RetrievedDocument
+from app.services.tutor_service import TutorService
+
+
+def approved_rate_document() -> RetrievedDocument:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    return RetrievedDocument(
+        content="기준금리가 오르면 일반적으로 대출금리의 상승 압력이 커질 수 있습니다.",
+        source="https://example.test/rate",
+        source_url="https://example.test/rate",
+        source_id="SRC-RATE",
+        document_id="DOC-RATE",
+        chunk_id="DOC-RATE:1",
+        title="기준금리 학습자료",
+        version="v1",
+        concept_id="concept-rate",
+        stage_id="stage-rate",
+        review_status="approved",
+    )
+
+
+def internal_service() -> TutorService:
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    class FakeGenerator:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        llm = object()
+        model_id = "test-model"
+        last_usage = {"prompt_tokens": 12, "completion_tokens": 8}
+
+        async def generate(self, query, context):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            return (
+                "기준금리가 오르면 대출금리 상승 압력이 생길 수 있습니다. "
+                "[출처: DOC-RATE/DOC-RATE:1]"
+            )
+
+    pipeline = MultiTurnRAG(
+        history_manager=HistoryManager(),
+        retriever=Retriever(InMemoryRetriever([approved_rate_document()])),
+        answer_generator=FakeGenerator(),
+    )
+    return TutorService(pipeline)
+
+
+def test_internal_api_camel_case_contract_and_idempotency():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    service = internal_service()
+    app.dependency_overrides[get_tutor_service] = lambda: service
+    app.dependency_overrides[require_internal_api] = lambda: None
+    payload = {
+        "userId": str(uuid.uuid4()),
+        "conversationId": str(uuid.uuid4()),
+        "requestId": str(uuid.uuid4()),
+        "question": "기준금리가 오르면 어떻게 돼?",
+        "modelTier": "BASIC",
+        "history": [],
+        "context": {
+            "entryPoint": "CONCEPT",
+            "stageId": None,
+            "conceptId": None,
+            "conceptCode": None,
+        },
+        "knowledgeScope": {"conceptCodes": []},
+    }
+    try:
+        client = TestClient(app)
+        first = client.post("/internal/v1/tutor/answer", json=payload)
+        second = client.post("/internal/v1/tutor/answer", json=payload)
+        assert first.status_code == 200
+        assert second.status_code == 200
+        body = first.json()
+        assert second.json() == body
+        assert body["requestId"] == payload["requestId"]
+        assert body["groundingStatus"] == "GROUNDED"
+        assert body["historyFromSeq"] is None
+        assert body["sources"][0] == {
+            "documentId": "DOC-RATE",
+            "documentVersion": "v1",
+            "chunkId": "DOC-RATE:1",
+            "titleSnapshot": "기준금리 학습자료",
+            "conceptCode": None,
+            "rank": 1,
+            "relevanceScore": body["sources"][0]["relevanceScore"],
+        }
+        assert 0.0 <= body["sources"][0]["relevanceScore"] <= 1.0
+        assert body["usage"]["inputTokens"] == 12
+        assert body["usage"]["outputTokens"] == 8
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_internal_api_rejects_missing_service_authentication():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    client = TestClient(app)
+    response = client.post(
+        "/internal/v1/tutor/answer",
+        json={
+            "userId": "user-1",
+            "requestId": "request-auth",
+            "stageId": "stage-rate",
+            "conceptId": "concept-rate",
+            "question": "기준금리가 뭐야?",
+        },
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_rewriter_does_not_pollute_unrelated_short_question():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    history = [{"role": "user", "content": "기준금리가 뭐야?"}]
+    rewritten = await QueryRewriter().rewrite("환율이 뭐야?", history)
+    assert rewritten == "환율이 뭐야?"
+    switched = await QueryRewriter().rewrite("그럼 환율이 뭐야?", history)
+    assert switched == "그럼 환율이 뭐야?"
+
+
+@pytest.mark.asyncio
+async def test_retriever_filters_unapproved_and_concept_stage():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    approved = approved_rate_document()
+    draft = RetrievedDocument(
+        content="기준금리 초안",
+        source="draft",
+        document_id="DRAFT",
+        chunk_id="DRAFT:1",
+        concept_id="concept-rate",
+        stage_id="stage-rate",
+        review_status="draft",
+    )
+    retriever = Retriever(InMemoryRetriever([approved, draft]))
+    results = await retriever.retrieve(
+        "기준금리 상승", concept_id="concept-rate", stage_id="stage-rate"
+    )
+    assert [item.document_id for item in results] == ["DOC-RATE"]
+    assert await retriever.retrieve("기준금리", concept_id="other") == []
+
+
+def test_grounding_requires_claim_overlap_and_real_citation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    source = approved_rate_document()
+    validator = CitationValidator(min_overlap=0.2)
+    unrelated = validator.validate_and_build(
+        "화성에는 거대한 바다가 있습니다. [출처: DOC-RATE/DOC-RATE:1]", [source]
+    )
+    fabricated = validator.validate_and_build(
+        "기준금리 설명입니다. [출처: OTHER/1]", [source]
+    )
+    assert unrelated.valid is True
+    assert unrelated.grounded is False
+    assert fabricated.valid is False
+    assert fabricated.citations == []
+
+
+@pytest.mark.asyncio
+async def test_pipeline_removes_case_insensitive_fabricated_citation():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    class FabricatingGenerator:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        async def generate(self, query, context):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            return "근거 없는 답변 [Source: OTHER/unknown]"
+
+    pipeline = MultiTurnRAG(
+        history_manager=HistoryManager(),
+        retriever=Retriever(InMemoryRetriever([approved_rate_document()])),
+        answer_generator=FabricatingGenerator(),
+    )
+    result = await pipeline.run("user-1", "기준금리")
+    assert "OTHER/unknown" not in result.answer
+    assert result.citations == []
+    assert result.grounded is False
+
+
+def test_manifest_loader_requires_metadata_and_preserves_fields(tmp_path):
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    (tmp_path / "rate.md").write_text("기준금리 설명\n\n\n검수 문서", encoding="utf-8")
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "documents": [
+                    {
+                        "path": "rate.md",
+                        "source_id": "SRC-1",
+                        "document_id": "DOC-1",
+                        "document_version": "2026-01",
+                        "title": "기준금리",
+                        "source_url": "https://example.test/source",
+                        "concept_id": "concept-1",
+                        "stage_id": "stage-1",
+                        "review_status": "approved",
+                        "license": "test-only",
+                    }
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    document = load_manifest(manifest)[0]
+    assert document.source_id == "SRC-1"
+    assert document.version == "2026-01"
+    assert document.content == "기준금리 설명\n\n검수 문서"
+
+
+def test_retrieval_metrics_and_comparison():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    result = evaluate_retrieval([(["wrong", "right"], {"right"})], k=2)
+    assert result.recall_at_k == 1.0
+    assert result.mrr == 0.5
+    comparison = compare_runs(
+        [(["wrong"], {"right"})],
+        [(["right"], {"right"})],
+        k=1,
+    )
+    assert comparison["multi_turn"].mrr > comparison["single_turn"].mrr
+
+
+@pytest.mark.asyncio
+async def test_indexer_writes_metadata_and_replaces_old_nodes():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    class FakeVectorStore:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.deleted: list[str] = []
+
+        async def adelete_nodes(self, node_ids):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.deleted.extend(node_ids)
+
+    class FakeIndex:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.vector_store = FakeVectorStore()
+            self.nodes = []
+
+        async def ainsert_nodes(self, nodes):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.nodes.extend(nodes)
+
+    class FakeManager:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.index = FakeIndex()
+
+        def get_or_create(self, collection):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            assert collection == "test_collection"
+            return self.index
+
+    class FakeRepository:
+        # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
+        def __init__(self):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.saved = []
+            self.configuration = None
+
+        async def ensure_index_configuration(self, *configuration):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.configuration = configuration
+
+        async def existing_content_hashes(self, hashes):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            return set()
+
+        async def chunk_ids_for_documents(self, document_ids):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            return ["old-node"]
+
+        async def save_documents(self, documents, nodes, embedding_dimension):
+            # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+            self.saved = [documents, nodes, embedding_dimension]
+
+    settings = Settings(
+        embedding_provider="deterministic",
+        vector_store_collection="test_collection",
+        chunk_size=256,
+        chunk_overlap=0,
+    )
+    manager = FakeManager()
+    repository = FakeRepository()
+    indexer = DocumentIndexer(manager, settings, repository)
+    count = await indexer.index(
+        [
+            IngestDocument(
+                document_id="DOC-1",
+                title="기준금리",
+                source="https://example.test/source",
+                source_id="SRC-1",
+                source_url="https://example.test/source",
+                content="기준금리는 중앙은행의 정책금리입니다.",
+                version="v1",
+                concept_id="concept-rate",
+                stage_id="stage-rate",
+                review_status="approved",
+                license="test-only",
+            )
+        ]
+    )
+    assert count == len(manager.index.nodes) > 0
+    assert manager.index.vector_store.deleted == ["old-node"]
+    assert repository.configuration[-1] == settings.embedding_dimension
+    assert manager.index.nodes[0].metadata["source_id"] == "SRC-1"
+    assert repository.saved[0][0].content_hash
+
+
+@pytest.mark.asyncio
+async def test_indexer_rejects_unapproved_document_before_vector_write():
+    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+    settings = Settings(embedding_provider="deterministic")
+    indexer = DocumentIndexer(settings=settings)
+    with pytest.raises(ValueError, match="only approved"):
+        await indexer.index(
+            [
+                IngestDocument(
+                    document_id="DRAFT-1",
+                    title="초안",
+                    source="local",
+                    content="검수 전 자료",
+                    review_status="draft",
+                )
+            ]
+        )

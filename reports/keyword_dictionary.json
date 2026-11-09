@@ -1,0 +1,76 @@
+{
+  "dictionary_status": "DRAFT_CANDIDATE_DICTIONARY",
+  "curriculum_status": "DRAFT_NOT_CANONICAL",
+  "chapter_id": "inflation",
+  "rubric_version": "inflation-rubric-draft-v1",
+  "groups": {
+    "core": {
+      "purpose": "챕터 핵심 개념을 넓게 찾는 후보 신호",
+      "keywords": [
+        "인플레이션",
+        "물가 상승",
+        "물가상승",
+        "물가 상승률",
+        "물가상승률",
+        "물가 수준",
+        "물가수준",
+        "소비자물가지수",
+        "소비자물가",
+        "CPI"
+      ],
+      "review_status": "PENDING_HUMAN_REVIEW"
+    },
+    "aliases": {
+      "purpose": "한글 표제어의 영문명·약어 후보",
+      "keywords": [
+        "inflation",
+        "Consumer Price Index",
+        "PPI"
+      ],
+      "review_status": "PENDING_HUMAN_REVIEW",
+      "source_rule": "원문 또는 공식 출처 확인 전에는 정답 동의어로 취급하지 않음"
+    },
+    "related": {
+      "purpose": "원인·영향·측정·정책을 이해하는 데 연결되는 간접 후보",
+      "keywords": [
+        "생산자물가지수",
+        "근원인플레이션",
+        "근원물가",
+        "구매력",
+        "화폐 가치",
+        "기대인플레이션",
+        "통화량",
+        "기준금리",
+        "실질금리",
+        "스태그플레이션",
+        "수요견인 인플레이션",
+        "비용인상 인플레이션"
+      ],
+      "review_status": "PENDING_HUMAN_REVIEW",
+      "warning": "단순 등장만으로 직접 관련 또는 문제 생성 허용으로 판정하지 않음"
+    },
+    "opposite": {
+      "purpose": "챕터 경계와 비교 설명을 찾는 후보 신호",
+      "keywords": [
+        "디플레이션",
+        "디스인플레이션",
+        "물가 하락"
+      ],
+      "review_status": "PENDING_HUMAN_REVIEW"
+    },
+    "exclude": {
+      "purpose": "동일 문자열이지만 경제 학습과 무관할 가능성이 높은 표현",
+      "keywords": [
+        "인플레이션감축법",
+        "인플레이션 감축법"
+      ],
+      "review_status": "PENDING_HUMAN_REVIEW"
+    }
+  },
+  "matching_policy": {
+    "normalization": "공백 제거 및 영문 casefold",
+    "candidate_only": true,
+    "final_relevance_from_keyword_count": false,
+    "unmatched_chunks_deleted": false
+  }
+}

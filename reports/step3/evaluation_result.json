@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-10-29T12:29:18.650999+00:00",
+  "status": "NOT_EVALUATED",
+  "scope": "sampled_review_set",
+  "predictions_path": "reports/step3/keyword_predictions.csv",
+  "gold_path": "reports/step3/gold_label_template.csv",
+  "population_count": 789,
+  "gold_row_count": 205,
+  "joined_row_count": 205,
+  "labeled_count": 0,
+  "missing_gold_count": 205,
+  "deferred_needs_review_count": 0,
+  "resolved_count_for_binary_metrics": 0,
+  "gold_label_counts": {},
+  "invalid_labels": {},
+  "missing_predictions": [],
+  "metrics": null,
+  "general_population_recall_allowed": false,
+  "needs_review_policy": "excluded from binary precision/recall; never auto-negative",
+  "llm_calls": 0,
+  "db_writes": 0,
+  "reason": "Every row in the selected evaluation scope needs an explicit human Gold Label; missing/invalid labels are not inferred."
+}

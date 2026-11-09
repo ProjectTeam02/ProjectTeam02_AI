@@ -1,0 +1,38 @@
+{
+  "schema_status": "PROPOSAL_ONLY_UNTIL_HUMAN_REVIEW",
+  "concept": {
+    "concept_id": "string|required|stable concept identifier",
+    "keyword": "string|required|official source term",
+    "aliases": "array[string]|nullable|source-backed or review-pending aliases",
+    "root_topic": "string|nullable|temporary economic domain until curriculum is canonical",
+    "relation_type": "array[enum]|nullable|metric,policy,variant,impact,driver,counter,general",
+    "base_concept_id": "string|nullable|required when relation_type needs a base concept",
+    "summary": "string|nullable|source-grounded concise definition",
+    "source_id": "string|required",
+    "source_url": "string|nullable",
+    "source_locator": "string|nullable",
+    "content_hash": "string|required|sha256 of source text"
+  },
+  "chapter_mapping": {
+    "concept_id_or_chunk_id": "string|required",
+    "chapter_id": "string|required|must come from canonical curriculum",
+    "relevance_score": "number 0..1|LLM judgement, not probability",
+    "relevance_band": "enum:0,1,2|human-approved band",
+    "matched_keywords": "array[string]",
+    "evidence_text": "string|nullable|verbatim source evidence",
+    "reasoning": "string|nullable",
+    "confidence": "number 0..1|model self-report, not accuracy",
+    "review_status": "enum:PENDING,APPROVED,REJECTED,NEEDS_REVISION",
+    "classifier_version": "string|nullable"
+  },
+  "usage_policy": {
+    "tutor_allowed": "boolean|derived after source and mapping gates",
+    "question_generation_allowed": "boolean|requires relevance 2 and human approval"
+  },
+  "non_invention_rules": [
+    "Do not create aliases that are not in the source without review status.",
+    "Do not treat root_topic as chapter_id.",
+    "Do not use keyword counts as final relevance.",
+    "Do not treat model confidence as measured precision."
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-10-29T08:05:51.195554+00:00",
+  "analysis_scope": "STEP 1 read-only local dataset and code analysis",
+  "repository_root": "/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI",
+  "tokenizer": {
+    "kind": "tiktoken",
+    "encoding": "o200k_base (gpt-4o-mini alias)",
+    "basis": "generation model alias gpt-4o-mini; OpenRouter-qualified model is mapped explicitly"
+  },
+  "code_settings": {
+    "llm_model": "openai/gpt-4o-mini",
+    "embedding_model": "openai/text-embedding-3-small",
+    "chunk_size": 700,
+    "chunk_overlap": 100,
+    "approved_review_status": "approved",
+    "retrieval_top_k": 5,
+    "embedding_dimension": 1536
+  },
+  "datasets": [
+    {
+      "dataset_name": "BOK canonical terms",
+      "source": "data/bok_terms_2026.json; source.publisher=한국은행",
+      "file_format": "JSON",
+      "file_count": 1,
+      "record_count": 789,
+      "document_count": 789,
+      "chunk_count": null,
+      "total_tokens": 237635,
+      "average_tokens": 301.1850443599493,
+      "median_tokens": 298,
+      "p95_tokens": 493.5999999999999,
+      "min_tokens": 24,
+      "max_tokens": 928,
+      "duplicate_count": 0,
+      "empty_count": 0,
+      "review_status": "approved=760; needs_review=29",
+      "license_status": "Not a per-record license field; source metadata is in extraction report",
+      "token_basis": "record.definition",
+      "measurement_kind": "measured_local_data",
+      "notes": "Canonical JSON is the source-shaped 789-record dataset; not a PDF file."
+    },
+    {
+      "dataset_name": "BOK RAG terms",
+      "source": "data/bok_terms_2026_rag.jsonl; row.publisher=한국은행",
+      "file_format": "JSONL",
+      "file_count": 1,
+      "record_count": 789,
+      "document_count": 789,
+      "chunk_count": 1489,
+      "total_tokens": 260304,
+      "average_tokens": 329.91634980988596,
+      "median_tokens": 322,
+      "p95_tokens": 524.0,
+      "min_tokens": 42,
+      "max_tokens": 953,
+      "duplicate_count": 0,
+      "empty_count": 0,
+      "review_status": "approved=760; needs_review=29",
+      "license_status": "permission-and-attribution-review-required",
+      "token_basis": "row.content; o200k_base",
+      "measurement_kind": "measured_local_data_and_code_projection",
+      "notes": "Chunk count is a read-only projection over approved rows only."
+    },
+    {
+      "dataset_name": "BOK RAG evaluation cases",
+      "source": "data/bok_eval_questions.json -> source_dataset",
+      "file_format": "JSON",
+      "file_count": 1,
+      "record_count": 40,
+      "document_count": 25,
+      "chunk_count": 0,
+      "total_tokens": 931,
+      "average_tokens": 17.903846153846153,
+      "median_tokens": 21.0,
+      "p95_tokens": 27.0,
+      "min_tokens": 7,
+      "max_tokens": 30,
+      "duplicate_count": 0,
+      "empty_count": 0,
+      "review_status": "human_scope_verified=4; source_term_id_verified=36",
+      "license_status": "Inherited from BOK source; not independently recorded in this file",
+      "token_basis": "question + history.content",
+      "measurement_kind": "measured_local_data",
+      "notes": "Evaluation cases, not a retrieval corpus; 25 unique relevant document IDs."
+    },
+    {
+      "dataset_name": "BOK extraction report",
+      "source": "data/bok_extraction_report.json",
+      "file_format": "JSON",
+      "file_count": 1,
+      "record_count": 1,
+      "document_count": null,
+      "chunk_count": null,
+      "total_tokens": null,
+      "average_tokens": null,
+      "median_tokens": null,
+      "p95_tokens": null,
+      "min_tokens": null,
+      "max_tokens": null,
+      "duplicate_count": null,
+      "empty_count": null,
+      "review_status": "approved_record_count=760; review_flag_count=29",
+      "license_status": "permission-and-attribution-review-required",
+      "token_basis": "not applicable",
+      "measurement_kind": "measured_local_report",
+      "notes": "Reports 789 source/RAG records and a PDF SHA-256, but the PDF is absent locally."
+    },
+    {
+      "dataset_name": "C0704 evaluation status",
+      "source": "outputs/c0704/evaluation_status.json",
+      "file_format": "JSON",
+      "file_count": 1,
+      "record_count": 1,
+      "document_count": 0,
+      "chunk_count": 0,
+      "total_tokens": null,
+      "average_tokens": null,
+      "median_tokens": null,
+      "p95_tokens": null,
+      "min_tokens": null,
+      "max_tokens": null,
+      "duplicate_count": null,
+      "empty_count": null,
+      "review_status": "NOT_AVAILABLE",
+      "license_status": "Not available",
+      "token_basis": "not applicable",
+      "measurement_kind": "measured_local_report",
+      "notes": "required mentor dataset files are not present; no substitute dataset was used"
+    }
+  ],
+  "bok_rag_detail": {
+    "all_record_token_statistics": {
+      "total_tokens": 260304,
+      "average_tokens": 329.91634980988596,
+      "median_tokens": 322,
+      "p95_tokens": 524.0,
+      "min_tokens": 42,
+      "max_tokens": 953
+    },
+    "approved_record_token_statistics": {
+      "total_tokens": 249142,
+      "average_tokens": 327.8184210526316,
+      "median_tokens": 319.5,
+      "p95_tokens": 521.1499999999999,
+      "min_tokens": 42,
+      "max_tokens": 953
+    },
+    "status_counts": {
+      "approved": 760,
+      "needs_review": 29
+    },
+    "chunk_projection": {
+      "status": "measured",
+      "document_count": 760,
+      "chunk_count": 1489,
+      "chunk_id_duplicate_count": 0,
+      "chunks_per_document": {
+        "total_tokens": 1489,
+        "average_tokens": 1.9592105263157895,
+        "median_tokens": 2.0,
+        "p95_tokens": 3.0,
+        "min_tokens": 1,
+        "max_tokens": 5
+      },
+      "chunk_token_statistics": {
+        "total_tokens": 268501,
+        "average_tokens": 180.32303559435863,
+        "median_tokens": 193,
+        "p95_tokens": 248.5999999999999,
+        "min_tokens": 7,
+        "max_tokens": 286
+      },
+      "settings": {
+        "chunk_size": 700,
+        "chunk_overlap": 100
+      },
+      "method": "LlamaIndex SentenceSplitter with DocumentIndexer metadata shape; no index/DB write"
+    },
+    "unique_source_id_count": 1,
+    "unique_relevant_eval_document_ids": 25
+  },
+  "quality_summary": {
+    "quality_rows": 20,
+    "issue_rows": 10
+  },
+  "filesystem_scope": {
+    "data_raw_exists": false,
+    "data_processed_exists": false,
+    "data_samples_exists": false,
+    "pdf_files_found_outside_data": 0,
+    "csv_files_found_outside_data": 0
+  },
+  "source_and_pipeline_notes": [
+    "Local BOK JSON/JSONL metadata claims publisher 한국은행; no KDI, KOSIS, OpenDART, or AI-Hub data files were found.",
+    "BOK extraction report says deterministic pypdf extraction and no LLM rewrite; the source PDF is not locally present.",
+    "Chunk projection used LlamaIndex SentenceSplitter and the same metadata shape as DocumentIndexer, without DB/index writes."
+  ]
+}

@@ -1,9 +1,4 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+# 파일 역할: PostgreSQL 연결과 SQLAlchemy 데이터 모델을 관리합니다.
+"""Compatibility import for repositories moved to ``app.repositories``."""
 
-
-class MemoryRepository:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def list_by_user(self, user_id: str):
-        raise NotImplementedError
+from app.repositories.memory_repository import *  # noqa: F401,F403

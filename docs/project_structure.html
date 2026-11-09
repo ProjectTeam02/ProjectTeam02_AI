@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leren AI Project Structure</title>
+  <style>
+    :root { --ink:#172033; --muted:#60708a; --line:#dbe3ef; --bg:#f6f8fb; --card:#fff; --api:#e7f0ff; --core:#eee9ff; --service:#e7f8ef; --rag:#fff1d9; --db:#ffe6e6; --test:#e7f7f7; --other:#edf0f5; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1200px; margin:0 auto; padding:42px 24px 64px; }
+    h1 { margin:0 0 8px; font-size:clamp(28px,4vw,46px); letter-spacing:-.04em; }
+    h2 { margin:36px 0 14px; font-size:22px; }
+    .lead { color:var(--muted); max-width:760px; }
+    .legend { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0; }
+    .legend span { border:1px solid var(--line); border-radius:999px; padding:5px 10px; font-size:12px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 4px 16px #1720330a; }
+    .card.api { background:var(--api); } .card.core { background:var(--core); } .card.service { background:var(--service); } .card.rag { background:var(--rag); } .card.db { background:var(--db); } .card.test { background:var(--test); } .card.other { background:var(--other); }
+    .path { font:600 14px ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .role { color:var(--muted); margin:6px 0 12px; }
+    ul { margin:0; padding-left:20px; } li + li { margin-top:4px; }
+    .flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .node { padding:11px 14px; background:#fff; border:1px solid var(--line); border-radius:10px; font-weight:650; }
+    .arrow { color:#8997ac; font-size:22px; }
+    table { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    th,td { padding:11px 13px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; } th { background:#eef2f8; font-size:13px; } tr:last-child td { border-bottom:0; }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; }
+    footer { margin-top:36px; color:var(--muted); font-size:13px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Leren AI</h1>
+  <p class="lead">실제 Python 코드 기준의 기능별 구조. 색상은 API, Core, Service, RAG, Database, Test/운영 영역을 구분합니다.</p>
+  <div class="legend">
+    <span style="background:var(--api)">API</span><span style="background:var(--core)">Core / Schema</span><span style="background:var(--service)">Service / Question</span><span style="background:var(--rag)">RAG</span><span style="background:var(--db)">Database</span><span style="background:var(--test)">Test / Evaluation</span>
+  </div>
+
+  <h2>Application tree</h2>
+  <section class="grid">
+    <article class="card api"><div class="path">app/api/v1/routers</div><div class="role">HTTP 경로와 요청/응답 연결</div><ul><li><code>health.py</code> — GET /health</li><li><code>tutor.py</code> — /api/tutor/chat, /internal/v1/tutor/answer</li><li><code>memory.py</code> — /api/memory/{user_id}</li></ul></article>
+    <article class="card core"><div class="path">app/core + app/schemas</div><div class="role">공통 설정·예외와 Pydantic 계약</div><ul><li><code>config.py</code> — .env/provider 설정</li><li><code>exceptions.py</code> — 도메인 예외</li><li><code>schemas/tutor.py</code> — internal/public DTO</li></ul></article>
+    <article class="card service"><div class="path">app/services</div><div class="role">유스케이스 계층</div><ul><li><code>tutor_service.py</code> — 권한·timeout·usage</li><li><code>memory_service.py</code> — 사용자 메모리</li></ul></article>
+    <article class="card db"><div class="path">app/repositories + app/db</div><div class="role">데이터 접근과 PostgreSQL 모델</div><ul><li><code>connection.py</code> — async engine/session</li><li><code>models.py</code> — memory/RAG/legacy mapping</li><li><code>rag_repository.py</code> — 문서 metadata registry</li></ul></article>
+    <article class="card rag"><div class="path">app/rag/ingestion</div><div class="role">검토된 문서 입력</div><ul><li><code>document_loader.py</code> — md/txt cleanup</li><li><code>bok_terms_loader.py</code> — JSON/JSONL 검증</li></ul></article>
+    <article class="card rag"><div class="path">app/rag/indexing</div><div class="role">LlamaIndex와 embedding/index 관리</div><ul><li><code>indexer.py</code> — split/hash/insert</li><li><code>index_manager.py</code> — VectorStoreIndex</li><li><code>vector_store.py</code> — PGVectorStore</li></ul></article>
+    <article class="card rag"><div class="path">app/rag/retrieval</div><div class="role">Multi-turn 검색 정책</div><ul><li><code>query_rewriter.py</code> — follow-up rewrite</li><li><code>retriever.py</code> — exact/vector merge</li><li><code>llamaindex_retriever.py</code> — pgvector adapter</li></ul></article>
+    <article class="card rag"><div class="path">app/rag/memory · generation · grounding</div><div class="role">문맥·생성·근거 검증</div><ul><li><code>history_manager.py</code> — bounded history</li><li><code>answer_generator.py</code> — LLM/offline</li><li><code>citation_validator.py</code> — grounding</li></ul></article>
+    <article class="card service"><div class="path">app/question_generation</div><div class="role">문제 도메인 검증과 초안 준비</div><ul><li><code>dataset.py</code> — curriculum/mentor validation</li><li><code>generator.py</code> — approved evidence + blueprint plan</li></ul></article>
+    <article class="card test"><div class="path">tests · app/evaluation</div><div class="role">계약·unit·검색 평가</div><ul><li>API / internal contract</li><li>Multi-turn / BOK / provider config</li><li>RAG metrics / relevance</li></ul></article>
+  </section>
+
+  <h2>Request flow</h2>
+  <div class="card">
+    <div class="flow"><div class="node">Node.js Backend</div><div class="arrow">→</div><div class="node">FastAPI Router</div><div class="arrow">→</div><div class="node">TutorService</div><div class="arrow">→</div><div class="node">MultiTurnRAG</div><div class="arrow">→</div><div class="node">Rewrite · Retrieve · Generate · Ground</div><div class="arrow">→</div><div class="node">Response + sources + usage</div></div>
+  </div>
+
+  <h2>Responsibility map</h2>
+  <table><thead><tr><th>영역</th><th>현재 구현</th><th>다음 계층</th></tr></thead><tbody>
+    <tr><td>API</td><td>인증, Pydantic validation, status mapping</td><td>Service</td></tr>
+    <tr><td>RAG</td><td>history → rewrite → hybrid retrieval → LLM → citation validation</td><td>PostgreSQL/pgvector, provider</td></tr>
+    <tr><td>Question</td><td>승인 근거와 blueprint 기반 DRAFT_READY 계획</td><td>Node.js human review/publish</td></tr>
+    <tr><td>Storage</td><td>RAG metadata/vector와 AI memory</td><td>Node.js conversation ERD</td></tr>
+  </tbody></table>
+  <footer>Source: repository code and tests, updated 2026-10-29. Legacy import paths remain as thin compatibility shims.</footer>
+</main>
+</body>
+</html>

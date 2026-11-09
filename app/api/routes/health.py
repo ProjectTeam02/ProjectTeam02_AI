@@ -1,8 +1,6 @@
-from fastapi import APIRouter
+# 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
+"""Compatibility import for the pre-v1 router path."""
 
-router = APIRouter(tags=["health"])
+from app.api.v1.routers.health import router
 
-
-@router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+__all__ = ["router"]

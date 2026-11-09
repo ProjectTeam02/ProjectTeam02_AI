@@ -1,0 +1,64 @@
+{
+  "design_status": "PROPOSAL_ONLY",
+  "physical_storage_policy": {
+    "canonical_source": "data/bok_terms_2026_rag.jsonl",
+    "deduplication_key": [
+      "source_id",
+      "document_id",
+      "content_hash"
+    ],
+    "purpose_metadata_storage": "sidecar mapping keyed by document_id + content_hash",
+    "physical_duplicate_allowed": false,
+    "embedding_policy": "one embedding per unique content_hash; purpose filters are metadata filters"
+  },
+  "usage_type_enum": [
+    "both_candidate",
+    "tutor_candidate",
+    "question_candidate",
+    "review_only",
+    "excluded_for_inflation_pilot"
+  ],
+  "operational_gate": [
+    "source_review_status == approved",
+    "mapping_review_status == approved",
+    "license_status == approved",
+    "usage_type allows the requested consumer"
+  ],
+  "tutor_policy": {
+    "approved_data": "candidate only until license is cleared",
+    "retrieval_filter": "review_status=approved and license_status=approved",
+    "chapter_filter": "concept_id/concept_code/stage_id when canonical curriculum is available",
+    "citation_required": true
+  },
+  "question_generation_policy": {
+    "approved_data": "candidate only until mapping and license are approved",
+    "required_metadata": [
+      "concept_id",
+      "concept_code",
+      "stage_id",
+      "learning_goal",
+      "difficulty",
+      "evidence_document_id",
+      "evidence_quote"
+    ],
+    "human_review_required": true,
+    "duplicate_question_check_required": true
+  },
+  "status_semantics": {
+    "source_review_status": {
+      "approved": "source passed existing ingestion/index eligibility; not expert or license approval",
+      "needs_review": "source has unresolved extraction/review flags; do not index or generate from it"
+    },
+    "mapping_review_status": {
+      "approved": "human reviewer confirms relevance to the named chapter/concept and evidence span",
+      "needs_review": "candidate is plausible but evidence, scope, or category is unresolved",
+      "irrelevant": "not relevant to the named chapter/concept; retain in canonical source but exclude from that purpose mapping"
+    },
+    "license_status": {
+      "approved": "permission/attribution terms verified for the intended use",
+      "pending_review": "license value exists but permission/attribution is not cleared",
+      "unknown": "no reliable license evidence",
+      "rejected": "use is not allowed"
+    }
+  }
+}
