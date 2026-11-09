@@ -50,28 +50,6 @@ docker buildx build --platform linux/amd64 \
 terraform apply
 ```
 
-## FastAPI와 Swagger UI 접속
-
-이 배포 구성은 EC2의 `:8000`을 브라우저에 직접 공개하지 않습니다. ALB가
-외부 HTTP 80번 포트를 받고, ALB 보안 그룹에서만 ECS FastAPI 태스크의 8000번
-포트로 전달합니다. 따라서 EC2 퍼블릭 IP에 `:8000`을 붙여 접속하지 말고,
-Terraform이 출력하는 ALB 주소를 사용해야 합니다.
-
-```bash
-terraform output -raw swagger_url
-```
-
-출력된 주소를 브라우저에서 열면 Swagger UI가 표시됩니다. 주소 형식은 다음과
-같습니다.
-
-```text
-http://<alb-dns-name>/docs
-```
-
-FastAPI의 기본 `/docs`가 Swagger UI HTML을 제공하므로 `HTMLResponse`를 별도로
-import하거나 루트 `/` 응답을 HTML로 바꿀 필요가 없습니다. `/`는 기존 실행 확인용
-JSON 응답을 유지하고, 문서 확인은 `/docs`, 상태 확인은 `/health`를 사용합니다.
-
 승인 자료는 저장소에 포함하지 않으므로 S3에 별도로 업로드합니다.
 
 ```bash

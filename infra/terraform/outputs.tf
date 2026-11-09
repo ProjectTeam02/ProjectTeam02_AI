@@ -2,10 +2,6 @@ output "alb_url" {
   value = "http://${aws_lb.ai.dns_name}"
 }
 
-output "swagger_url" {
-  value = "http://${aws_lb.ai.dns_name}/docs"
-}
-
 output "ecr_repository_url" {
   value = aws_ecr_repository.ai.repository_url
 }
