@@ -1,0 +1,60 @@
+{
+  "family": "projectteam02-ai",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/projectteam02-ai-task-role",
+  "containerDefinitions": [
+    {
+      "name": "ai",
+      "image": "YOUR_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com/projectteam02-ai:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {"name": "ENVIRONMENT", "value": "production"},
+        {"name": "LLM_PROVIDER", "value": "openrouter"},
+        {"name": "LLM_BASE_URL", "value": "https://openrouter.ai/api/v1"},
+        {"name": "BOK_TERMS_S3_URI", "value": "s3://YOUR_BUCKET/leren-ai/bok_terms_2026_rag.jsonl"},
+        {"name": "BOK_SOURCE_S3_URI", "value": "s3://YOUR_BUCKET/leren-ai/bok_terms_2026.json"},
+        {"name": "QUESTION_EVIDENCE_S3_URI", "value": "s3://YOUR_BUCKET/leren-ai/bok_terms_2026_rag.jsonl"},
+        {"name": "QUESTION_APPROVAL_LABEL_S3_URI", "value": "s3://YOUR_BUCKET/leren-ai/BOK_라벨링.xlsx"}
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:YOUR_ACCOUNT_ID:secret:leren/prod/database-url"
+        },
+        {
+          "name": "OPENROUTER_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:YOUR_ACCOUNT_ID:secret:leren/prod/openrouter-api-key"
+        },
+        {
+          "name": "INTERNAL_API_TOKEN",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:YOUR_ACCOUNT_ID:secret:leren/prod/internal-api-token"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)\""],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/projectteam02-ai",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ai"
+        }
+      }
+    }
+  ]
+}

@@ -5,12 +5,16 @@ services:
     build: .
     ports:
       - "8000:8000"
+    restart: unless-stopped
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/leren
+    volumes:
+      - ./data:/app/data:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     # 벡터 검색을 지원하는 PostgreSQL 이미지입니다.
@@ -23,6 +27,11 @@ services:
       - "5433:5432"
     volumes:
       - ai_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d leren"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   ai_postgres_data:
