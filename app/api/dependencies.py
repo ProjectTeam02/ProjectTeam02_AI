@@ -7,6 +7,12 @@ from fastapi import Depends, Header, HTTPException
 from app.core.config import Settings, get_settings
 from app.core.exceptions import ConfigurationError
 from app.db.connection import get_session
+from app.question_generation.evidence import (
+    JsonlEvidenceProvider,
+    JsonlExistingQuestionProvider,
+)
+from app.question_generation.llm import OpenAICompatibleJsonLLM
+from app.question_generation.service import QuestionGenerationService
 from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.indexing.llm_factory import LLMFactory
@@ -127,3 +133,18 @@ async def get_tutor_service() -> TutorService:
 async def get_memory_service(session=Depends(get_session)) -> MemoryService:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return MemoryService(MemoryRepository(session))
+
+
+def get_question_generation_service() -> QuestionGenerationService:
+    current_settings = get_settings()
+    return QuestionGenerationService(
+        settings=current_settings,
+        llm=OpenAICompatibleJsonLLM(current_settings),
+        evidence_provider=JsonlEvidenceProvider(
+            current_settings.question_evidence_path,
+            approval_label_path=current_settings.question_approval_label_path,
+        ),
+        existing_question_provider=JsonlExistingQuestionProvider(
+            current_settings.question_existing_path
+        ),
+    )

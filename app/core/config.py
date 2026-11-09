@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # docker-compose exposes PostgreSQL on host port 5433. Containers override
     # this URL with the service hostname ``db`` and container port 5432.
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/leren"
-    # Provider credentials are intentionally separate.  An OpenRouter key must
+    # Provider credentials are intentionally separate. An OpenRouter key must
     # never silently fall back to OPENAI_API_KEY (or vice versa).
     openrouter_api_key: str | None = None
     openai_api_key: str | None = None
@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     chunk_size: int = 700
     chunk_overlap: int = 100
     internal_api_token: str | None = None
+    question_evidence_path: str | None = None
+    question_approval_label_path: str | None = None
+    question_existing_path: str | None = None
+    question_max_count: int = 20
+    question_max_revision_attempts: int = 2
     vector_store_collection: str = "projectteam02"
     vector_store_schema: str = "public"
     approved_review_status: str = "approved"
@@ -52,13 +57,11 @@ class Settings(BaseSettings):
     @field_validator("llm_provider", "embedding_provider")
     @classmethod
     def normalize_provider(cls, value: str) -> str:
-        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         return value.strip().lower()
 
     @field_validator("openrouter_api_key", "openai_api_key", mode="before")
     @classmethod
     def normalize_optional_secret(cls, value: str | None) -> str | None:
-        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if value is None:
             return None
         value = str(value).strip()
@@ -67,7 +70,6 @@ class Settings(BaseSettings):
     @field_validator("llm_model", "embedding_model")
     @classmethod
     def validate_model_name(cls, value: str) -> str:
-        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         value = value.strip()
         if not value:
             raise ValueError("model name must not be empty")
@@ -76,7 +78,6 @@ class Settings(BaseSettings):
     @field_validator("embedding_dimension", "retrieval_top_k", "context_max_tokens")
     @classmethod
     def positive_integer(cls, value: int) -> int:
-        # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if value <= 0:
             raise ValueError("must be greater than zero")
         return value
@@ -84,5 +85,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     return Settings()
