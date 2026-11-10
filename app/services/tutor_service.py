@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 
 from app.core.config import get_settings
@@ -10,7 +11,10 @@ from app.core.exceptions import (
     ConversationAccessError,
     GenerationTimeoutError,
 )
-from app.rag.generation.answer_generator import AnswerGenerator
+from app.rag.generation.answer_generator import (
+    TUTOR_PROMPT_VERSION,
+    AnswerGenerator,
+)
 from app.rag.pipeline import MultiTurnRAG
 from app.schemas.tutor import (
     Citation,
@@ -22,6 +26,8 @@ from app.schemas.tutor import (
     TutorRequest,
     TutorResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class TutorService:
@@ -120,9 +126,37 @@ class TutorService:
                 timeout=settings.internal_request_timeout_seconds,
             )
         except asyncio.TimeoutError as exc:
+            logger.warning(
+                "tutor_workflow_failed",
+                extra={
+                    "request_id": str(request.request_id),
+                    "workflow_stage": "generation",
+                    "evidence_document_ids": [],
+                    "prompt_version": TUTOR_PROMPT_VERSION,
+                    "model_id": getattr(generator, "model_id", settings.llm_model),
+                    "latency_ms": max(0, round((time.perf_counter() - started) * 1000)),
+                    "attempt_count": 1,
+                    "failure_code": "TIMEOUT",
+                },
+            )
             raise GenerationTimeoutError("internal tutor request timed out") from exc
 
         latency_ms = max(0, round((time.perf_counter() - started) * 1000))
+        logger.info(
+            "tutor_workflow_completed",
+            extra={
+                "request_id": str(request.request_id),
+                "workflow_stage": "citation_validation",
+                "evidence_document_ids": [
+                    item.document_id for item in result.retrieved_documents
+                ],
+                "prompt_version": TUTOR_PROMPT_VERSION,
+                "model_id": getattr(generator, "model_id", settings.llm_model),
+                "latency_ms": latency_ms,
+                "attempt_count": 1,
+                "failure_code": None,
+            },
+        )
         usage = self._usage(
             result=result,
             latency_ms=latency_ms,

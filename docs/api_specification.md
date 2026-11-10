@@ -148,6 +148,37 @@ FastAPI는 이 경로에서 conversation/message/request를 저장하지 않습�
     "created_at": "2026-10-29T00:00:00Z"
   }
 ]
+
+### `POST /internal/v1/questions/jobs`
+
+내부 인증이 필요한 승인 근거 기반 문제 생성 작업 API입니다. `requestId`는
+재시도에 재사용하는 멱등 키입니다. `questionCount`는 설정값
+`QUESTION_MAX_COUNT`(기본 20)를 넘을 수 없습니다. 서버 승인 목록에서
+`review_status=approved`이고 문서 버전이 있는 근거만 사용하며, 튜터 검색
+결과는 이 목록에 자동 승격되지 않습니다.
+
+```json
+{
+  "requestId": "aafb8e7b-1e15-428e-8a7d-e746c4aa9c04",
+  "chapterId": "macro",
+  "topic": "인플레이션",
+  "difficulty": "MEDIUM",
+  "questionCount": 1,
+  "learningObjectives": ["물가상승률의 의미를 설명한다"]
+}
+```
+
+성공 작업은 `executionStatus=COMPLETED`, `reviewStatus=PENDING_REVIEW`이며
+`result.questions`와 `result.evidenceReferences`에 문제와 문서 ID/버전을
+반환합니다. 근거 부족·QG/QV·코드 검증 실패는 `executionStatus=FAILED`로
+끝나고 `failureStep`, `failureCode`, `failureDetail`을 남기며 문제를
+반환하거나 저장하지 않습니다.
+
+### `GET /internal/v1/questions/jobs/{job_id}`
+
+작업 실행 상태와 문항 검수 상태를 분리해 조회합니다. 같은 `requestId`를
+같은 payload로 다시 제출하면 같은 `jobId`를 반환하고 모델을 다시 호출하지
+않습니다. 다른 payload로 재사용하면 `409`입니다.
 ```
 
 ## 오류 처리

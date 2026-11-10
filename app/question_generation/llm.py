@@ -31,12 +31,24 @@ class OpenAICompatibleJsonLLM:
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        self.base_url = settings.llm_base_url.rstrip("/")
+        configured_url = settings.llm_base_url
+        if configured_url is None:
+            configured_url = (
+                "https://openrouter.ai/api/v1"
+                if settings.llm_provider == "openrouter"
+                else "https://api.openai.com/v1"
+            )
+        self.base_url = configured_url.rstrip("/")
 
     async def complete_json(
         self, *, system_prompt: str, user_payload: dict[str, Any]
     ) -> dict[str, Any] | str:
-        api_key = self.settings.openrouter_api_key or self.settings.openai_api_key
+        if self.settings.llm_provider == "openrouter":
+            api_key = self.settings.openrouter_api_key
+        elif self.settings.llm_provider == "openai":
+            api_key = self.settings.openai_api_key
+        else:
+            api_key = None
         if not api_key:
             raise LLMConfigurationError("LLM credentials are not configured")
 
@@ -56,7 +68,9 @@ class OpenAICompatibleJsonLLM:
         }
         headers = {"Authorization": f"Bearer {api_key}"}
         if self.settings.llm_provider.casefold() == "openrouter":
-            headers["HTTP-Referer"] = "https://github.com/ProjectTeam02/ProjectTeam02_AI"
+            headers["HTTP-Referer"] = (
+                "https://github.com/ProjectTeam02/ProjectTeam02_AI"
+            )
             headers["X-Title"] = "Leren question generation"
 
         try:

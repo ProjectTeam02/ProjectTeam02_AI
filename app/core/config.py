@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     question_evidence_path: str | None = None
     question_approval_label_path: str | None = None
     question_existing_path: str | None = None
-    question_max_count: int = 20
-    question_max_revision_attempts: int = 2
+    question_max_count: int = Field(default=20, ge=1, le=100)
+    question_max_revision_attempts: int = Field(default=2, ge=0, le=10)
     vector_store_collection: str = "projectteam02"
     vector_store_schema: str = "public"
     approved_review_status: str = "approved"

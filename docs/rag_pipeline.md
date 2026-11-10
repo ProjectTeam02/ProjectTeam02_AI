@@ -93,10 +93,15 @@ LLM 답변의 `[출처: document_id/chunk_id]` 또는 `[source: ...]` marker를 
 
 최종 응답은 내부 API에서 `groundingStatus`, `sources`, `usage`로 반환됩니다. citation이 유효하지 않으면 `sources=[]`, `grounded=false`가 될 수 있습니다.
 
-## 7. 문제 생성 준비 로직
+## 7. 문제 생성 워크플로우
 
-`app/question_generation/generator.py`는 현재 완성된 문제 생성/검증기가 아닙니다. 기존 blueprint가 있고 승인된 evidence에 `document_id`와 content가 있을 때만 근거 기반 prompt를 만들어 `DRAFT_READY`를 반환합니다.
+`app/question_generation/service.py`가 승인 근거만으로 QG를 호출하고, 코드
+검증 후 별도 QV 호출을 수행한다. `jobs.py`는 `requestId` 멱등성과 실행 상태를
+관리하며, 모든 문항이 QG·QV를 통과한 경우에만 `PENDING_REVIEW` 결과를
+노출한다. `generator.py`의 `prepare_question_generation()`은 blueprint와
+근거를 사전 점검하는 호환 헬퍼로 남아 있다.
 
-- blueprint가 없으면 `BLOCKED_NEEDS_AUTHORING`
-- 승인 근거가 없으면 `BLOCKED_NO_APPROVED_EVIDENCE`
-- LLM 호출, 최종 승인, 중복 문제 검사, 사용자 채점/보상은 아직 이 모듈의 책임이 아님
+- 근거가 없으면 `FAILED/INSUFFICIENT_EVIDENCE`
+- QV가 `REVISE`하면 최초 생성 이후 설정된 횟수만큼만 QG 수정 후 재검증
+- `REJECT`, 코드 검증 실패, 수량 불일치, 중복은 문항을 공개하지 않음
+- 채점·보상·최종 게시 상태는 Node.js/검수 시스템 책임
