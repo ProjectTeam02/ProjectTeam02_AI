@@ -31,9 +31,7 @@ class EmptyEvidenceProvider:
 
 
 class EmptyExistingQuestionProvider:
-    async def list_similar(
-        self, request: GenerationRequest
-    ) -> list[ExistingQuestion]:
+    async def list_similar(self, request: GenerationRequest) -> list[ExistingQuestion]:
         return []
 
 
@@ -45,8 +43,17 @@ class JsonlEvidenceProvider:
     ``review_status == approved`` here as a second safety boundary.
     """
 
-    def __init__(self, path: str | Path | None, *, max_results: int = 12) -> None:
+    def __init__(
+        self,
+        path: str | Path | None,
+        *,
+        approval_label_path: str | Path | None = None,
+        max_results: int = 12,
+    ) -> None:
         self.path = Path(path) if path else None
+        self.approval_label_path = (
+            Path(approval_label_path) if approval_label_path else None
+        )
         self.max_results = max_results
 
     async def search(self, request: GenerationRequest) -> list[EvidenceSource]:
@@ -54,10 +61,15 @@ class JsonlEvidenceProvider:
             return []
 
         query_terms = _terms(" ".join([request.topic, *request.learning_objectives]))
+        approval_labels = _read_approval_labels(self.approval_label_path)
         candidates: list[tuple[int, EvidenceSource]] = []
         for raw in _read_jsonl(self.path):
             source = _to_evidence(raw)
             if source is None or source.review_status.casefold() != "approved":
+                continue
+            if approval_labels is not None and not _is_approved_by_label(
+                source, approval_labels
+            ):
                 continue
             searchable = _terms(
                 " ".join(
@@ -85,9 +97,7 @@ class JsonlExistingQuestionProvider:
         self.path = Path(path) if path else None
         self.max_results = max_results
 
-    async def list_similar(
-        self, request: GenerationRequest
-    ) -> list[ExistingQuestion]:
+    async def list_similar(self, request: GenerationRequest) -> list[ExistingQuestion]:
         if self.path is None or not self.path.exists():
             return []
 
@@ -107,16 +117,26 @@ class JsonlExistingQuestionProvider:
 
 def _read_jsonl(path: Path) -> Iterable[dict[str, object]]:
     try:
-        with path.open(encoding="utf-8") as handle:
-            for line in handle:
-                if not line.strip():
-                    continue
-                try:
-                    value = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                if isinstance(value, dict):
-                    yield value
+        text = path.read_text(encoding="utf-8")
+        try:
+            value = json.loads(text)
+        except json.JSONDecodeError:
+            value = None
+        if isinstance(value, dict):
+            yield value
+            return
+        if isinstance(value, list):
+            yield from (item for item in value if isinstance(item, dict))
+            return
+        for line in text.splitlines():
+            if not line.strip():
+                continue
+            try:
+                value = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(value, dict):
+                yield value
     except OSError:
         return
 
@@ -168,6 +188,28 @@ def _to_evidence(raw: dict[str, object]) -> EvidenceSource | None:
 
 def _optional_string(value: object) -> str | None:
     return value if isinstance(value, str) and value else None
+
+
+def _read_approval_labels(path: Path | None) -> set[str] | None:
+    """Read the server-managed approval allowlist without trusting tutor hits."""
+    if path is None or not path.exists():
+        return None if path is None else set()
+    labels: set[str] = set()
+    for raw in _read_jsonl(path):
+        status = str(
+            raw.get("review_status", raw.get("reviewStatus", raw.get("status", "")))
+        ).casefold()
+        if status != "approved":
+            continue
+        for key in ("source_id", "sourceId", "document_id", "documentId", "id"):
+            value = raw.get(key)
+            if isinstance(value, str) and value.strip():
+                labels.add(value.strip())
+    return labels
+
+
+def _is_approved_by_label(source: EvidenceSource, labels: set[str]) -> bool:
+    return source.source_id in labels or source.document_id in labels
 
 
 def _terms(value: str) -> set[str]:

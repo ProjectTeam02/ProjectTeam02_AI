@@ -11,6 +11,10 @@ from app.question_generation.evidence import (
     JsonlEvidenceProvider,
     JsonlExistingQuestionProvider,
 )
+from app.question_generation.jobs import (
+    InMemoryQuestionJobRepository,
+    QuestionGenerationJobService,
+)
 from app.question_generation.llm import OpenAICompatibleJsonLLM
 from app.question_generation.service import QuestionGenerationService
 from app.rag.generation.answer_generator import AnswerGenerator
@@ -34,6 +38,7 @@ from app.services.tutor_service import TutorService
 # The internal Node.js contract never uses this repository or persists backend
 # conversation tables; Node.js supplies history and owns its ERD tables.
 _legacy_history_repository = InMemoryConversationRepository()
+_question_job_repository = InMemoryQuestionJobRepository()
 
 
 def settings() -> Settings:
@@ -148,3 +153,10 @@ def get_question_generation_service() -> QuestionGenerationService:
             current_settings.question_existing_path
         ),
     )
+
+
+def get_question_job_service(
+    service: QuestionGenerationService = Depends(get_question_generation_service),
+) -> QuestionGenerationJobService:
+    """Build the job runner while keeping the idempotency repository singleton."""
+    return QuestionGenerationJobService(service, _question_job_repository)
