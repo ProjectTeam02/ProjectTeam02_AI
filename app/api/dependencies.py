@@ -6,7 +6,6 @@ from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import ConfigurationError
-from app.db.connection import get_session
 from app.question_generation.evidence import (
     JsonlEvidenceProvider,
     JsonlExistingQuestionProvider,
@@ -30,8 +29,6 @@ from app.rag.pipeline import MultiTurnRAG
 from app.rag.retrieval.llamaindex_retriever import LlamaIndexRetriever
 from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
-from app.repositories.memory_repository import MemoryRepository
-from app.services.memory_service import MemoryService
 from app.services.tutor_service import TutorService
 
 # The legacy public-compatible route is retained for local compatibility only.
@@ -133,11 +130,6 @@ async def get_tutor_service() -> TutorService:
         ),
     )
     return TutorService(pipeline)
-
-
-async def get_memory_service(session=Depends(get_session)) -> MemoryService:
-    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
-    return MemoryService(MemoryRepository(session))
 
 
 def get_question_generation_service() -> QuestionGenerationService:

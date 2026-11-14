@@ -134,21 +134,6 @@ FastAPI는 이 경로에서 conversation/message/request를 저장하지 않습�
 }
 ```
 
-### `GET /api/memory/{user_id}`
-
-`X-Internal-API-Key` 또는 Bearer token과 `X-User-ID`가 필요합니다. path의 user ID와 인증 user ID가 다르면 `403`입니다. 응답은 `MemoryResponse` 배열입니다.
-
-```json
-[
-  {
-    "id": "...",
-    "user_id": "user-1",
-    "content": "금리 개념을 복습 중",
-    "source": "tutor",
-    "created_at": "2026-10-29T00:00:00Z"
-  }
-]
-
 ### `POST /internal/v1/questions/jobs`
 
 내부 인증이 필요한 승인 근거 기반 문제 생성 작업 API입니다. `requestId`는

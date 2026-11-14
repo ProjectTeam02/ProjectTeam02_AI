@@ -41,18 +41,17 @@ FastAPI 요청의 `conversationId`, `context.entryPoint`, `topicId`, `stageId`,
 비용 필드를 저장한다. 비용 가격표가 설정되지 않은 경우 `estimatedCost`와 `currency`는
 `null`이다. 추정값을 실제 provider usage로 가장하지 않는다.
 
-## FastAPI 소유 테이블
+## ai 스키마 테이블 (FastAPI가 읽고 쓰는 테이블)
 
-기존 RAG 문서/청크/인덱스 설정 테이블만 FastAPI가 관리한다. `create_tables()`도
-`ai_user_memories`, `rag_documents`, `rag_document_chunks`,
-`rag_index_configurations`만 대상으로 제한되어 있다. `ai_conversations`,
-`ai_messages`, `ai_message_sources`, `ai_requests`를 새로 만들거나 변경하는
-마이그레이션은 추가하지 않았다.
+DB 구조의 기준은 백엔드 레포 `database/sql/init/02~04`다 (ai 스키마, 소유자 `ai_user`).
+FastAPI는 `rag_documents`, `rag_document_chunks`, `rag_index_configurations`와
+벡터 테이블 `data_projectteam02`에 데이터를 적재·검색만 하고, 운영(RDS)에서는
+테이블을 만들지 않는다 (`VECTOR_STORE_PERFORM_SETUP=false`). `create_tables()`는
+로컬 일회용 DB 전용이다.
 
-기존 `migrations/003_ai_conversations_and_rag.sql`과
-`migrations/004_multiturn_rag_p0.sql`은 과거 P0 호환 이력이다. 공유 DB에 적용할 때는
-Node.js 스키마 소유자와 실행 순서를 먼저 합의하고, FastAPI에서는 해당 DDL을 자동
-실행하지 않는다.
+대화·메시지·근거·요청·요약·장기 메모리(`tutor` 스키마)는 Node.js 백엔드 소유이며,
+이 레포에는 해당 모델과 migration을 두지 않는다. 예전 `migrations/001~005`와
+`/api/memory`, `ai.ai_user_memories`는 정리했다 (RDS의 빈 테이블은 2026-11-14 삭제).
 
 ## 흐름
 

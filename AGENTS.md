@@ -6,7 +6,7 @@
 - HTTP 계약: `app/api/routes`, `app/api/v1/routers`, `app/schemas`
 - 문제 생성: `app/question_generation`, 작업 상태: `app/question_generation/jobs.py`
 - 튜터/RAG: `app/services/tutor_service.py`, `app/rag/pipeline.py`, `app/rag/retrieval`
-- 저장 계층: `app/repositories`, `app/db`, SQL은 `migrations/`
+- 저장 계층: `app/repositories`, `app/db`. DB 구조(SQL)는 백엔드 레포 `database/`가 기준 (이 레포에 migration 없음)
 - 회귀 하네스: `tests/`; CI: `.github/workflows/test-ai.yml`
 
 ## 로컬 검증 순서
