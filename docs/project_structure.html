@@ -39,7 +39,7 @@
 
   <h2>Application tree</h2>
   <section class="grid">
-    <article class="card api"><div class="path">app/api/v1/routers</div><div class="role">HTTP 경로와 요청/응답 연결</div><ul><li><code>health.py</code> — GET /health</li><li><code>tutor.py</code> — /api/tutor/chat, /internal/v1/tutor/answer</li><li><code>memory.py</code> — /api/memory/{user_id}</li></ul></article>
+    <article class="card api"><div class="path">app/api/v1/routers</div><div class="role">HTTP 경로와 요청/응답 연결</div><ul><li><code>health.py</code> — GET /health</li><li><code>tutor.py</code> — /api/tutor/chat, /internal/v1/tutor/answer</li></ul></article>
     <article class="card core"><div class="path">app/core + app/schemas</div><div class="role">공통 설정·예외와 Pydantic 계약</div><ul><li><code>config.py</code> — .env/provider 설정</li><li><code>exceptions.py</code> — 도메인 예외</li><li><code>schemas/tutor.py</code> — internal/public DTO</li></ul></article>
     <article class="card service"><div class="path">app/services</div><div class="role">유스케이스 계층</div><ul><li><code>tutor_service.py</code> — 권한·timeout·usage</li><li><code>memory_service.py</code> — 사용자 메모리</li></ul></article>
     <article class="card db"><div class="path">app/repositories + app/db</div><div class="role">데이터 접근과 PostgreSQL 모델</div><ul><li><code>connection.py</code> — async engine/session</li><li><code>models.py</code> — memory/RAG/legacy mapping</li><li><code>rag_repository.py</code> — 문서 metadata registry</li></ul></article>

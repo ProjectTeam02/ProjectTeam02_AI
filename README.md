@@ -40,14 +40,23 @@ EMBEDDING_PROVIDER=openrouter
 INTERNAL_API_TOKEN=change-me
 ```
 
-Docker로 PostgreSQL을 실행할 때 호스트 포트는 `5433`입니다. 운영 대화 테이블은 Node.js가 소유하므로 migration 적용 순서와 소유권은 [migrations/README.md](migrations/README.md) 및 [AI Backend ERD mapping](docs/AI_BACKEND_ERD_MAPPING.md)을 확인하세요.
+Docker로 PostgreSQL을 실행할 때 호스트 포트는 `5433`입니다.
+
+**DB 구조의 기준은 백엔드 레포(ProjectTeam02_Back) `database/` 폴더입니다.**
+ai 스키마(`rag_documents`, `rag_document_chunks`, `rag_index_configurations`,
+벡터 테이블 `data_projectteam02`)는 `database/sql/init/02~04` SQL로 만들고,
+대화·메시지·근거·장기 메모리는 백엔드 `tutor` 스키마가 소유합니다.
+이 레포에는 migration SQL을 두지 않으며, 운영(RDS)에서는 테이블을 만들지 않습니다
+(`VECTOR_STORE_SCHEMA=ai`, `VECTOR_STORE_PERFORM_SETUP=false`).
+
+로컬 일회용 DB에서만 아래처럼 테이블을 자동으로 만들 수 있습니다.
 
 ```bash
 docker compose up -d db
-for migration in migrations/*.sql; do
-  docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d leren < "$migration"
-done
-.venv/bin/python -m uvicorn main:app --reload
+# RAG 메타 테이블 3개 생성 (로컬 전용, RDS에서 실행 금지)
+.venv/bin/python -c "import asyncio; from app.db.connection import create_tables; asyncio.run(create_tables())"
+# 벡터 테이블은 첫 적재 때 LlamaIndex가 만들도록 허용 (로컬 전용)
+VECTOR_STORE_PERFORM_SETUP=true .venv/bin/python -m uvicorn main:app --reload
 ```
 
 또는 AI 서버까지 Compose로 실행합니다.
@@ -64,7 +73,6 @@ docker compose up --build
 | GET | `/` | 루트 실행 확인 |
 | POST | `/internal/v1/tutor/answer` | Node.js 전용 Tutor API, 내부 토큰 필요 |
 | POST | `/api/tutor/chat` | 기존 snake_case 공개 호환 API |
-| GET | `/api/memory/{user_id}` | 인증 사용자의 메모리 조회 |
 | GET | `/docs` | Swagger UI |
 
 내부 API의 상세 계약은 [docs/api_specification.md](docs/api_specification.md)와 [docs/TUTOR_INTERNAL_API_CONTRACT.md](docs/TUTOR_INTERNAL_API_CONTRACT.md)에 있습니다.
@@ -306,11 +314,11 @@ Hybrid 결과에서 키워드 비후보 문서는 명시적인 음성 예측으�
 ```text
 app/
 ├── main.py                         FastAPI 앱 조립
-├── api/v1/routers/                 health, tutor, memory 라우터
+├── api/v1/routers/                 health, tutor 라우터
 ├── core/                           설정·예외·로깅
 ├── schemas/                        Pydantic 요청/응답 모델
-├── services/                       Tutor/Memory 유스케이스
-├── repositories/                   PostgreSQL 데이터 접근
+├── services/                       Tutor 유스케이스
+├── repositories/                   RAG 문서 메타 저장 (ai 스키마)
 ├── db/                             연결·SQLAlchemy 모델
 ├── rag/
 │   ├── ingestion/                  문서/BOK 데이터 로딩

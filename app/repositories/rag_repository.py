@@ -129,7 +129,6 @@ class RAGDocumentRepository:
                             content=node.get_content(),
                             # LlamaIndex PGVectorStore is the single vector owner.
                             # This application table is an audit/metadata registry.
-                            embedding=None,
                             metadata_json=metadata,
                         )
                     )

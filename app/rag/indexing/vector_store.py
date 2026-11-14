@@ -26,6 +26,6 @@ class VectorStoreFactory:
             schema_name=self.settings.vector_store_schema,
             embed_dim=self.settings.embedding_dimension,
             use_jsonb=True,
-            perform_setup=True,
+            perform_setup=self.settings.vector_store_perform_setup,
             initialization_fail_on_error=True,
         )

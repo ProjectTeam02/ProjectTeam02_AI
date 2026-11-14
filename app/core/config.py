@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     question_max_revision_attempts: int = Field(default=2, ge=0, le=10)
     vector_store_collection: str = "projectteam02"
     vector_store_schema: str = "public"
+    # 운영(RDS)은 false: 벡터 테이블은 백엔드 레포 04_ai_vector_table.sql이 만든다.
+    # 로컬 일회용 DB에서만 true로 두면 LlamaIndex가 스키마·확장·테이블을 만든다.
+    vector_store_perform_setup: bool = False
     approved_review_status: str = "approved"
     grounding_min_overlap: float = Field(default=0.12, ge=0.0, le=1.0)
     bok_terms_path: str = "data/bok_terms_2026_rag.jsonl"

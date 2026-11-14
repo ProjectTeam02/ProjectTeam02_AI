@@ -57,12 +57,12 @@ flowchart LR
 | 데이터 | 현재 소유/저장 | 확인 근거 |
 |---|---|---|
 | 대화·메시지·요청 | Node.js 백엔드 | `TutorService.answer_internal`, ERD 문서, 내부 API 계약 |
-| AI 사용자 memory | FastAPI가 연결할 수 있는 `ai_user_memories` | `MemoryRepository`, `db.connection.create_tables` |
-| RAG 문서/청크 메타데이터 | FastAPI | `RAGDocumentRepository`, `RAGDocument/RAGChunk` |
-| 벡터 index | LlamaIndex `PGVectorStore` + PostgreSQL | `VectorStoreFactory`, `IndexManager` |
+| AI 사용자 memory | Node.js 백엔드 (`tutor.ai_user_memories`) | 백엔드 레포 `database/` |
+| RAG 문서/청크 메타데이터 | FastAPI가 적재 (구조는 백엔드 SQL) | `RAGDocumentRepository`, `RAGDocument/RAGChunk` |
+| 벡터 index | `ai.data_projectteam02` (백엔드 04 SQL이 생성, LlamaIndex가 적재·검색) | `VectorStoreFactory`, `IndexManager` |
 | 원본 파일/객체 저장 | 확인되지 않음 | S3 SDK, bucket 환경변수, upload 코드 없음 |
 
-`app/db/models.py`에는 Node.js 소유 테이블도 레거시 호환 목적으로 매핑되어 있지만, `create_tables()`는 FastAPI가 소유하는 memory/RAG 테이블만 생성합니다.
+`app/db/models.py`에는 ai 스키마의 RAG 메타 테이블 3개만 매핑합니다. `create_tables()`는 로컬 일회용 DB에서만 쓰고, 운영 테이블은 백엔드 레포 SQL로 만듭니다.
 
 ## 설정과 provider
 
