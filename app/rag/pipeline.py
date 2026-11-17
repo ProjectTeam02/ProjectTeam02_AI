@@ -13,6 +13,7 @@ from app.rag.memory.history_manager import HistoryManager
 from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
 from app.rag.retrieval.types import RetrievedDocument
+from app.schemas.tutor import PersonalizedTutorContext
 
 
 @dataclass(slots=True)
@@ -121,6 +122,7 @@ class MultiTurnRAG:
         concept_id: str | None = None,
         concept_codes: list[str] | None = None,
         history_from_seq: int | None = None,
+        personalized_context: PersonalizedTutorContext | None = None,
     ) -> RAGResult:
         """Run with Node.js-supplied context without touching conversation tables."""
         return await self._execute(
@@ -133,6 +135,7 @@ class MultiTurnRAG:
             concept_id=concept_id,
             concept_codes=concept_codes,
             history_from_seq=history_from_seq,
+            personalized_context=personalized_context,
         )
 
     async def _execute(
@@ -147,6 +150,7 @@ class MultiTurnRAG:
         concept_id: str | None,
         concept_codes: list[str] | None = None,
         history_from_seq: int | None = None,
+        personalized_context: PersonalizedTutorContext | None = None,
     ) -> RAGResult:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         trace: list[dict[str, object]] = []
@@ -194,6 +198,7 @@ class MultiTurnRAG:
             incorrect_answer=incorrect_answer,
             stage_id=stage_id,
             concept_id=concept_id,
+            personalized_context=personalized_context,
         )
         trace.append(
             {

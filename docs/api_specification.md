@@ -56,9 +56,17 @@ Node.js 백엔드 전용 내부 Tutor API입니다. 다음 중 하나로 인증�
     "conceptId": "interest-rate",
     "conceptCode": "ECON_RATE"
   },
-  "knowledgeScope": {"conceptCodes": ["ECON_RATE"]}
+  "knowledgeScope": {"conceptCodes": ["ECON_RATE"]},
+  "personalizedContext": null
 }
 ```
+
+`personalizedContext`는 선택적 AI Tutor 확장이다. 학습 프로필, 미확정 오개념
+가설, 최근 평가, 교수 전략 참고값, 승인된 개념 그래프를 camelCase로 전달할 수
+있다. AI 서버는 이를 사용자별 영속 데이터로 저장하지 않으며, 값이 없으면 기존
+요청과 동일하게 처리한다. 현재 Backend `develop` DTO에는 아직 이 필드가 없으므로
+실제 전달을 활성화하려면 Backend와 입력 범위, 0~1 숙련도 단위, 관계 검수 상태를
+먼저 확정해야 한다. 승인 상태가 없는 개념 관계는 AI Context에서 제외된다.
 
 응답의 핵심 필드는 다음과 같습니다.
 

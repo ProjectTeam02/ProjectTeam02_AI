@@ -20,6 +20,7 @@ from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.indexing.llm_factory import LLMFactory
 from app.rag.ingestion.bok_terms_loader import BOKTermCatalog
+from app.rag.memory.concept_graph import ConceptGraphContextBuilder
 from app.rag.memory.context_builder import ContextBuilder
 from app.rag.memory.history_manager import (
     HistoryManager,
@@ -131,7 +132,14 @@ async def get_tutor_service() -> TutorService:
             reranker=(LexicalReranker() if settings_value.reranking_enabled else None),
             fusion_k=settings_value.retrieval_fusion_k,
         ),
-        context_builder=ContextBuilder(settings_value.context_max_tokens),
+        context_builder=ContextBuilder(
+            settings_value.context_max_tokens,
+            concept_graph_builder=ConceptGraphContextBuilder(
+                max_depth=settings_value.concept_graph_max_depth,
+                max_nodes=settings_value.concept_graph_max_nodes,
+                max_tokens=settings_value.concept_graph_max_tokens,
+            ),
+        ),
         answer_generator=AnswerGenerator(llm, settings_value),
         citation_validator=CitationValidator(
             settings_value.approved_review_status,

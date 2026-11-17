@@ -1,4 +1,5 @@
 # 파일 역할: API 요청·응답의 데이터 구조와 입력 검증 규칙을 정의합니다.
+from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -112,6 +113,154 @@ class TutorKnowledgeScope(BaseModel):
         return normalized
 
 
+class LearnerProfileContext(BaseModel):
+    """Backend-provided learner signals used only as personalization hints.
+
+    Scores are deliberately optional and normalized to the inclusive 0..1 range.
+    The Backend contract must define the conversion from percentage values before
+    this field is enabled in production.
+    """
+
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=30, alias="conceptCode"
+    )
+    accuracy_rate: float | None = Field(
+        default=None, ge=0.0, le=1.0, alias="accuracyRate"
+    )
+    recent_incorrect_count: int | None = Field(
+        default=None, ge=0, le=10000, alias="recentIncorrectCount"
+    )
+    estimated_mastery: float | None = Field(
+        default=None, ge=0.0, le=1.0, alias="estimatedMastery"
+    )
+    weakness_score: float | None = Field(
+        default=None, ge=0.0, le=1.0, alias="weaknessScore"
+    )
+    last_studied_at: datetime | None = Field(default=None, alias="lastStudiedAt")
+    current_stage_id: str | None = Field(
+        default=None, max_length=255, alias="currentStageId"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class ConceptGraphNode(BaseModel):
+    """A Backend-supplied graph edge target, not an AI-owned graph record."""
+
+    concept_code: str = Field(
+        min_length=1, max_length=30, alias="conceptCode"
+    )
+    title: str | None = Field(default=None, max_length=255)
+    relationship_type: str = Field(
+        default="PREREQUISITE", min_length=1, max_length=40, alias="relationshipType"
+    )
+    relation_review_status: str | None = Field(
+        default=None, max_length=30, alias="relationReviewStatus"
+    )
+    learner_concept_mastery: float | None = Field(
+        default=None, ge=0.0, le=1.0, alias="learnerConceptMastery"
+    )
+    depth: int = Field(default=1, ge=1, le=5)
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class ConceptGraphContext(BaseModel):
+    current_concept_code: str | None = Field(
+        default=None, min_length=1, max_length=30, alias="currentConceptCode"
+    )
+    prerequisite_concepts: list[ConceptGraphNode] = Field(
+        default_factory=list, max_length=50, alias="prerequisiteConcepts"
+    )
+    related_concepts: list[ConceptGraphNode] = Field(
+        default_factory=list, max_length=50, alias="relatedConcepts"
+    )
+    learner_concept_mastery: dict[str, float] = Field(
+        default_factory=dict, max_length=50, alias="learnerConceptMastery"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @field_validator("learner_concept_mastery")
+    @classmethod
+    def validate_mastery_map(cls, values: dict[str, float]) -> dict[str, float]:
+        if any(not code.strip() or len(code.strip()) > 30 for code in values):
+            raise ValueError(
+                "learnerConceptMastery keys must contain 1 to 30 characters"
+            )
+        if any(value < 0.0 or value > 1.0 for value in values.values()):
+            raise ValueError("learnerConceptMastery values must be between 0 and 1")
+        return values
+
+
+class MisconceptionHypothesisContext(BaseModel):
+    """Unconfirmed diagnosis data reserved for the later diagnosis contract."""
+
+    hypothesis_type: str = Field(min_length=1, max_length=40, alias="hypothesisType")
+    status: str = Field(default="UNCONFIRMED", min_length=1, max_length=30)
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=30, alias="conceptCode"
+    )
+    evidence_ids: list[str] = Field(
+        default_factory=list, max_length=20, alias="evidenceIds"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class DiagnosisEvidenceContext(BaseModel):
+    evidence_id: str = Field(min_length=1, max_length=255, alias="evidenceId")
+    evidence_type: str = Field(min_length=1, max_length=40, alias="evidenceType")
+    review_status: str | None = Field(default=None, max_length=30, alias="reviewStatus")
+    question_id: str | None = Field(default=None, max_length=255, alias="questionId")
+    document_id: str | None = Field(default=None, max_length=255, alias="documentId")
+    chunk_id: str | None = Field(default=None, max_length=255, alias="chunkId")
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class RecentAssessmentContext(BaseModel):
+    assessment_id: str = Field(min_length=1, max_length=255, alias="assessmentId")
+    question_id: str | None = Field(default=None, max_length=255, alias="questionId")
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=30, alias="conceptCode"
+    )
+    is_correct: bool | None = Field(default=None, alias="isCorrect")
+    assessed_at: datetime | None = Field(default=None, alias="assessedAt")
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class TeachingStrategyContext(BaseModel):
+    strategy_id: str = Field(min_length=1, max_length=100, alias="strategyId")
+    strategy_version: str = Field(min_length=1, max_length=50, alias="strategyVersion")
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class PersonalizedTutorContext(BaseModel):
+    learner_profile: LearnerProfileContext | None = Field(
+        default=None, alias="learnerProfile"
+    )
+    misconception_hypotheses: list[MisconceptionHypothesisContext] = Field(
+        default_factory=list, max_length=10, alias="misconceptionHypotheses"
+    )
+    diagnosis_evidence: list[DiagnosisEvidenceContext] = Field(
+        default_factory=list, max_length=20, alias="diagnosisEvidence"
+    )
+    recent_assessments: list[RecentAssessmentContext] = Field(
+        default_factory=list, max_length=10, alias="recentAssessments"
+    )
+    teaching_strategy: TeachingStrategyContext | None = Field(
+        default=None, alias="teachingStrategy"
+    )
+    concept_graph_context: ConceptGraphContext | None = Field(
+        default=None, alias="conceptGraphContext"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
 class InternalTutorRequest(BaseModel):
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     request_id: UUID = Field(alias="requestId")
@@ -129,6 +278,9 @@ class InternalTutorRequest(BaseModel):
     context: TutorLearningContext | None = None
     knowledge_scope: TutorKnowledgeScope | None = Field(
         default=None, alias="knowledgeScope"
+    )
+    personalized_context: PersonalizedTutorContext | None = Field(
+        default=None, alias="personalizedContext"
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")

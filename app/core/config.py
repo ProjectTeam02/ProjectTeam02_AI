@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 5
     retrieval_min_score: float = Field(default=0.3, ge=-1.0, le=1.0)
     context_max_tokens: int = 3000
+    concept_graph_max_depth: int = Field(default=2, ge=0, le=5)
+    concept_graph_max_nodes: int = Field(default=20, ge=1, le=100)
+    concept_graph_max_tokens: int = Field(default=600, ge=100, le=3000)
     history_max_messages: int = 12
     history_max_tokens: int = 1200
     chunk_size: int = 700

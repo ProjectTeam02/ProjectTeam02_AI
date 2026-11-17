@@ -37,13 +37,54 @@ ${INTERNAL_API_TOKEN}` 헤더를 사용한다. 토큰이 비어 있거나 일치
     "questionId": null,
     "attemptId": null
   },
-  "knowledgeScope": {"conceptCodes": []}
+  "knowledgeScope": {"conceptCodes": []},
+  "personalizedContext": null
 }
 ```
 
 `history`는 sequence가 오름차순이어야 하며 최대 50개다. `summary`를 보내면
 `summaryUntilSeq`도 함께 보내야 한다. 요약 이전의 메시지는 중복 컨텍스트로 보내지
 않고, 토큰 예산 내에서 최근 메시지만 사용한다.
+
+`personalizedContext`는 선택적 AI 확장 필드다. 현재 AI 서버는 다음 구조를 검증한다.
+
+```json
+{
+  "learnerProfile": {
+    "conceptCode": "ECON_RATE",
+    "accuracyRate": 0.7,
+    "recentIncorrectCount": 2,
+    "estimatedMastery": 0.55,
+    "weaknessScore": 0.45,
+    "lastStudiedAt": "2026-11-17T09:00:00Z",
+    "currentStageId": "stage-1"
+  },
+  "misconceptionHypotheses": [],
+  "diagnosisEvidence": [],
+  "recentAssessments": [],
+  "teachingStrategy": null,
+  "conceptGraphContext": {
+    "currentConceptCode": "ECON_RATE",
+    "prerequisiteConcepts": [
+      {
+        "conceptCode": "ECON_MONEY",
+        "relationshipType": "PREREQUISITE",
+        "relationReviewStatus": "approved",
+        "depth": 1
+      }
+    ],
+    "relatedConcepts": [],
+    "learnerConceptMastery": {"ECON_MONEY": 0.8}
+  }
+}
+```
+
+이 확장은 기존 요청을 깨지 않도록 선택 사항이며, 누락되면 기존 Multi-turn RAG
+흐름을 사용한다. 현재 Backend `develop`의 요청 DTO는 이 필드를 아직 허용하거나
+AI로 전달하지 않으므로, 운영 연결 전 Backend DTO·Swagger·검수 상태 계약을 먼저
+업데이트해야 한다. `accuracyRate`, 숙련도 값은 0~1 정규화 값이며, Backend의
+퍼센트 값 변환 규칙이 확정되기 전에는 임의 변환하지 않는다. 개념 관계는
+`relationReviewStatus`가 승인 상태로 명시된 경우만 Context에 포함한다.
 
 ## Response (`200`)
 
