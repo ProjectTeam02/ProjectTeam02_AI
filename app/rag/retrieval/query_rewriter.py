@@ -43,6 +43,7 @@ class QueryRewriter:
         self.llm = llm
         self.timeout_seconds = timeout_seconds
         self.last_usage: dict | None = None
+        self.last_trace: dict[str, object] = {}
 
     async def rewrite(
         self,
@@ -54,8 +55,17 @@ class QueryRewriter:
             history.messages if isinstance(history, ConversationHistory) else history
         )
         self.last_usage = None
+        self.last_trace = {
+            "original_query": message,
+            "rewritten_query": message,
+            "used_llm": False,
+            "fallback": False,
+            "reason": "no_history" if not messages else "standalone_query",
+        }
         if not messages or not self._needs_rewrite(message):
             return message
+
+        self.last_trace["reason"] = "context_dependent_follow_up"
 
         if self.llm is not None:
             try:
@@ -65,12 +75,33 @@ class QueryRewriter:
                 )
                 self.last_usage = self._extract_usage(response)
                 text = getattr(response, "text", str(response)).strip()
-                if text:
+                if self._valid_llm_rewrite(text, message):
+                    self.last_trace.update(
+                        {
+                            "rewritten_query": text[:1000],
+                            "used_llm": True,
+                        }
+                    )
                     return text[:1000]
-            except Exception:
+            except Exception as exc:
                 # Retrieval can safely continue with the original follow-up.
-                pass
-        return self._deterministic_rewrite(message, messages)
+                self.last_trace.update(
+                    {"fallback": True, "error": type(exc).__name__}
+                )
+        rewritten = self._deterministic_rewrite(message, messages)
+        self.last_trace.update({"rewritten_query": rewritten, "fallback": True})
+        return rewritten
+
+    @staticmethod
+    def _valid_llm_rewrite(candidate: str, original: str) -> bool:
+        if not candidate or len(candidate) > 1000:
+            return False
+        if "\n" in candidate or candidate.casefold() == original.strip().casefold():
+            return False
+        # A rewrite must remain a question-like search string, not an answer,
+        # refusal, or a prompt-injection continuation.
+        forbidden_prefixes = ("답변:", "모르겠", "죄송", "system:", "assistant:")
+        return not candidate.casefold().startswith(forbidden_prefixes)
 
     @classmethod
     def _needs_rewrite(cls, message: str) -> bool:

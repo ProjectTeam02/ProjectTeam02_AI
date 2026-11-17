@@ -167,6 +167,20 @@ def test_internal_api_applies_knowledge_scope():
     assert response.json()["sources"] == []
 
 
+def test_internal_api_uses_context_concept_code_as_retrieval_scope():
+    response = post_with_service(
+        payload(
+            context={"entryPoint": "CONCEPT", "conceptCode": "rate-concept"},
+            knowledgeScope={"conceptCodes": []},
+        ),
+        service(documents=[rate_document(concept_code="rate-concept")]),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["groundingStatus"] == "GROUNDED"
+    assert response.json()["sources"][0]["conceptCode"] == "rate-concept"
+
+
 def test_internal_api_openapi_exposes_contract_enums():
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     schema = TestClient(app).get("/openapi.json").json()

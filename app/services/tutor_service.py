@@ -89,6 +89,9 @@ class TutorService:
         )
         concept_code = learning_context.concept_code if learning_context else None
         knowledge_scope = request.knowledge_scope
+        concept_codes = list(knowledge_scope.concept_codes) if knowledge_scope else []
+        if concept_code and concept_code not in concept_codes:
+            concept_codes.insert(0, concept_code)
         history, history_from_seq = self.pipeline.history_manager.from_external(
             conversation_id=str(request.conversation_id),
             user_id=str(request.user_id),
@@ -112,9 +115,7 @@ class TutorService:
                     learning_concept=concept_code,
                     stage_id=stage_id,
                     concept_id=concept_id,
-                    concept_codes=(
-                        knowledge_scope.concept_codes if knowledge_scope else None
-                    ),
+                    concept_codes=concept_codes or None,
                     history_from_seq=history_from_seq,
                 ),
                 timeout=settings.internal_request_timeout_seconds,
@@ -190,15 +191,21 @@ class TutorService:
         ]
         input_tokens = cls._sum_usage(raw_usages, "prompt_tokens", "input_tokens")
         output_tokens = cls._sum_usage(raw_usages, "completion_tokens", "output_tokens")
-        methods = {item.retrieval_method for item in result.retrieved_documents}
-        if not methods:
-            retrieval_strategy = "NONE"
-        elif {"exact", "vector"}.issubset(methods):
-            retrieval_strategy = "HYBRID_EXACT_VECTOR"
-        elif "exact" in methods:
-            retrieval_strategy = "EXACT"
-        else:
-            retrieval_strategy = "VECTOR"
+        retrieval_strategy = (
+            "NONE"
+            if not result.retrieved_documents
+            else getattr(retriever, "last_strategy", None)
+        )
+        if not retrieval_strategy:
+            methods = {item.retrieval_method for item in result.retrieved_documents}
+            if not methods:
+                retrieval_strategy = "NONE"
+            elif {"exact", "vector"}.issubset(methods):
+                retrieval_strategy = "HYBRID_EXACT_VECTOR"
+            elif "exact" in methods:
+                retrieval_strategy = "EXACT"
+            else:
+                retrieval_strategy = "VECTOR"
 
         model_id = getattr(generator, "model_id", None)
         if model_id is None and getattr(generator, "llm", None) is not None:
@@ -221,8 +228,32 @@ class TutorService:
             latencyMs=latency_ms,
             cacheHit=False,
             retrievalStrategy=retrieval_strategy,
-            estimatedCost=None,
-            currency=None,
+            estimatedCost=cls._estimated_cost(
+                input_tokens, output_tokens, settings
+            ),
+            currency=(
+                "USD"
+                if cls._estimated_cost(input_tokens, output_tokens, settings)
+                is not None
+                else None
+            ),
+        )
+
+    @staticmethod
+    def _estimated_cost(
+        input_tokens: int | None, output_tokens: int | None, settings
+    ) -> float | None:
+        if input_tokens is None or output_tokens is None:
+            return None
+        if (
+            settings.llm_input_cost_per_1k is None
+            or settings.llm_output_cost_per_1k is None
+        ):
+            return None
+        return round(
+            input_tokens / 1000 * settings.llm_input_cost_per_1k
+            + output_tokens / 1000 * settings.llm_output_cost_per_1k,
+            8,
         )
 
     @staticmethod

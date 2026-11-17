@@ -89,6 +89,20 @@ docker compose up --build
 .venv/bin/python -m ruff check .
 ```
 
+멀티턴 검색 arm 비교는 JSONL Gold가 검수되기 전에도 실행할 수 있습니다.
+검수되지 않은 행은 성능 지표에 포함되지 않습니다.
+
+```bash
+.venv/bin/python scripts/evaluate_multiturn_rag.py \
+  --init-template /tmp/leren_multiturn_eval.jsonl --count 80
+.venv/bin/python scripts/evaluate_multiturn_rag.py \
+  /tmp/leren_multiturn_eval.jsonl
+```
+
+연구 매핑과 하네스 계약은 [`docs/research_and_application_mapping.md`](docs/research_and_application_mapping.md),
+[`docs/harness_engineering.md`](docs/harness_engineering.md),
+[`docs/multiturn_evaluation.md`](docs/multiturn_evaluation.md)에 있습니다.
+
 ## 데이터셋 EDA 및 선별 파이프라인
 
 현재 `data/`의 KDI/BOK JSON·JSONL mirror를 중복 집계하지 않고, 원문을 수정하지
