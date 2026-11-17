@@ -9,6 +9,7 @@ from app.core.exceptions import GenerationError, GenerationTimeoutError
 from app.rag.memory.context_builder import ContextBundle
 
 logger = logging.getLogger(__name__)
+TUTOR_PROMPT_VERSION = "tutor-v1"
 
 
 class AnswerGenerator:

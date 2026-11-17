@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import unicodedata
 from collections.abc import Iterable
@@ -23,6 +24,7 @@ from app.question_generation.prompts import (
     QV_PROMPT_VERSION,
 )
 from app.schemas.question_generation import (
+    EvidenceReference,
     EvidenceSource,
     ExistingQuestion,
     GeneratedQuestion,
@@ -34,6 +36,8 @@ from app.schemas.question_generation import (
     ValidationRecord,
     ValidationResult,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionGenerationService:
@@ -62,9 +66,31 @@ class QuestionGenerationService:
         evidence = await self.evidence_provider.search(request)
         evidence = _approved_evidence(evidence)
         if not evidence:
+            logger.info(
+                "question_workflow",
+                extra={
+                    "workflow_stage": "evidence_lookup",
+                    "evidence_document_ids": [],
+                    "prompt_version": QG_PROMPT_VERSION,
+                    "model_id": getattr(self.llm, "model_id", None),
+                    "attempt_count": 0,
+                    "failure_code": GenerationErrorCode.INSUFFICIENT_EVIDENCE.value,
+                },
+            )
             return self._failed(request, GenerationErrorCode.INSUFFICIENT_EVIDENCE)
 
         existing = await self.existing_question_provider.list_similar(request)
+        logger.info(
+            "question_workflow",
+            extra={
+                "workflow_stage": "evidence_approved",
+                "evidence_document_ids": [source.document_id for source in evidence],
+                "prompt_version": QG_PROMPT_VERSION,
+                "model_id": getattr(self.llm, "model_id", None),
+                "attempt_count": 0,
+                "failure_code": None,
+            },
+        )
         try:
             batch = await self._generate_batch(request, evidence, existing)
         except ModelGenerationError as exc:
@@ -184,6 +210,7 @@ class QuestionGenerationService:
         source_ids = sorted(
             {source_id for question in validated for source_id in question.source_ids}
         )
+        source_by_id = {source.source_id: source for source in evidence}
         return GeneratedQuestionResult(
             status="COMPLETED",
             topic=request.topic,
@@ -192,6 +219,14 @@ class QuestionGenerationService:
             sourceIds=source_ids,
             validation=records,
             promptVersions={"qg": QG_PROMPT_VERSION, "qv": QV_PROMPT_VERSION},
+            evidenceReferences=[
+                EvidenceReference(
+                    sourceId=source_id,
+                    documentId=source_by_id[source_id].document_id,
+                    documentVersion=source_by_id[source_id].document_version,
+                )
+                for source_id in source_ids
+            ],
         )
 
     async def _generate_batch(
@@ -353,10 +388,13 @@ def validate_question(
         _normalize(item.question) for item in existing
     }:
         return "question duplicates an existing question"
-    if sum(
-        _normalize(candidate.question) == _normalize(item.question)
-        for item in batch_questions
-    ) > 1:
+    if (
+        sum(
+            _normalize(candidate.question) == _normalize(item.question)
+            for item in batch_questions
+        )
+        > 1
+    ):
         return "question duplicates another generated question"
     return None
 
@@ -372,6 +410,7 @@ def _generation_payload(
             "difficulty": request.difficulty,
             "questionCount": request.question_count,
             "learningObjectives": request.learning_objectives,
+            "chapterId": request.chapter_id,
         },
         "evidence": [source.model_dump(mode="json") for source in evidence],
         "existingQuestions": [

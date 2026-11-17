@@ -2,9 +2,7 @@
 import uuid
 from datetime import datetime
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
-    Boolean,
     DateTime,
     ForeignKey,
     Integer,
@@ -17,111 +15,14 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
+# DB 구조의 기준은 백엔드 레포 database/sql/init/02~04
+# (ai 스키마, 소유자 ai_user). 여기 모델은 그 테이블을 읽고 쓰기 위한 매핑이며,
+# 구조를 바꿀 때는 백엔드 SQL을 먼저 바꾼다.
+# 대화·메시지·근거·장기 메모리는 백엔드(tutor 스키마) 소유라 모델을 두지 않는다.
+# 벡터는 LlamaIndex 테이블 ai.data_<컬렉션>에만 저장한다.
 class Base(DeclarativeBase):
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     pass
-
-
-class AIConversation(Base):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    __tablename__ = "ai_conversations"
-
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    user_id: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
-    stage_id: Mapped[str | None] = mapped_column(String(255), index=True)
-    concept_id: Mapped[str | None] = mapped_column(String(255), index=True)
-    status: Mapped[str] = mapped_column(
-        String(20), default="active", server_default="active"
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-    messages: Mapped[list["AIMessage"]] = relationship(
-        back_populates="conversation",
-        cascade="all, delete-orphan",
-        order_by="AIMessage.created_at",
-    )
-
-
-class AIMessage(Base):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    __tablename__ = "ai_messages"
-    __table_args__ = (
-        UniqueConstraint(
-            "conversation_id", "sequence_no", name="uq_ai_message_sequence"
-        ),
-        UniqueConstraint("request_id", "role", name="uq_ai_message_request_role"),
-    )
-
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    conversation_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("ai_conversations.id", ondelete="CASCADE"),
-        index=True,
-    )
-    role: Mapped[str] = mapped_column(String(20), nullable=False)
-    sequence_no: Mapped[int] = mapped_column(Integer, nullable=False)
-    request_id: Mapped[str | None] = mapped_column(String(255), index=True)
-    status: Mapped[str] = mapped_column(
-        String(20), default="completed", server_default="completed"
-    )
-    grounded: Mapped[bool] = mapped_column(
-        Boolean, default=False, server_default="false"
-    )
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-    conversation: Mapped[AIConversation] = relationship(back_populates="messages")
-    sources: Mapped[list["AIMessageSource"]] = relationship(
-        back_populates="message", cascade="all, delete-orphan"
-    )
-
-
-class AIMessageSource(Base):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    __tablename__ = "ai_message_sources"
-    __table_args__ = (
-        UniqueConstraint(
-            "message_id", "document_id", "chunk_id", name="uq_ai_message_source"
-        ),
-    )
-
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    message_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("ai_messages.id", ondelete="CASCADE"), index=True
-    )
-    source_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    document_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    chunk_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    document_version: Mapped[str | None] = mapped_column(String(100))
-    title_snapshot: Mapped[str | None] = mapped_column(String(500))
-    source_url: Mapped[str | None] = mapped_column(String(2000))
-    message: Mapped[AIMessage] = relationship(back_populates="sources")
-
-
-class AIUserMemory(Base):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    __tablename__ = "ai_user_memories"
-
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    user_id: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    source: Mapped[str | None] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
 
 
 class RAGDocument(Base):
@@ -173,7 +74,6 @@ class RAGChunk(Base):
     )
     chunk_id: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[list[float] | None] = mapped_column(Vector(1536))
     metadata_json: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     document: Mapped[RAGDocument] = relationship(back_populates="chunks")
 

@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.core.config import get_settings
 from app.db.models import (
-    AIUserMemory,
     Base,
     RAGChunk,
     RAGDocument,
@@ -28,16 +27,14 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def create_tables() -> None:
-    """Create only FastAPI-owned local tables.
+    """Create the RAG metadata tables on a local development database only.
 
-    ``ai_conversations``, ``ai_messages``, ``ai_message_sources`` and
-    ``ai_requests`` belong to Node.js according to the current ERD. They remain
-    mapped for legacy compatibility but are deliberately excluded here.
-    Production deployments should use the backend migration owner instead of
-    calling this helper.
+    The schema owner is the backend repository (``database/sql/init/02~04``).
+    Never call this against RDS. The LlamaIndex vector table is created by the
+    backend SQL as well; set ``VECTOR_STORE_PERFORM_SETUP=true`` only for a
+    throwaway local database.
     """
     tables = [
-        AIUserMemory.__table__,
         RAGDocument.__table__,
         RAGChunk.__table__,
         RAGIndexConfiguration.__table__,

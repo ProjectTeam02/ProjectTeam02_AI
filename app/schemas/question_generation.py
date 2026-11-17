@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -34,6 +35,7 @@ class GenerationRequest(BaseModel):
     )
 
     topic: Annotated[str, Field(min_length=1, max_length=120)]
+    chapter_id: Annotated[str | None, Field(alias="chapterId", max_length=120)] = None
     difficulty: Difficulty
     question_count: Annotated[int, Field(alias="questionCount", ge=1, le=100)]
     learning_objectives: Annotated[
@@ -87,6 +89,13 @@ class GeneratedQuestion(BaseModel):
     source_ids: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
         alias="sourceIds", min_length=1, max_length=10
     )
+
+    @field_validator("source_ids")
+    @classmethod
+    def reject_duplicate_sources(cls, values: list[str]) -> list[str]:
+        if len(set(values)) != len(values):
+            raise ValueError("sourceIds must not contain duplicates")
+        return values
 
 
 class GeneratedQuestionBatch(BaseModel):
@@ -146,3 +155,39 @@ class GeneratedQuestionResult(BaseModel):
     prompt_versions: dict[str, str] = Field(
         default_factory=dict, alias="promptVersions"
     )
+    evidence_references: list["EvidenceReference"] = Field(
+        default_factory=list, alias="evidenceReferences"
+    )
+    job_id: UUID | None = Field(default=None, alias="jobId")
+
+
+class EvidenceReference(BaseModel):
+    """Immutable approval/version trace attached to a generated batch."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    source_id: str = Field(alias="sourceId", min_length=1, max_length=200)
+    document_id: str = Field(alias="documentId", min_length=1, max_length=200)
+    document_version: str = Field(alias="documentVersion", min_length=1, max_length=120)
+
+
+class GenerationJobRequest(GenerationRequest):
+    """Idempotent internal request used by the persisted question workflow."""
+
+    request_id: UUID = Field(alias="requestId")
+
+
+class GenerationJobResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    job_id: UUID = Field(alias="jobId")
+    request_id: UUID = Field(alias="requestId")
+    execution_status: str = Field(alias="executionStatus")
+    review_status: str | None = Field(default=None, alias="reviewStatus")
+    failure_step: str | None = Field(default=None, alias="failureStep")
+    failure_code: str | None = Field(default=None, alias="failureCode")
+    failure_detail: str | None = Field(default=None, alias="failureDetail")
+    attempt_count: int = Field(alias="attemptCount", ge=0)
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+    result: GeneratedQuestionResult | None = None

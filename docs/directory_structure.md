@@ -105,7 +105,7 @@ ProjectTeam02_AI/
 | `rag/generation` | LLM 호출 및 offline 답변 | `answer_generator.py` | context + provider |
 | `rag/grounding` | citation identity/overlap 검증 | `citation_validator.py` | 검색 결과 + 생성 답변 |
 | `rag/pipeline.py` | 전체 Multi-turn RAG 순서 제어 | `MultiTurnRAG` | memory → rewrite → retrieve → generate |
-| `question_generation` | 커리큘럼/멘토 데이터 검증, 초안 계획 | `dataset.py`, `generator.py` | 승인 근거 + blueprint |
+| `question_generation` | 승인 근거 기반 QG/QV와 멱등 작업 상태 | `service.py`, `jobs.py`, `evidence.py` | 승인 근거 + 기존 문항 |
 | `evaluation` | 검색·관련성 평가 | `rag_metrics.py` | scripts/notebooks |
 
 ## 실제 의존 방향

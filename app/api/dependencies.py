@@ -6,10 +6,13 @@ from fastapi import Depends, Header, HTTPException
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import ConfigurationError
-from app.db.connection import get_session
 from app.question_generation.evidence import (
     JsonlEvidenceProvider,
     JsonlExistingQuestionProvider,
+)
+from app.question_generation.jobs import (
+    InMemoryQuestionJobRepository,
+    QuestionGenerationJobService,
 )
 from app.question_generation.llm import OpenAICompatibleJsonLLM
 from app.question_generation.service import QuestionGenerationService
@@ -28,14 +31,13 @@ from app.rag.retrieval.postgres_sparse import PostgresSparseRetriever
 from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.reranker import LexicalReranker
 from app.rag.retrieval.retriever import Retriever
-from app.repositories.memory_repository import MemoryRepository
-from app.services.memory_service import MemoryService
 from app.services.tutor_service import TutorService
 
 # The legacy public-compatible route is retained for local compatibility only.
 # The internal Node.js contract never uses this repository or persists backend
 # conversation tables; Node.js supplies history and owns its ERD tables.
 _legacy_history_repository = InMemoryConversationRepository()
+_question_job_repository = InMemoryQuestionJobRepository()
 
 
 def settings() -> Settings:
@@ -139,11 +141,6 @@ async def get_tutor_service() -> TutorService:
     return TutorService(pipeline)
 
 
-async def get_memory_service(session=Depends(get_session)) -> MemoryService:
-    # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
-    return MemoryService(MemoryRepository(session))
-
-
 def get_question_generation_service() -> QuestionGenerationService:
     current_settings = get_settings()
     return QuestionGenerationService(
@@ -157,3 +154,10 @@ def get_question_generation_service() -> QuestionGenerationService:
             current_settings.question_existing_path
         ),
     )
+
+
+def get_question_job_service(
+    service: QuestionGenerationService = Depends(get_question_generation_service),
+) -> QuestionGenerationJobService:
+    """Build the job runner while keeping the idempotency repository singleton."""
+    return QuestionGenerationJobService(service, _question_job_repository)

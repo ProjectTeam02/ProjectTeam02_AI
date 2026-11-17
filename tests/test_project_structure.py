@@ -8,7 +8,6 @@ def test_required_directories_exist() -> None:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     for name in (
         "app",
-        "migrations",
         "scripts",
         "notebook",
         "data",

@@ -221,7 +221,6 @@ def test_create_tables_excludes_node_owned_erd_tables(monkeypatch):
 
     names = {table.name for table in captured["tables"]}
     assert names == {
-        "ai_user_memories",
         "rag_documents",
         "rag_document_chunks",
         "rag_index_configurations",
