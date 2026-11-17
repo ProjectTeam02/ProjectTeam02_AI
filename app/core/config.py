@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     bok_source_path: str = "data/bok_terms_2026.json"
     bok_hybrid_search_enabled: bool = True
     related_term_top_k: int = Field(default=2, ge=0, le=10)
+    sparse_retrieval_enabled: bool = True
+    reranking_enabled: bool = False
+    retrieval_fusion_k: int = Field(default=60, ge=1, le=1000)
+    rag_stage_timeout_seconds: float = Field(default=20.0, gt=0.0)
+    rag_max_retries: int = Field(default=1, ge=0, le=3)
+    llm_input_cost_per_1k: float | None = Field(default=None, ge=0.0)
+    llm_output_cost_per_1k: float | None = Field(default=None, ge=0.0)
 
     model_config = SettingsConfigDict(
         env_file=".env",

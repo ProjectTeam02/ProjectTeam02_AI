@@ -9,7 +9,7 @@ sequenceDiagram
     participant M as HistoryManager
     participant Q as QueryRewriter
     participant R as Retriever
-    participant V as LlamaIndex/pgvector
+    participant V as pgvector + PostgreSQL FTS
     participant G as AnswerGenerator
     participant C as CitationValidator
 
@@ -69,18 +69,25 @@ sequenceDiagram
 `Retriever`는 backend인 `LlamaIndexRetriever`에 다음 정책을 적용합니다.
 
 - 승인 문서만 검색
-- concept/stage/knowledge scope 조건을 전달
+- concept/stage/concept-code가 있으면 scoped evidence를 우선 검색하고,
+  명시적으로 `knowledge_scope=global`인 승인 문서만 Global Knowledge fallback으로 허용
 - BOK 용어 catalog가 있으면 exact 결과를 vector 결과와 citation key로 병합
+- 설정이 켜져 있으면 기존 PostgreSQL RAG 테이블의 `to_tsvector`/`ts_rank_cd`
+  sparse 결과를 dense/exact와 RRF로 병합
+- optional lexical reranker는 실험용이며 cross-encoder로 간주하지 않음
 - 관련 용어를 설정된 수만큼 추가 검색
-- 중복 문서를 제거하고 top-k로 제한
+- 승인 상태를 최종 재검증하고 `(document_id, chunk_id)` 기준으로 중복을 제거한 뒤
+  최종 결과를 top-k로 제한
 
-LlamaIndex adapter는 `PGVectorStore` 검색 결과의 metadata를 `RetrievedDocument`로 변환합니다. DB 연결 또는 index 설정 오류는 `RetrievalError`로 감쌉니다.
+LlamaIndex adapter는 `PGVectorStore` 검색 결과의 metadata를 `RetrievedDocument`로 변환합니다. PostgreSQL sparse adapter는 동일한 `rag_documents`/`rag_document_chunks`를 조회하며 별도 검색 인프라를 추가하지 않습니다. sparse 오류는 dense 경로로 제한적으로 fallback하고, dense/index 설정 오류는 `RetrievalError`로 감쌉니다.
 
 ## 5. Context와 generation
 
 `ContextBuilder`는 현재 질문, rewrite 결과, 제한된 history, 검색 문서, learning concept/stage/concept를 하나의 prompt context로 만듭니다. `AnswerGenerator`는 provider LLM을 호출하고 usage/timeout을 기록합니다.
 
-문서가 하나도 없으면 LLM이 추측하지 않고 자료 부족 응답을 반환합니다. `LLM_PROVIDER=offline|none`이면 검색된 첫 문서를 이용하는 테스트용 offline 답변 경로가 사용될 수 있습니다.
+문서가 하나도 없으면 LLM이 추측하지 않고 자료 부족 응답을 반환합니다. 문서가 있어도 citation identity 또는 lexical groundedness 검증에 실패하면 안전한 보류 응답을 반환합니다. `LLM_PROVIDER=offline|none`이면 검색된 첫 문서를 이용하는 테스트용 offline 답변 경로가 사용될 수 있습니다.
+
+각 stage는 `ExecutionHarness`가 bounded timeout/retry와 safe stage event를 기록합니다. 이벤트에는 사용자 질문이나 provider secret을 포함하지 않습니다.
 
 ## 6. Citation과 grounding
 

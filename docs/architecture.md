@@ -15,17 +15,19 @@ flowchart TD
     pipeline[MultiTurnRAG]
     memory[HistoryManager\n외부 history/summary bounded]
     rewrite[QueryRewriter\nLLM 또는 deterministic]
-    retrieve[Retriever\nexact BOK + vector search]
+    retrieve[Retriever\ndense + PostgreSQL sparse + exact + optional rerank]
     llama[LlamaIndexRetriever]
     index[IndexManager / PGVectorStore]
     embed[EmbeddingModelFactory]
     generate[AnswerGenerator\nLLM 또는 offline]
     ground[CitationValidator\nidentity + overlap]
+    harness[ExecutionHarness\nstage contract + timeout + bounded retry + trace]
     pg[(PostgreSQL + pgvector)]
 
     client --> node
     node --> internal --> fastapi --> router --> service --> pipeline
     pipeline --> memory
+    pipeline --> harness
     pipeline --> rewrite
     rewrite --> retrieve --> llama --> index
     index --> embed
@@ -70,6 +72,11 @@ flowchart LR
 
 - LLM: `LLM_PROVIDER=openrouter|openai|offline|none`
 - Embedding: `EMBEDDING_PROVIDER=openrouter|openai|deterministic`
+- Sparse retrieval: existing PostgreSQL `rag_document_chunks`/`rag_documents`
+  full-text query, controlled by `SPARSE_RETRIEVAL_ENABLED`; no new search
+  service or migration is required.
+- Reranking: disabled by default; when enabled, the dependency-free lexical
+  reranker is an experiment arm, not a cross-encoder claim.
 - OpenRouter 모델은 provider-qualified ID를 요구합니다.
 - `DATABASE_URL`은 호스트 실행 시 `localhost:5433`, Compose AI 컨테이너에서는 `db:5432`입니다.
 - 내부 API는 `INTERNAL_API_TOKEN`과 header 검증을 사용합니다.
@@ -79,3 +86,5 @@ flowchart LR
 - React Native와 Node.js의 실제 저장소는 현재 Python 저장소에 포함되어 있지 않아 호출 코드 자체는 확인하지 못했습니다. Python 쪽 내부 DTO와 계약 문서만 확인했습니다.
 - AWS S3 연동 코드는 발견되지 않았습니다.
 - 실제 OpenRouter/OpenAI latency, 비용, 모델 품질은 API key와 승인 corpus가 없어 이 저장소 테스트로 검증하지 않았습니다.
+- 실제 PostgreSQL FTS/pgvector latency와 retrieval lift는 reviewed JSONL Gold가
+  준비된 뒤 `scripts/evaluate_multiturn_rag.py`로 측정해야 합니다.

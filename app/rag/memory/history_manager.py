@@ -38,6 +38,16 @@ class PersistedTurn:
     grounded: bool = False
 
 
+@dataclass(frozen=True, slots=True)
+class MemoryDecision:
+    """A bounded-memory decision; it never contains message contents."""
+
+    summary_required: bool
+    summary_until_seq: int | None
+    selected_message_count: int
+    estimated_tokens: int
+
+
 class InMemoryConversationRepository:
     """A process-local repository for tests and API smoke runs without a database."""
 
@@ -96,10 +106,13 @@ class InMemoryConversationRepository:
                 raise ConversationAccessError(conversation_id)
             # Both messages are added while holding one lock, preventing a
             # partially persisted turn.
+            next_sequence = len(conversation.messages) + 1
             conversation.messages.extend(
                 [
-                    HistoryMessage("user", user_message),
-                    HistoryMessage("assistant", assistant_message),
+                    HistoryMessage("user", user_message, sequence_no=next_sequence),
+                    HistoryMessage(
+                        "assistant", assistant_message, sequence_no=next_sequence + 1
+                    ),
                 ]
             )
             turn = PersistedTurn(
@@ -167,6 +180,33 @@ class HistoryManager:
             return None
         record = await finder(user_id, request_id)
         return self._turn(record) if record is not None else None
+
+    def memory_decision(
+        self, history: ConversationHistory | list[HistoryMessage]
+    ) -> MemoryDecision:
+        """Report when a caller should create a summary before the next turn.
+
+        Summarization is intentionally not performed here because the internal
+        API's Node.js owner supplies the summary and owns its persistence. This
+        method makes the policy explicit and testable for both API owners.
+        """
+        messages = (
+            history.messages if isinstance(history, ConversationHistory) else history
+        )
+        estimated = sum(self._estimate_tokens(item.content) for item in messages)
+        selected = self._select_messages(messages)
+        selected_ids = {id(item) for item in selected}
+        omitted = [item for item in messages if id(item) not in selected_ids]
+        cutoff = max(
+            (item.sequence_no for item in omitted if item.sequence_no is not None),
+            default=None,
+        )
+        return MemoryDecision(
+            summary_required=bool(omitted),
+            summary_until_seq=cutoff,
+            selected_message_count=len(selected),
+            estimated_tokens=estimated,
+        )
 
     def from_external(
         self,
@@ -298,6 +338,18 @@ class HistoryManager:
             stage_id=getattr(history, "stage_id", None),
             concept_id=getattr(history, "concept_id", None),
         )
+
+    def _select_messages(self, messages: list[HistoryMessage]) -> list[HistoryMessage]:
+        selected: list[HistoryMessage] = []
+        token_count = 0
+        for item in reversed(messages[-self.max_messages :]):
+            estimated = self._estimate_tokens(item.content)
+            if selected and token_count + estimated > self.max_tokens:
+                break
+            selected.append(item)
+            token_count += estimated
+        selected.reverse()
+        return selected
 
     @staticmethod
     def _turn(record) -> PersistedTurn:

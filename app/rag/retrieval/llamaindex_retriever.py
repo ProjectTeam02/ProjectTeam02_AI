@@ -41,10 +41,12 @@ class LlamaIndexRetriever:
                 similarity_top_k=top_k, filters=MetadataFilters(filters=filters)
             )
             nodes = await llama_retriever.aretrieve(query)
-            if concept_id or stage_id:
+            if concept_id or stage_id or concept_codes:
                 from llama_index.core.vector_stores import MetadataFilter
 
-                global_filters = self._filters(None, None, concept_codes)
+                # Global Knowledge is a fallback/reference corpus. It is not
+                # concept-coded, so a scoped concept code must not hide it.
+                global_filters = self._filters(None, None, None)
                 global_filters.append(
                     MetadataFilter(key="knowledge_scope", value="global")
                 )
@@ -53,9 +55,11 @@ class LlamaIndexRetriever:
                     filters=MetadataFilters(filters=global_filters),
                 )
                 global_nodes = await global_retriever.aretrieve(query)
-                seen = {item.node.node_id for item in nodes}
+                seen = {self._node_key(item) for item in nodes}
                 nodes.extend(
-                    item for item in global_nodes if item.node.node_id not in seen
+                    item
+                    for item in global_nodes
+                    if self._node_key(item) not in seen
                 )
                 nodes = sorted(
                     nodes,
@@ -97,7 +101,9 @@ class LlamaIndexRetriever:
             results: list[RetrievedDocument] = []
             per_term_limit = max(1, min(2, top_k))
             for term in terms:
-                filters = self._filters(None, None, concept_codes)
+                # The exact catalog is Global Knowledge. Scoped concept codes
+                # select the learning corpus, not the canonical term lookup.
+                filters = self._filters(None, None, None)
                 filters.append(MetadataFilter(key="term", value=term))
                 filters.append(MetadataFilter(key="knowledge_scope", value="global"))
                 retriever = index.as_retriever(
@@ -181,5 +187,18 @@ class LlamaIndexRetriever:
             edition=metadata.get("edition") or None,
             printed_page=int(printed_page) if printed_page else None,
             related_terms=list(metadata.get("related_terms") or []),
+            knowledge_scope=str(metadata.get("knowledge_scope", "scoped")),
             retrieval_method=retrieval_method,
+        )
+
+    @staticmethod
+    def _node_key(item) -> tuple[str, str]:
+        metadata = item.node.metadata or {}
+        return (
+            str(
+                metadata.get(
+                    "document_id", item.node.ref_doc_id or "unknown-document"
+                )
+            ),
+            str(metadata.get("chunk_id", item.node.node_id)),
         )

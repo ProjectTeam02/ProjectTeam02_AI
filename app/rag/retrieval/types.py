@@ -32,6 +32,7 @@ class RetrievedDocument:
     printed_page: int | None = None
     related_terms: list[str] | None = None
     retrieval_method: str = "vector"
+    knowledge_scope: str = "scoped"
 
     def citation_key(self) -> tuple[str, str]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.

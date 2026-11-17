@@ -27,7 +27,9 @@ from app.rag.memory.history_manager import (
 )
 from app.rag.pipeline import MultiTurnRAG
 from app.rag.retrieval.llamaindex_retriever import LlamaIndexRetriever
+from app.rag.retrieval.postgres_sparse import PostgresSparseRetriever
 from app.rag.retrieval.query_rewriter import QueryRewriter
+from app.rag.retrieval.reranker import LexicalReranker
 from app.rag.retrieval.retriever import Retriever
 from app.services.tutor_service import TutorService
 
@@ -121,6 +123,13 @@ async def get_tutor_service() -> TutorService:
             settings_value.retrieval_top_k,
             exact_matcher=bok_catalog,
             related_term_top_k=settings_value.related_term_top_k,
+            sparse_backend=(
+                PostgresSparseRetriever(settings_value)
+                if settings_value.sparse_retrieval_enabled
+                else None
+            ),
+            reranker=(LexicalReranker() if settings_value.reranking_enabled else None),
+            fusion_k=settings_value.retrieval_fusion_k,
         ),
         context_builder=ContextBuilder(settings_value.context_max_tokens),
         answer_generator=AnswerGenerator(llm, settings_value),

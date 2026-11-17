@@ -4,8 +4,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from app.core.config import get_settings
 from app.rag.generation.answer_generator import AnswerGenerator
 from app.rag.grounding.citation_validator import CitationValidator
+from app.rag.harness import ExecutionHarness, StageContract
 from app.rag.memory.context_builder import ContextBuilder
 from app.rag.memory.history_manager import HistoryManager
 from app.rag.retrieval.query_rewriter import QueryRewriter
@@ -23,6 +25,7 @@ class RAGResult:
     retrieved_documents: list[RetrievedDocument]
     grounded: bool = False
     history_from_seq: int | None = None
+    trace: list[dict[str, object]] | None = None
 
 
 class MultiTurnRAG:
@@ -43,6 +46,10 @@ class MultiTurnRAG:
         self.context_builder = context_builder or ContextBuilder()
         self.answer_generator = answer_generator or AnswerGenerator()
         self.citation_validator = citation_validator or CitationValidator()
+        settings = get_settings()
+        self.harness = ExecutionHarness(
+            settings.rag_stage_timeout_seconds, settings.rag_max_retries
+        )
 
     async def run(
         self,
@@ -142,18 +149,33 @@ class MultiTurnRAG:
         history_from_seq: int | None = None,
     ) -> RAGResult:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
-        rewritten_query = await self.query_rewriter.rewrite(message, history)
-        documents = await self.retriever.retrieve(
-            rewritten_query,
-            concept_id=concept_id,
-            stage_id=stage_id,
-            concept_codes=concept_codes,
+        trace: list[dict[str, object]] = []
+        rewritten_query = await self.harness.run(
+            StageContract("query_rewriting", "question + bounded history", "query"),
+            lambda: self.query_rewriter.rewrite(message, history),
+            trace,
         )
-        documents = await self.retriever.retrieve_related(
-            documents,
-            concept_id=concept_id,
-            stage_id=stage_id,
-            concept_codes=concept_codes,
+        documents = await self.harness.run(
+            StageContract("retrieval", "rewritten query + scope", "documents"),
+            lambda: self.retriever.retrieve(
+                rewritten_query,
+                concept_id=concept_id,
+                stage_id=stage_id,
+                concept_codes=concept_codes,
+            ),
+            trace,
+        )
+        documents = await self.harness.run(
+            StageContract(
+                "related_retrieval", "retrieved documents + scope", "documents"
+            ),
+            lambda: self.retriever.retrieve_related(
+                documents,
+                concept_id=concept_id,
+                stage_id=stage_id,
+                concept_codes=concept_codes,
+            ),
+            trace,
         )
         if concept_codes:
             allowed_codes = set(concept_codes)
@@ -161,6 +183,7 @@ class MultiTurnRAG:
                 document
                 for document in documents
                 if document.concept_code in allowed_codes
+                or (document.knowledge_scope or "").casefold() == "global"
             ]
         context = self.context_builder.build(
             history=history,
@@ -172,8 +195,21 @@ class MultiTurnRAG:
             stage_id=stage_id,
             concept_id=concept_id,
         )
+        trace.append(
+            {
+                "stage": "context",
+                "status": "ok",
+                "document_count": len(documents),
+            }
+        )
         if documents:
-            answer = await self.answer_generator.generate(message, context)
+            answer = await self.harness.run(
+                StageContract(
+                    "answer_generation", "question + evidence context", "answer"
+                ),
+                lambda: self.answer_generator.generate(message, context),
+                trace,
+            )
         else:
             # A model must not improvise when retrieval found no approved evidence.
             answer = (
@@ -181,9 +217,17 @@ class MultiTurnRAG:
                 "질문과 관련된 학습자료를 먼저 확인해 주세요."
             )
         validation = self.citation_validator.validate_and_build(answer, documents)
-        if not validation.valid:
+        trace.append(
+            {
+                "stage": "groundedness_validation",
+                "status": "ok" if validation.grounded else "insufficient",
+                "citation_valid": validation.valid,
+                "citation_count": len(validation.citations),
+            }
+        )
+        if not validation.valid or not validation.grounded:
             # Remove unsupported reference markers. Identity validation cannot
-            # prove facts, but an unknown citation must not reach the client.
+            # prove facts, and an ungrounded answer must not reach the client.
             for reference in validation.unsupported_references:
                 document_id, chunk_id = reference.split("/", maxsplit=1)
                 pattern = re.compile(
@@ -192,7 +236,12 @@ class MultiTurnRAG:
                     re.IGNORECASE,
                 )
                 answer = pattern.sub("", answer)
-            citations = []
+            citations = validation.citations if validation.valid else []
+            if documents:
+                answer = (
+                    "확인된 학습자료만으로는 이 질문에 대한 답변을 충분히 "
+                    "검증하기 어려워요. 관련 자료를 더 확인한 뒤 다시 질문해 주세요."
+                )
         else:
             citations = validation.citations
         return RAGResult(
@@ -203,4 +252,5 @@ class MultiTurnRAG:
             retrieved_documents=documents,
             grounded=validation.grounded,
             history_from_seq=history_from_seq,
+            trace=trace,
         )

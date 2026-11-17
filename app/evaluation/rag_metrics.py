@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import log2
 from statistics import mean
 
 
@@ -11,6 +12,7 @@ class RetrievalEvaluation:
     recall_at_k: float
     mrr: float
     evaluated_queries: int
+    ndcg_at_k: float = 0.0
 
 
 def recall_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
@@ -31,6 +33,23 @@ def reciprocal_rank(retrieved_ids: list[str], relevant_ids: set[str]) -> float:
     return 0.0
 
 
+def ndcg_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
+    """Binary-relevance nDCG@k for a fixed, human-reviewed label set."""
+    if not relevant_ids:
+        raise ValueError("relevant_ids must not be empty")
+    dcg = sum(
+        1.0 / log2(rank + 1)
+        for rank, document_id in enumerate(retrieved_ids[:k], start=1)
+        if document_id in relevant_ids
+    )
+    ideal_hits = min(k, len(relevant_ids))
+    ideal = sum(
+        1.0 / log2(rank + 1)
+        for rank in range(1, ideal_hits + 1)
+    )
+    return dcg / ideal if ideal else 0.0
+
+
 def evaluate_retrieval(
     cases: list[tuple[list[str], set[str]]], k: int = 5
 ) -> RetrievalEvaluation:
@@ -43,6 +62,9 @@ def evaluate_retrieval(
         ),
         mrr=mean(reciprocal_rank(retrieved, relevant) for retrieved, relevant in cases),
         evaluated_queries=len(cases),
+        ndcg_at_k=mean(
+            ndcg_at_k(retrieved, relevant, k) for retrieved, relevant in cases
+        ),
     )
 
 
