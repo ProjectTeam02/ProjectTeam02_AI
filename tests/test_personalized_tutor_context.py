@@ -178,6 +178,31 @@ def test_graph_builder_applies_node_and_token_bounds():
     assert len(selection.text) <= 400
 
 
+def test_context_builder_omits_graph_when_no_relation_is_reviewed():
+    context = ContextBuilder().build(
+        history=[],
+        retrieved_context=[],
+        current_question="기준금리가 뭐야?",
+        personalized_context=PersonalizedTutorContext.model_validate(
+            personalized_payload(
+                conceptGraphContext=graph_payload(
+                    prerequisiteConcepts=[
+                        {
+                            "conceptCode": "UNREVIEWED",
+                            "relationshipType": "PREREQUISITE",
+                            "relationReviewStatus": "pending",
+                            "depth": 1,
+                        }
+                    ],
+                    relatedConcepts=[],
+                )
+            )
+        ),
+    )
+    assert "검수된 개념 그래프" not in context.text
+    assert "UNREVIEWED" not in context.text
+
+
 def test_context_builder_prioritizes_question_and_evidence_over_history():
     document = RetrievedDocument(
         content="기준금리는 중앙은행의 정책금리입니다.",

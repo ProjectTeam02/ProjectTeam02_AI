@@ -189,7 +189,9 @@ class ContextBuilder:
         selection = self.concept_graph_builder.build(
             context.concept_graph_context
         )
-        return selection.text if selection else ""
+        if selection is None or not selection.nodes:
+            return ""
+        return selection.text
 
     @staticmethod
     def _fit_sections(sections: list[tuple[str, str]], budget_chars: int) -> str:
