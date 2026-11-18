@@ -11,7 +11,25 @@ from app.db.models import (
     RAGIndexConfiguration,
 )
 
-_engine = create_async_engine(get_settings().database_url, pool_pre_ping=True)
+_settings = get_settings()
+
+
+def _connect_args(settings=_settings) -> dict[str, dict[str, str]]:
+    """Keep unqualified RAG metadata queries on the configured AI schema."""
+    if not settings.database_url.startswith("postgresql+asyncpg://"):
+        return {}
+    return {
+        "server_settings": {
+            "search_path": f"{settings.vector_store_schema},public"
+        }
+    }
+
+
+_engine = create_async_engine(
+    _settings.database_url,
+    pool_pre_ping=True,
+    connect_args=_connect_args(),
+)
 _session_factory = async_sessionmaker(_engine, expire_on_commit=False)
 
 

@@ -1,5 +1,6 @@
 # 파일 역할: AI 서버가 DB 구조를 만들지 않고 백엔드 소유 테이블을 쓰지 않는지 검증
 from app.core.config import Settings
+from app.db import connection
 from app.db.models import Base, RAGChunk
 from app.main import app
 from app.rag.indexing import vector_store as vector_store_module
@@ -17,6 +18,22 @@ def test_models_map_only_ai_schema_rag_tables():
 def test_rag_chunk_has_no_vector_column():
     # 함수 역할: 벡터는 LlamaIndex 테이블에만 저장하므로 청크에 벡터 컬럼이 없습니다.
     assert "embedding" not in RAGChunk.__table__.columns
+
+
+def test_postgres_metadata_queries_use_configured_rag_schema():
+    settings = Settings(
+        _env_file=None,
+        database_url="postgresql+asyncpg://u:p@localhost:5432/leren",
+        vector_store_schema="ai",
+    )
+    assert connection._connect_args(settings) == {
+        "server_settings": {"search_path": "ai,public"}
+    }
+
+
+def test_non_postgres_connections_do_not_receive_asyncpg_options():
+    settings = Settings(_env_file=None, database_url="sqlite+aiosqlite:///./test.db")
+    assert connection._connect_args(settings) == {}
 
 
 def test_legacy_memory_api_is_removed():

@@ -80,6 +80,7 @@ flowchart LR
 - OpenRouter 모델은 provider-qualified ID를 요구합니다.
 - `DATABASE_URL`은 호스트 실행 시 `localhost:5433`, Compose AI 컨테이너에서는 `db:5432`입니다. `.env.example`은 이 로컬 경계를 반영하며, production은 별도 Secret의 DB URL을 사용합니다.
 - 로컬 일회용 Compose DB의 기본 벡터 스키마는 `public`이고, 운영은 백엔드가 소유한 `ai` 스키마를 사용합니다. production 설정에서는 `INTERNAL_API_TOKEN` 누락, `VECTOR_STORE_SCHEMA=public`, `VECTOR_STORE_PERFORM_SETUP=true`를 시작 단계에서 거부합니다.
+- PostgreSQL 연결은 `VECTOR_STORE_SCHEMA`를 `search_path`의 첫 스키마로 설정하므로, sparse 검색과 RAG 메타데이터 ORM도 벡터 인덱스와 같은 AI 스키마를 조회합니다.
 - 내부 API는 `INTERNAL_API_TOKEN`과 header 검증을 사용합니다.
 
 ## 확인되지 않은 영역
