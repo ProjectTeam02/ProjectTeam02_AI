@@ -1,0 +1,93 @@
+# AI 서버 이미지 빌드
+# - main에 머지되면(또는 수동 실행): 테스트(pytest, ruff) 통과 후 ARM64 이미지 빌드 → ECR leren-ai:<커밋 12자리> 푸시
+# - 배포는 백엔드 레포의 deploy 워크플로우(action=deploy, ai_tag=<이 태그>)에서 실행합니다.
+# - AWS 인증은 OIDC(장기 키 없음). production 환경(main만 허용)에서만 실행됩니다.
+name: build-ai-image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: build-ai-image
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REGISTRY: 955094290134.dkr.ecr.ap-northeast-2.amazonaws.com
+
+jobs:
+  test:
+    name: CI checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run pytest
+        run: python -m pytest -q
+      - name: Run ruff
+        run: python -m ruff check .
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: 이미지 태그 (커밋 12자리)
+        id: meta
+        run: echo "tag=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: OIDC 주체(sub) 확인 — AWS 신뢰 정책과 비교용 (토큰 자체는 출력하지 않음)
+        run: |
+          TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          P=$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')
+          while [ $(( ${#P} % 4 )) -ne 0 ]; do P="$P="; done
+          echo "$P" | base64 -d | jq -r '"sub=" + .sub'
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ECR 로그인
+        run: aws ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: 같은 태그가 이미 있으면 건너뛰기 (태그 덮어쓰기 불가 설정)
+        id: exists
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          if aws ecr describe-images --repository-name leren-ai --image-ids imageTag="$TAG" > /dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"; echo "이미 있음: leren-ai:$TAG"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: ARM64 빌드 준비 (EC2 t4g = ARM)
+        if: steps.exists.outputs.skip == 'false'
+        run: |
+          docker run --privileged --rm tonistiigi/binfmt --install arm64
+          docker buildx create --use --name leren-builder
+
+      - name: 빌드·푸시 (linux/arm64)
+        if: steps.exists.outputs.skip == 'false'
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          docker buildx build --platform linux/arm64 --provenance=false --sbom=false \
+            -t "$ECR_REGISTRY/leren-ai:$TAG" --push .
+          echo "### 푸시 완료: leren-ai:$TAG" >> "$GITHUB_STEP_SUMMARY"
