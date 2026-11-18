@@ -1,7 +1,8 @@
 # 파일 역할: 환경 설정, 예외, 로깅 등 애플리케이션 공통 기능을 제공합니다.
+import re
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -87,6 +88,33 @@ class Settings(BaseSettings):
         if not value:
             raise ValueError("model name must not be empty")
         return value
+
+    @field_validator("vector_store_schema")
+    @classmethod
+    def validate_schema_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value or not re.fullmatch(r"[a-z_][a-z0-9_]*", value):
+            raise ValueError(
+                "VECTOR_STORE_SCHEMA must be a lowercase PostgreSQL identifier"
+            )
+        return value
+
+    @model_validator(mode="after")
+    def validate_production_safety(self) -> "Settings":
+        if self.environment.strip().casefold() != "production":
+            return self
+        if not self.internal_api_token:
+            raise ValueError("INTERNAL_API_TOKEN is required in production")
+        if self.vector_store_schema == "public":
+            raise ValueError(
+                "VECTOR_STORE_SCHEMA must not be public in production; use the "
+                "backend-owned AI schema"
+            )
+        if self.vector_store_perform_setup:
+            raise ValueError(
+                "VECTOR_STORE_PERFORM_SETUP must be false in production"
+            )
+        return self
 
     @field_validator("embedding_dimension", "retrieval_top_k", "context_max_tokens")
     @classmethod

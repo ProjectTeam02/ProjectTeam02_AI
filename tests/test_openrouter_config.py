@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 import app.api.dependencies as dependencies
 from app.api.dependencies import require_internal_api
@@ -104,6 +105,39 @@ def test_embedding_response_dimension_is_checked_before_pgvector_write():
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     with pytest.raises(ConfigurationError, match="expected 1536, received 3"):
         ValidatedOpenAIEmbedding._validate([0.0, 0.0, 0.0], 1536)
+
+
+def test_production_settings_require_safe_runtime_configuration():
+    with pytest.raises(ValidationError, match="INTERNAL_API_TOKEN"):
+        Settings(
+            _env_file=None,
+            environment="production",
+            vector_store_schema="ai",
+        )
+
+    with pytest.raises(ValidationError, match="must not be public"):
+        Settings(
+            _env_file=None,
+            environment="production",
+            internal_api_token="internal-test-token",
+            vector_store_schema="public",
+        )
+
+    with pytest.raises(ValidationError, match="must be false"):
+        Settings(
+            _env_file=None,
+            environment="production",
+            internal_api_token="internal-test-token",
+            vector_store_schema="ai",
+            vector_store_perform_setup=True,
+        )
+
+
+def test_vector_store_schema_must_be_a_safe_identifier():
+    with pytest.raises(ValidationError, match="PostgreSQL identifier"):
+        Settings(vector_store_schema="ai.schema")
+
+    assert Settings(vector_store_schema="ai_data").vector_store_schema == "ai_data"
 
 
 def test_missing_openrouter_key_returns_safe_api_configuration_error(monkeypatch):
