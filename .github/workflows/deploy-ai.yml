@@ -1,8 +1,8 @@
 name: Deploy AI service
 
+# 현재 운영 AI 서버는 EC2(Docker)에서 실행 중이며, 이미지는 build-ai-image.yml이 ECR leren-ai로 올립니다.
+# ECS 전환이 확정될 때까지 이 워크플로우는 수동 실행만 허용합니다 (main 머지 시 자동 실행 안 함).
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
