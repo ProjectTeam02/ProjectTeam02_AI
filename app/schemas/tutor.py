@@ -238,6 +238,67 @@ class TeachingStrategyContext(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
 
+class VerifiedContextStatus(StrEnum):
+    VERIFIED = "VERIFIED"
+    BLOCKED = "BLOCKED"
+
+
+class VerifiedSourceContext(BaseModel):
+    document_id: str = Field(alias="documentId", min_length=1, max_length=255)
+    document_version: str | None = Field(
+        default=None, alias="documentVersion", max_length=100
+    )
+    title: str | None = Field(default=None, max_length=500)
+    review_status: str = Field(alias="reviewStatus", min_length=1, max_length=30)
+    license_review_status: str | None = Field(
+        default=None, alias="licenseReviewStatus", max_length=30
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class VerifiedConceptContext(BaseModel):
+    """Backend-owned proof boundary for concept-scoped retrieval."""
+
+    verification_status: VerifiedContextStatus = Field(alias="verificationStatus")
+    concept_id: str | None = Field(default=None, alias="conceptId", max_length=255)
+    concept_code: str = Field(alias="conceptCode", min_length=1, max_length=30)
+    version: int = Field(ge=1)
+    title: str = Field(min_length=1, max_length=100)
+    short_definition: str | None = Field(
+        default=None, alias="shortDefinition", max_length=255
+    )
+    source_document_ids: list[str] = Field(
+        default_factory=list, max_length=100, alias="sourceDocumentIds"
+    )
+    sources: list[VerifiedSourceContext] = Field(default_factory=list, max_length=100)
+    prerequisite_concepts: list[ConceptGraphNode] = Field(
+        default_factory=list, max_length=50, alias="prerequisiteConcepts"
+    )
+    blocking_reasons: list[str] = Field(
+        default_factory=list, max_length=20, alias="blockingReasons"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @model_validator(mode="after")
+    def validate_source_scope(self):
+        if len(set(self.source_document_ids)) != len(self.source_document_ids):
+            raise ValueError("sourceDocumentIds must not contain duplicates")
+        source_ids = {source.document_id for source in self.sources}
+        if self.verification_status == VerifiedContextStatus.VERIFIED:
+            if (
+                not self.source_document_ids
+                or source_ids != set(self.source_document_ids)
+            ):
+                raise ValueError(
+                    "VERIFIED context must include every approved source document"
+                )
+            if self.blocking_reasons:
+                raise ValueError("VERIFIED context must not contain blocking reasons")
+        return self
+
+
 class PersonalizedTutorContext(BaseModel):
     learner_profile: LearnerProfileContext | None = Field(
         default=None, alias="learnerProfile"
@@ -281,6 +342,9 @@ class InternalTutorRequest(BaseModel):
     )
     personalized_context: PersonalizedTutorContext | None = Field(
         default=None, alias="personalizedContext"
+    )
+    verified_context: VerifiedConceptContext | None = Field(
+        default=None, alias="verifiedContext"
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")

@@ -20,6 +20,7 @@ class RetrievedDocument:
     stage_id: str | None = None
     review_status: str = "approved"
     license: str | None = None
+    license_review_status: str | None = None
     published_at: datetime | str | None = None
     updated_at: datetime | str | None = None
     content_hash: str | None = None

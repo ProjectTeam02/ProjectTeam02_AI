@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "BLOCKED",
+  "inputRoot": "data/curation/2026-11-23",
+  "expectedFiles": {
+    "concept_master": "concept/concept_master.json",
+    "concept_master_1123": "concept/concept_master_1123.json",
+    "concept_check": "concept/concept_check.txt",
+    "bok_documents_raw": "source/bok_documents_raw.csv",
+    "bok_documents": "source/bok_documents.csv",
+    "concept_source_candidates": "source/concept_source_candidates.csv",
+    "concept_sources_reviewed": "source/concept_sources_reviewed.csv",
+    "source_check": "source/source_check.txt",
+    "source_check_after": "source/source_check_after.txt",
+    "prerequisite_raw": "prerequisite/prerequisite_raw.csv",
+    "prerequisite_review": "prerequisite/prerequisite_review.csv",
+    "ai_schema_check": "db_check/ai_schema_check.txt"
+  },
+  "missingFiles": [
+    "concept/concept_master.json",
+    "concept/concept_master_1123.json",
+    "concept/concept_check.txt",
+    "source/bok_documents_raw.csv",
+    "source/bok_documents.csv",
+    "source/concept_source_candidates.csv",
+    "source/concept_sources_reviewed.csv",
+    "source/source_check.txt",
+    "source/source_check_after.txt",
+    "prerequisite/prerequisite_raw.csv",
+    "prerequisite/prerequisite_review.csv",
+    "db_check/ai_schema_check.txt"
+  ],
+  "errors": [
+    "required curation files are missing"
+  ],
+  "warnings": [],
+  "counts": {},
+  "approval": {
+    "publishedConceptsMissingReviewHistory": [],
+    "pendingLicenseDocuments": [],
+    "approvedPrerequisiteRowsAreNotDbApproval": true
+  }
+}

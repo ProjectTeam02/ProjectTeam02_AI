@@ -28,6 +28,7 @@ class PostgresSparseRetriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         if not query.strip():
             return []
@@ -50,6 +51,9 @@ class PostgresSparseRetriever:
         if concept_codes:
             clauses.append("c.metadata_json ->> 'concept_code' IN :concept_codes")
             params["concept_codes"] = concept_codes
+        if document_ids:
+            clauses.append("c.document_id IN :document_ids")
+            params["document_ids"] = document_ids
 
         statement = text(
             "SELECT c.content, c.document_id, c.chunk_id, c.metadata_json, "
@@ -64,8 +68,13 @@ class PostgresSparseRetriever:
             "ORDER BY sparse_score DESC, c.document_id, c.chunk_id "
             "LIMIT :limit"
         )
+        expanding = []
         if concept_codes:
-            statement = statement.bindparams(bindparam("concept_codes", expanding=True))
+            expanding.append(bindparam("concept_codes", expanding=True))
+        if document_ids:
+            expanding.append(bindparam("document_ids", expanding=True))
+        if expanding:
+            statement = statement.bindparams(*expanding)
         try:
             async with self._session_factory() as session:
                 result = await session.execute(statement, params)
@@ -91,6 +100,11 @@ class PostgresSparseRetriever:
             stage_id=row.get("stage_id"),
             review_status=str(row.get("review_status") or ""),
             license=row.get("license"),
+            license_review_status=(
+                metadata.get("license_review_status")
+                or metadata.get("licenseReviewStatus")
+                or None
+            ),
             published_at=row.get("published_at"),
             updated_at=row.get("updated_at"),
             content_hash=metadata.get("content_hash"),

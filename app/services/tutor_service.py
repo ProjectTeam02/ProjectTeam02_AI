@@ -98,6 +98,9 @@ class TutorService:
         concept_codes = list(knowledge_scope.concept_codes) if knowledge_scope else []
         if concept_code and concept_code not in concept_codes:
             concept_codes.insert(0, concept_code)
+        verified_context = request.verified_context
+        if verified_context and verified_context.concept_code not in concept_codes:
+            concept_codes.insert(0, verified_context.concept_code)
         history, history_from_seq = self.pipeline.history_manager.from_external(
             conversation_id=str(request.conversation_id),
             user_id=str(request.user_id),
@@ -122,6 +125,7 @@ class TutorService:
                     stage_id=stage_id,
                     concept_id=concept_id,
                     concept_codes=concept_codes or None,
+                    verified_context=verified_context,
                     history_from_seq=history_from_seq,
                     personalized_context=request.personalized_context,
                 ),

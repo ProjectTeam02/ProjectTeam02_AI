@@ -13,7 +13,7 @@ from app.rag.memory.history_manager import HistoryManager
 from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
 from app.rag.retrieval.types import RetrievedDocument
-from app.schemas.tutor import PersonalizedTutorContext
+from app.schemas.tutor import PersonalizedTutorContext, VerifiedConceptContext
 
 
 @dataclass(slots=True)
@@ -121,6 +121,7 @@ class MultiTurnRAG:
         stage_id: str | None = None,
         concept_id: str | None = None,
         concept_codes: list[str] | None = None,
+        verified_context: VerifiedConceptContext | None = None,
         history_from_seq: int | None = None,
         personalized_context: PersonalizedTutorContext | None = None,
     ) -> RAGResult:
@@ -134,6 +135,7 @@ class MultiTurnRAG:
             stage_id=stage_id,
             concept_id=concept_id,
             concept_codes=concept_codes,
+            verified_context=verified_context,
             history_from_seq=history_from_seq,
             personalized_context=personalized_context,
         )
@@ -149,6 +151,7 @@ class MultiTurnRAG:
         stage_id: str | None,
         concept_id: str | None,
         concept_codes: list[str] | None = None,
+        verified_context: VerifiedConceptContext | None = None,
         history_from_seq: int | None = None,
         personalized_context: PersonalizedTutorContext | None = None,
     ) -> RAGResult:
@@ -159,29 +162,51 @@ class MultiTurnRAG:
             lambda: self.query_rewriter.rewrite(message, history),
             trace,
         )
-        documents = await self.harness.run(
-            StageContract("retrieval", "rewritten query + scope", "documents"),
-            lambda: self.retriever.retrieve(
-                rewritten_query,
-                concept_id=concept_id,
-                stage_id=stage_id,
-                concept_codes=concept_codes,
-            ),
-            trace,
+        verified_blocked = (
+            verified_context is not None
+            and verified_context.verification_status.value == "BLOCKED"
         )
-        documents = await self.harness.run(
-            StageContract(
-                "related_retrieval", "retrieved documents + scope", "documents"
-            ),
-            lambda: self.retriever.retrieve_related(
-                documents,
-                concept_id=concept_id,
-                stage_id=stage_id,
-                concept_codes=concept_codes,
-            ),
-            trace,
+        document_ids = (
+            verified_context.source_document_ids
+            if verified_context is not None
+            and verified_context.verification_status.value == "VERIFIED"
+            else None
         )
-        if concept_codes:
+        if verified_blocked:
+            documents = []
+            trace.append(
+                {
+                    "stage": "retrieval",
+                    "status": "blocked",
+                    "reason": verified_context.blocking_reasons,
+                }
+            )
+        else:
+            documents = await self.harness.run(
+                StageContract("retrieval", "rewritten query + scope", "documents"),
+                lambda: self.retriever.retrieve(
+                    rewritten_query,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                    document_ids=document_ids,
+                ),
+                trace,
+            )
+            documents = await self.harness.run(
+                StageContract(
+                    "related_retrieval", "retrieved documents + scope", "documents"
+                ),
+                lambda: self.retriever.retrieve_related(
+                    documents,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                    document_ids=document_ids,
+                ),
+                trace,
+            )
+        if concept_codes and not verified_blocked:
             allowed_codes = set(concept_codes)
             documents = [
                 document
@@ -199,6 +224,7 @@ class MultiTurnRAG:
             stage_id=stage_id,
             concept_id=concept_id,
             personalized_context=personalized_context,
+            verified_context=verified_context,
         )
         trace.append(
             {

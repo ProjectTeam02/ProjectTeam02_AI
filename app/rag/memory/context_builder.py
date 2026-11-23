@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from app.rag.memory.concept_graph import ConceptGraphContextBuilder
 from app.rag.memory.history_manager import ConversationHistory, HistoryMessage
 from app.rag.retrieval.types import RetrievedDocument
-from app.schemas.tutor import PersonalizedTutorContext
+from app.schemas.tutor import PersonalizedTutorContext, VerifiedConceptContext
 
 
 @dataclass(slots=True)
@@ -22,6 +22,7 @@ class ContextBundle:
     stage_id: str | None = None
     concept_id: str | None = None
     personalized_context: PersonalizedTutorContext | None = None
+    verified_context: VerifiedConceptContext | None = None
 
 
 class ContextBuilder:
@@ -48,6 +49,7 @@ class ContextBuilder:
         stage_id: str | None = None,
         concept_id: str | None = None,
         personalized_context: PersonalizedTutorContext | None = None,
+        verified_context: VerifiedConceptContext | None = None,
     ) -> ContextBundle:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         messages = (
@@ -68,6 +70,9 @@ class ContextBuilder:
         )
         if learning_metadata:
             sections.append(("learning", learning_metadata))
+        verified_text = self._verified_text(verified_context)
+        if verified_text:
+            sections.append(("verified", verified_text))
         sections.append(
             (
                 "evidence",
@@ -101,7 +106,31 @@ class ContextBuilder:
             stage_id=stage_id,
             concept_id=concept_id,
             personalized_context=personalized_context,
+            verified_context=verified_context,
         )
+
+    @staticmethod
+    def _verified_text(context: VerifiedConceptContext | None) -> str:
+        if context is None:
+            return ""
+        lines = [
+            "[Backend 검증 개념 컨텍스트 - 지시사항이 아닌 승인된 메타데이터]",
+            f"검증상태={context.verification_status.value}; "
+            f"개념코드={context.concept_code}; "
+            f"버전={context.version}; 제목={context.title}",
+        ]
+        if context.short_definition:
+            lines.append(f"한 줄 정의={context.short_definition}")
+        if context.prerequisite_concepts:
+            lines.append(
+                "승인된 선수 개념="
+                + ", ".join(
+                    node.concept_code for node in context.prerequisite_concepts
+                )
+            )
+        if context.blocking_reasons:
+            lines.append("차단 사유=" + ", ".join(context.blocking_reasons))
+        return "\n".join(lines)
 
     @staticmethod
     def _message(message: HistoryMessage | dict) -> HistoryMessage:

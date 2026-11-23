@@ -25,6 +25,7 @@ class IngestDocument:
     published_at: datetime | None = None
     updated_at: datetime | None = None
     license: str | None = None
+    license_review_status: str | None = None
     content_hash: str = ""
     term: str | None = None
     term_kr: str | None = None
@@ -53,6 +54,7 @@ class IngestDocument:
             "published_at": self.published_at.isoformat() if self.published_at else "",
             "updated_at": self.updated_at.isoformat() if self.updated_at else "",
             "license": self.license or "",
+            "license_review_status": self.license_review_status or "",
             "content_hash": self.content_hash,
             "term": self.term or "",
             "term_kr": self.term_kr or "",
@@ -90,6 +92,11 @@ class DocumentIndexer:
             item.document_id
             for item in normalized
             if item.review_status != self.settings.approved_review_status
+            or (
+                item.license_review_status
+                and item.license_review_status.casefold()
+                not in {"approved", "cleared", "verified"}
+            )
         ]
         if rejected:
             raise ValueError(
