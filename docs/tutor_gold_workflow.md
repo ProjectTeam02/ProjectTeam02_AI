@@ -17,6 +17,12 @@ canonical source는 `app/model_comparison/catalog.py`이며, Gold 검증기는 �
 - `goldStatus`: 100건 `PENDING_REVIEW`
 - 독립 사람 검수: 미완료
 
+`data/curation/2026-11-23/`의 12개 구조화 파일이 canonical 입력입니다. 현재
+구조화 디렉터리가 없고 `data/` 루트의 동일 이름 flat export만 있으면 검증기는
+이를 확인용 레거시 레이아웃으로 표시하고 전체 curation 상태를 `BLOCKED`로
+유지합니다. flat CSV의 `APPROVED`/`Y` 표시는 DB 승인 이력이나 라이선스 승인으로
+승격하지 않습니다.
+
 ## 검증 실행
 
 ```bash
@@ -51,8 +57,11 @@ license 상태를 확인합니다. 두 명 이상의 합의 검수 또는 정의
 ## 최종 모델 비교와 Smoke Test
 
 ```bash
-# Gold와 무관한 실제 OpenRouter 연결 확인
-OPENROUTER_API_KEY=... .venv/bin/python scripts/openrouter_smoke_test.py
+# Gold와 무관한 catalog-only dry-run (기본값)
+.venv/bin/python scripts/openrouter_smoke_test.py
+
+# Gold와 무관한 실제 OpenRouter 연결 확인이 명시적으로 필요한 경우
+OPENROUTER_API_KEY=... .venv/bin/python scripts/openrouter_smoke_test.py --execute
 
 # 승인 후에만 최종 모델 비교
 OPENROUTER_API_KEY=... .venv/bin/python scripts/compare_tutor_models.py \

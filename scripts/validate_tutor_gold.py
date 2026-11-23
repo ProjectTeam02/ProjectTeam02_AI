@@ -14,6 +14,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(ROOT))
 
 from app.dataset_pipeline.io import load_corpus  # noqa: E402
+from app.evaluation.curation_inputs import inspect_curation_inputs  # noqa: E402
 from app.evaluation.tutor_gold import (  # noqa: E402
     load_concept_map,
     validate_tutor_gold,
@@ -42,6 +43,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=ROOT / "data" / "evaluation" / "tutor_test_100.jsonl",
     )
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
+    parser.add_argument(
+        "--curation-dir",
+        type=Path,
+        default=ROOT / "data" / "curation" / "2026-11-23",
+    )
     parser.add_argument("--concept-map", type=Path)
     parser.add_argument(
         "--report",
@@ -96,6 +102,8 @@ def render_report(
         f"- conceptCode 누락: {validation['missingConceptCodeCount']}건",
         f"- approvedEvidence 포함 행: {validation['approvedEvidenceRowCount']}건",
         f"- 차단 finding: {validation['blockingFindingCount']}건",
+        "- curation 입력 상태: `"
+        f"{validation.get('curationInputs', {}).get('status', 'UNKNOWN')}`",
         "",
         "## 미완료 입력",
         "",
@@ -125,7 +133,36 @@ def render_report(
 
 def main() -> int:
     args = build_parser().parse_args()
-    rows = read_jsonl(args.input)
+    curation_inputs = inspect_curation_inputs(
+        args.curation_dir, flat_fallback=args.data_dir
+    )
+    try:
+        rows = read_jsonl(args.input)
+    except FileNotFoundError as exc:
+        validation = {
+            "schemaVersion": 1,
+            "goldValidatorVersion": "tutor-gold-v1",
+            "validStructure": False,
+            "readyForScoring": False,
+            "rowCount": 0,
+            "errorCount": 1,
+            "blockingFindingCount": 1,
+            "errors": [{"code": "INPUT_MISSING", "detail": str(exc)}],
+            "blockingFindings": [{"code": "INPUT_MISSING"}],
+            "statusCounts": {},
+            "reviewQueueStatusCounts": {},
+            "missingConceptCodeCount": 0,
+            "approvedEvidenceRowCount": 0,
+            "sourceDataModified": False,
+            "curationInputs": curation_inputs,
+        }
+        args.json_report.parent.mkdir(parents=True, exist_ok=True)
+        args.json_report.write_text(
+            json.dumps(validation, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        render_report(args.report, args.input, validation, [str(exc)])
+        return 0 if args.report_only else 1
     documents = []
     source_error = None
     try:
@@ -151,6 +188,7 @@ def main() -> int:
         missing_inputs.append("approved evidence with confirmed source/license status")
     if source_error:
         validation["sourceLoadError"] = source_error
+    validation["curationInputs"] = curation_inputs
     args.json_report.parent.mkdir(parents=True, exist_ok=True)
     args.json_report.write_text(
         json.dumps(validation, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

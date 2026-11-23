@@ -155,6 +155,7 @@ class ComparisonResult:
     error_type: str | None = None
     error_code: str | None = None
     provider_status: int | None = None
+    model_metadata: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -181,6 +182,7 @@ class ComparisonResult:
                 if self.error_type or self.error_code
                 else None
             ),
+            "model_metadata": self.model_metadata,
         }
 
 

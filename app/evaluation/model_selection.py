@@ -107,23 +107,39 @@ def analyze_model_selection(
         model_id: _model_summary(model_id, comparison_rows, quality_rows)
         for model_id in model_ids
     }
+    expected_case_count = len(dataset_rows)
+    expected_model_count = len(model_ids)
     quality_eligible = bool(dataset_rows) and all(
         row.get("goldStatus") == APPROVED_GOLD for row in dataset_rows
     ) and all(
-        summaries[model_id]["scoredQualityCount"] >= len(dataset_rows)
+        summaries[model_id]["scoredQualityCount"] == expected_case_count
         for model_id in model_ids
     )
     live_complete = all(
-        summaries[model_id]["liveSuccessCount"] >= len(dataset_rows)
+        summaries[model_id]["liveSuccessCount"] == expected_case_count
         and summaries[model_id]["ttftAvailable"]
-        and summaries[model_id]["latencySampleCount"] >= len(dataset_rows)
+        and summaries[model_id]["latencySampleCount"] == expected_case_count
         and summaries[model_id]["actualCostUsd"] is not None
         for model_id in model_ids
     )
-    human_complete = bool(human_review_rows) and all(
+    review_statuses_complete = all(
         str(row.get("reviewStatus", "")).upper()
         in {"APPROVED", "REVIEWED", "COMPLETED"}
         for row in human_review_rows
+    )
+    review_keys = [
+        (row.get("reviewId"), row.get("modelId"), row.get("caseIdHash"))
+        for row in human_review_rows
+    ]
+    human_complete = (
+        expected_case_count > 0
+        and len(human_review_rows) == expected_case_count * expected_model_count
+        and len(set(review_keys)) == len(review_keys)
+        and review_statuses_complete
+        and all(
+            row.get("humanTotalEducationScore") is not None
+            for row in human_review_rows
+        )
     )
     variants = {
         str(row.get("contextVariant", row.get("context_variant", ""))).upper()

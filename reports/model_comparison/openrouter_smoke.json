@@ -1,32 +1,122 @@
 {
   "schemaVersion": 1,
-  "status": "PASS",
+  "status": "DRY_RUN",
   "modelId": "openai/gpt-5.4-mini",
-  "latencyMs": 1602,
-  "usage": {
-    "completion_tokens": 7,
-    "prompt_tokens": 29,
-    "total_tokens": 36,
-    "completion_tokens_details": {
-      "accepted_prediction_tokens": null,
-      "audio_tokens": 0,
-      "reasoning_tokens": 0,
-      "rejected_prediction_tokens": null,
-      "image_tokens": 0
-    },
-    "prompt_tokens_details": {
-      "audio_tokens": 0,
-      "cache_write_tokens": 0,
-      "cached_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost": 5.325e-05,
-    "is_byok": false,
-    "cost_details": {
-      "upstream_inference_cost": 5.325e-05,
-      "upstream_inference_prompt_cost": 2.175e-05,
-      "upstream_inference_completions_cost": 3.15e-05
-    }
+  "catalog": {
+    "model_id": "openai/gpt-5.4-mini",
+    "name": "OpenAI: GPT-5.4 Mini",
+    "available": true,
+    "reason": null,
+    "context_window": 400000,
+    "input_price_per_million": 0.75,
+    "output_price_per_million": 4.5,
+    "supported_parameters": [
+      "include_reasoning",
+      "max_completion_tokens",
+      "max_tokens",
+      "reasoning",
+      "reasoning_effort",
+      "response_format",
+      "seed",
+      "structured_outputs",
+      "tool_choice",
+      "tools",
+      "verbosity"
+    ],
+    "structured_output_supported": true,
+    "endpoints": [
+      "/api/v1/chat/completions",
+      "/api/v1/completions",
+      "/api/v1/messages",
+      "/api/v1/responses"
+    ],
+    "providers": [
+      {
+        "provider_name": "OpenAI",
+        "tag": "openai/flex",
+        "status": 0,
+        "context_length": 400000,
+        "max_completion_tokens": 128000,
+        "input_price_per_million": 0.375,
+        "output_price_per_million": 2.25,
+        "supported_parameters": [
+          "include_reasoning",
+          "max_tokens",
+          "reasoning",
+          "reasoning_effort",
+          "response_format",
+          "seed",
+          "structured_outputs",
+          "tool_choice",
+          "tools",
+          "verbosity"
+        ]
+      },
+      {
+        "provider_name": "Azure",
+        "tag": "azure",
+        "status": 0,
+        "context_length": 400000,
+        "max_completion_tokens": 128000,
+        "input_price_per_million": 0.75,
+        "output_price_per_million": 4.5,
+        "supported_parameters": [
+          "include_reasoning",
+          "max_completion_tokens",
+          "reasoning",
+          "reasoning_effort",
+          "response_format",
+          "seed",
+          "structured_outputs",
+          "tool_choice",
+          "tools",
+          "verbosity"
+        ]
+      },
+      {
+        "provider_name": "OpenAI",
+        "tag": "openai",
+        "status": 0,
+        "context_length": 400000,
+        "max_completion_tokens": 128000,
+        "input_price_per_million": 0.75,
+        "output_price_per_million": 4.5,
+        "supported_parameters": [
+          "include_reasoning",
+          "max_tokens",
+          "reasoning",
+          "reasoning_effort",
+          "response_format",
+          "seed",
+          "structured_outputs",
+          "tool_choice",
+          "tools",
+          "verbosity"
+        ]
+      },
+      {
+        "provider_name": "OpenAI",
+        "tag": "openai/fast",
+        "status": 0,
+        "context_length": 400000,
+        "max_completion_tokens": 128000,
+        "input_price_per_million": 1.5,
+        "output_price_per_million": 9.0,
+        "supported_parameters": [
+          "include_reasoning",
+          "max_tokens",
+          "reasoning",
+          "reasoning_effort",
+          "response_format",
+          "seed",
+          "structured_outputs",
+          "tool_choice",
+          "tools",
+          "verbosity"
+        ]
+      }
+    ],
+    "fetched_at": "2026-11-23T13:34:09.186040+00:00"
   },
   "responseStored": false,
   "goldEvaluation": false

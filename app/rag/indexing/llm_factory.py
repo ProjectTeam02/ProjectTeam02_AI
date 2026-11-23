@@ -52,6 +52,7 @@ class OpenRouterLLM:
 
     def __new__(cls, *args, **kwargs):
         context_window = kwargs.pop("context_window", 1_000_000)
+        supported_parameters = kwargs.pop("_supported_parameters", None)
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from llama_index.core.llms import LLMMetadata, MessageRole
         from llama_index.llms.openai import OpenAI
@@ -62,6 +63,15 @@ class OpenRouterLLM:
                 # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
                 model_name = super()._get_model_name()
                 return model_name.split("/", 1)[1] if "/" in model_name else model_name
+
+            def _get_model_kwargs(self, **kwargs):
+                model_kwargs = super()._get_model_kwargs(**kwargs)
+                if supported_parameters is not None:
+                    if "temperature" not in supported_parameters:
+                        model_kwargs.pop("temperature", None)
+                    if "max_tokens" not in supported_parameters:
+                        model_kwargs.pop("max_tokens", None)
+                return model_kwargs
 
             @property
             def metadata(self) -> LLMMetadata:
@@ -86,7 +96,7 @@ class LLMFactory:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.settings = settings or get_settings()
 
-    def create(self):
+    def create(self, supported_parameters: set[str] | None = None):
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if self.settings.llm_provider in {"none", "offline"}:
             return None
@@ -106,11 +116,23 @@ class LLMFactory:
             from llama_index.llms.openai import OpenAI
 
             llm_class = OpenAI
+        parameters = (
+            supported_parameters
+            if supported_parameters is not None
+            else {"temperature", "max_tokens"}
+        )
+        kwargs = {
+            "model": self.settings.llm_model,
+            "api_key": api_key,
+            "api_base": api_base,
+            "timeout": self.settings.llm_timeout_seconds,
+        }
+        if provider == "openrouter" and supported_parameters is not None:
+            kwargs["_supported_parameters"] = supported_parameters
+        if "temperature" in parameters:
+            kwargs["temperature"] = 0.2
+        if "max_tokens" in parameters:
+            kwargs["max_tokens"] = self.settings.llm_max_output_tokens
         return llm_class(
-            model=self.settings.llm_model,
-            api_key=api_key,
-            api_base=api_base,
-            temperature=0.2,
-            max_tokens=self.settings.llm_max_output_tokens,
-            timeout=self.settings.llm_timeout_seconds,
+            **kwargs,
         )

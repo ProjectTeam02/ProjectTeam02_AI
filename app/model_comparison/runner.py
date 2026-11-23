@@ -18,6 +18,7 @@ from app.core.exceptions import (
 from app.model_comparison.catalog import MODEL_SPECS, ModelSpec
 from app.model_comparison.contracts import ComparisonCase, ComparisonResult
 from app.model_comparison.io import JsonlResultStore
+from app.model_comparison.openrouter_catalog import OpenRouterModelMetadata
 from app.rag.generation.answer_generator import (
     TUTOR_PROMPT_VERSION,
     AnswerGenerator,
@@ -58,6 +59,63 @@ class _MockLLM:
         )
 
 
+class EvaluationBudgetExceeded(RuntimeError):
+    """The explicit evaluation call or cost budget has been exhausted."""
+
+
+@dataclass(slots=True)
+class ComparisonBudget:
+    max_calls: int | None = None
+    max_cost_usd: float | None = None
+    max_retries: int = 0
+    min_interval_seconds: float = 0.0
+    calls: int = 0
+    estimated_cost_usd: float = 0.0
+    _last_call_at: float | None = None
+
+    def reserve_call(self) -> None:
+        if self.max_calls is not None and self.calls >= self.max_calls:
+            raise EvaluationBudgetExceeded("maximum evaluation calls reached")
+        self.calls += 1
+
+    async def wait_for_rate_limit(self) -> None:
+        if self._last_call_at is not None:
+            elapsed = time.perf_counter() - self._last_call_at
+            if elapsed < self.min_interval_seconds:
+                await asyncio.sleep(self.min_interval_seconds - elapsed)
+        self._last_call_at = time.perf_counter()
+
+    def record_cost(self, cost: float | None) -> None:
+        if cost is not None:
+            self.estimated_cost_usd += cost
+
+    @property
+    def exhausted(self) -> bool:
+        return (
+            self.max_cost_usd is not None
+            and self.estimated_cost_usd >= self.max_cost_usd
+        )
+
+
+class _BudgetedLLM:
+    """Apply bounded retries and rate limits around an existing LLM adapter."""
+
+    def __init__(self, inner, budget: ComparisonBudget):
+        self.inner = inner
+        self.budget = budget
+        self.model_id = getattr(inner, "model_id", "unknown")
+
+    async def acomplete(self, prompt: str):
+        for attempt in range(self.budget.max_retries + 1):
+            await self.budget.wait_for_rate_limit()
+            self.budget.reserve_call()
+            try:
+                return await self.inner.acomplete(prompt)
+            except Exception:
+                if attempt >= self.budget.max_retries:
+                    raise
+
+
 class ModelComparisonRunner:
     """Run identical Multi-turn RAG inputs against each model in the catalog."""
 
@@ -65,13 +123,17 @@ class ModelComparisonRunner:
         self,
         settings: Settings | None = None,
         model_specs: tuple[ModelSpec, ...] = MODEL_SPECS,
-        llm_builder: Callable[[ModelSpec, Settings], object] | None = None,
+        llm_builder: Callable[..., object] | None = None,
         top_k: int | None = None,
+        model_metadata: dict[str, OpenRouterModelMetadata] | None = None,
+        budget: ComparisonBudget | None = None,
     ):
         self.settings = settings or get_settings()
         self.model_specs = model_specs
-        self.llm_builder = llm_builder or self._build_live_llm
+        self.llm_builder = llm_builder
         self.top_k = top_k or self.settings.retrieval_top_k
+        self.model_metadata = model_metadata or {}
+        self.budget = budget
 
     async def run(
         self,
@@ -89,21 +151,51 @@ class ModelComparisonRunner:
         mode = run_label or ("live" if execute else "mock")
         store = JsonlResultStore(output_path)
         results: list[ComparisonResult] = []
+        budget = self.budget or ComparisonBudget()
         for spec in self.model_specs:
+            metadata = self.model_metadata.get(spec.model_id)
+            if execute and metadata is not None and not metadata.available:
+                for case in selected_cases:
+                    result = _error_result(
+                        case,
+                        spec,
+                        mode,
+                        ConfigurationError(metadata.reason or "model unavailable"),
+                        metadata,
+                    )
+                    result.status = "excluded_unavailable_model"
+                    store.append(result)
+                    results.append(result)
+                continue
             try:
-                generator = self._build_generator(spec, execute)
+                generator = self._build_generator(spec, execute, budget)
             except Exception as exc:
                 for case in selected_cases:
                     if resume and store.is_completed(case.case_id, spec.model_id, mode):
                         continue
-                    result = _error_result(case, spec, mode, exc)
+                    result = _error_result(case, spec, mode, exc, metadata)
                     store.append(result)
                     results.append(result)
                 continue
             for case in selected_cases:
                 if resume and store.is_completed(case.case_id, spec.model_id, mode):
                     continue
+                if execute and budget.exhausted:
+                    result = _error_result(
+                        case,
+                        spec,
+                        mode,
+                        EvaluationBudgetExceeded("maximum evaluation cost reached"),
+                        metadata,
+                    )
+                    result.status = "blocked_budget"
+                    store.append(result)
+                    results.append(result)
+                    continue
                 result = await self._run_case(case, spec, generator, mode)
+                budget.record_cost(result.estimated_cost_usd)
+                if execute and budget.exhausted:
+                    result.status = "blocked_budget"
                 store.append(result)
                 results.append(result)
         return results
@@ -188,7 +280,10 @@ class ModelComparisonRunner:
                     for item in rag_result.citations
                 ],
                 usage=usage,
-                estimated_cost_usd=_estimate_cost(spec, usage),
+                estimated_cost_usd=_estimate_cost(
+                    spec, usage, self.model_metadata.get(spec.model_id)
+                ),
+                model_metadata=_metadata_dict(self.model_metadata.get(spec.model_id)),
             )
         except Exception as exc:
             logger.warning(
@@ -211,23 +306,45 @@ class ModelComparisonRunner:
                 error_type=type(exc).__name__,
                 error_code=_error_code(exc),
                 provider_status=_provider_status(exc),
+                model_metadata=_metadata_dict(self.model_metadata.get(spec.model_id)),
             )
 
-    def _build_generator(self, spec: ModelSpec, execute: bool) -> AnswerGenerator:
+    def _build_generator(
+        self, spec: ModelSpec, execute: bool, budget: ComparisonBudget
+    ) -> AnswerGenerator:
         if not execute:
             return AnswerGenerator(llm=_MockLLM(spec.model_id), settings=self.settings)
         model_settings = self.settings.model_copy(
             update={"llm_model": spec.model_id, "llm_provider": "openrouter"}
         )
+        metadata = self.model_metadata.get(spec.model_id)
+        supported_parameters = (
+            set(metadata.supported_parameters) if metadata is not None else None
+        )
+        if self.llm_builder is not None:
+            try:
+                llm = self.llm_builder(spec, model_settings, supported_parameters)
+            except TypeError as exc:
+                # Keep compatibility with existing two-argument test adapters.
+                try:
+                    llm = self.llm_builder(spec, model_settings)
+                except TypeError:
+                    raise exc
+        else:
+            llm = self._build_live_llm(spec, model_settings, supported_parameters)
         return AnswerGenerator(
-            llm=self.llm_builder(spec, model_settings),
+            llm=_BudgetedLLM(llm, budget),
             settings=model_settings,
         )
 
     @staticmethod
-    def _build_live_llm(spec: ModelSpec, settings: Settings):
+    def _build_live_llm(
+        spec: ModelSpec,
+        settings: Settings,
+        supported_parameters: set[str] | None = None,
+    ):
         del spec
-        return LLMFactory(settings).create()
+        return LLMFactory(settings).create(supported_parameters)
 
 
 def _elapsed_ms(started: float) -> int:
@@ -287,24 +404,40 @@ def _nested_int(payload: dict, *keys: str) -> int | None:
     return int(value) if value is not None else None
 
 
-def _estimate_cost(spec: ModelSpec, usage: dict[str, int | None]) -> float | None:
+def _estimate_cost(
+    spec: ModelSpec,
+    usage: dict[str, int | None],
+    metadata: OpenRouterModelMetadata | None = None,
+) -> float | None:
     input_tokens = usage.get("input_tokens")
     output_tokens = usage.get("output_tokens")
     if (
         input_tokens is None
         or output_tokens is None
-        or spec.input_price_per_million is None
-        or spec.output_price_per_million is None
     ):
         return None
+    input_price = (
+        metadata.input_price_per_million
+        if metadata is not None
+        else spec.input_price_per_million
+    )
+    output_price = (
+        metadata.output_price_per_million
+        if metadata is not None
+        else spec.output_price_per_million
+    )
+    if input_price is None or output_price is None:
+        return None
     return round(
-        input_tokens / 1_000_000 * spec.input_price_per_million
-        + output_tokens / 1_000_000 * spec.output_price_per_million,
+        input_tokens / 1_000_000 * input_price
+        + output_tokens / 1_000_000 * output_price,
         8,
     )
 
 
 def _error_code(exc: Exception) -> str:
+    if isinstance(exc, EvaluationBudgetExceeded):
+        return "budget_exceeded"
     if isinstance(exc, GenerationTimeoutError):
         return "timeout"
     if isinstance(exc, ConfigurationError):
@@ -323,6 +456,7 @@ def _error_result(
     spec: ModelSpec,
     mode: str,
     exc: Exception,
+    metadata: OpenRouterModelMetadata | None = None,
 ) -> ComparisonResult:
     return ComparisonResult(
         case_id=case.case_id,
@@ -335,7 +469,14 @@ def _error_result(
         error_type=type(exc).__name__,
         error_code=_error_code(exc),
         provider_status=_provider_status(exc),
+        model_metadata=_metadata_dict(metadata),
     )
+
+
+def _metadata_dict(
+    metadata: OpenRouterModelMetadata | None,
+) -> dict | None:
+    return metadata.as_dict() if metadata is not None else None
 
 
 def _provider_status(exc: Exception) -> int | None:
