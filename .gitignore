@@ -13,6 +13,8 @@ terraform.tfstate*
 data/*
 !data/.gitkeep
 !data/README.md
+# 로컬 원본·가공 데이터 묶음은 사용권과 크기 문제로 Git에 올리지 않는다.
+/data.zip
 .idea/
 
 # Codex 플러그인에서 제공되는 SKILL.md는 프로젝트 소스에 포함하지 않습니다.
