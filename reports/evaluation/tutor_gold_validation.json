@@ -1,0 +1,2624 @@
+{
+  "schemaVersion": 1,
+  "goldValidatorVersion": "tutor-gold-v1",
+  "validStructure": true,
+  "readyForScoring": false,
+  "rowCount": 100,
+  "errorCount": 0,
+  "blockingFindingCount": 600,
+  "errors": [],
+  "blockingFindings": [
+    {
+      "caseId": "TUTOR-001",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-001",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_584"
+    },
+    {
+      "caseId": "TUTOR-001",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_584"
+    },
+    {
+      "caseId": "TUTOR-001",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-001",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-001",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_317"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_317"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-002",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1977"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1977"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-003",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_816"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_816"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-004",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2579"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2579"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-005",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_988"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_988"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-006",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_778"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_778"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-007",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1148"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1148"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-008",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1255"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1255"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-009",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_823"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_823"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-010",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2588"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2588"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-011",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1071"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1071"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-012",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1702"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1702"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-013",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2787"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2787"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-014",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_3019"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_3019"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-015",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2998"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2998"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-016",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1932"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1932"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-017",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_837"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_837"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-018",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2487"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2487"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-019",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2228"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2228"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-020",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2636"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2636"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-021",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_413"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_413"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-022",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2074"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2074"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-023",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_369"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_369"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-024",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2917"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2917"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-025",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2161"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2161"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-026",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2382"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2382"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-027",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1563"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1563"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-028",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2606"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2606"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-029",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_374"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_374"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-030",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2515"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2515"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-031",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_728"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_728"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-032",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2786"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2786"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-033",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_702"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_702"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-034",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1922"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1922"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-035",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_845"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_845"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-036",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_522"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_522"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-037",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2142"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2142"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-038",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_637"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_637"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-039",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1900"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1900"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-040",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_3012"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_3012"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-041",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1871"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1871"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-042",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_736"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_736"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-043",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2657"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2657"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-044",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2078"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2078"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-045",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_992"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_992"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-046",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1246"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1246"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-047",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1415"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_1415"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-048",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2836"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2836"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-049",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2414"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "kdi_dic_2414"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-050",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0469"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0469"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-051",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0192"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0192"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-052",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0187"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0187"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-053",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0567"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0567"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-054",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0305"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0305"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-055",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0779"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0779"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-056",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0689"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0689"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-057",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0404"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0404"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-058",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0272"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0272"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-059",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0189"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0189"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-060",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0551"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0551"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-061",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0581"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0581"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-062",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0132"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0132"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-063",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0748"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0748"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-064",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0435"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0435"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-065",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0589"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0589"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-066",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0224"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0224"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-067",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0462"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0462"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-068",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0085"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0085"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-069",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0587"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0587"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-070",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0348"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0348"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-071",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0330"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0330"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-072",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0417"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0417"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-073",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0138"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0138"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-074",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0720"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0720"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-075",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0470"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0470"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-076",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0612"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0612"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-077",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0577"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0577"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-078",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0372"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0372"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-079",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0732"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0732"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-080",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0378"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0378"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-081",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0425"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0425"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-082",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0017"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0017"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-083",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0410"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0410"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-084",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0218"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0218"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-085",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0445"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0445"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-086",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0698"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0698"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-087",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0166"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0166"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-088",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0143"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0143"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-089",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0286"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0286"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-090",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0432"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0432"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-091",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0098"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0098"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-092",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0289"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0289"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-093",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0786"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0786"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-094",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0653"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0653"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-095",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0125"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0125"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-096",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0390"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0390"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-097",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0188"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0188"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-098",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0501"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0501"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-099",
+      "code": "GOLD_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "CONCEPT_CODE_MISSING"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "SOURCE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0291"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "LICENSE_REVIEW_REQUIRED",
+      "sourceId": "bok2026-0291"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "INDEPENDENT_REVIEW_REQUIRED"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "DATASET_VERSION_MISSING"
+    },
+    {
+      "caseId": "TUTOR-100",
+      "code": "GOLD_VERSION_MISSING"
+    }
+  ],
+  "statusCounts": {
+    "PENDING_REVIEW": 100
+  },
+  "reviewQueueStatusCounts": {
+    "REVIEW_REQUIRED": 100
+  },
+  "missingConceptCodeCount": 100,
+  "approvedEvidenceRowCount": 0,
+  "sourceDocumentChecksEnabled": true,
+  "conceptMappingChecksEnabled": false,
+  "independentReviewWasInferred": false,
+  "sourceDataModified": false
+}

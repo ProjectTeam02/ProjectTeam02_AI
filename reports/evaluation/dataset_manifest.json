@@ -1,0 +1,54 @@
+{
+  "dataset_name": "Leren tutor evaluation scenarios",
+  "schema_version": "tutor-test-100-v1",
+  "seed": 20261122,
+  "target_count": 100,
+  "actual_count": 100,
+  "source_dataset": {
+    "canonical_rule": "JSONL is canonical when both JSON and JSONL exist for a source; the alternate export is audit-only. Cross-source records are not merged.",
+    "dataset_version": "50047d6bd740671252df664aba2ee0bbac845bbf68addbc4f90d6c5efe8e7d0d",
+    "document_count": 3539,
+    "document_count_by_source": {
+      "BOK": 789,
+      "KDI": 2750
+    },
+    "source_data_modified": false
+  },
+  "scenario_distribution": {
+    "difficulty": {
+      "easy": 34,
+      "hard": 33,
+      "medium": 33
+    },
+    "scenario_type": {
+      "A_CONCEPT_EXPLANATION": 20,
+      "B_MISCONCEPTION_DIAGNOSIS": 25,
+      "C_PERSONALIZED_LEARNING": 25,
+      "D_MULTITURN_CONTEXT": 20,
+      "E_INSUFFICIENT_EVIDENCE": 10
+    },
+    "source": {
+      "BOK": 50,
+      "KDI": 50
+    }
+  },
+  "review": {
+    "gold_status": {
+      "PENDING_REVIEW": 100
+    },
+    "approved_evidence_count": 0,
+    "independent_gold_ready": false
+  },
+  "missing_inputs": [
+    "canonical conceptCode mapping/curriculum is not present in the local corpus",
+    "source review and license approval are unresolved in the canonical exports",
+    "independent human Gold review is not complete"
+  ],
+  "model_input_policy": "Only public_model_input(row) may be passed to a model. Expected concepts, misconception hypotheses, teaching behavior, and Gold status are evaluator-only.",
+  "generated_at": "2026-11-22T13:32:46.186905+00:00",
+  "files": {
+    "scenario_jsonl": "data/evaluation/tutor_test_100.jsonl",
+    "scenario_sha256": "ba15317194b1f1d4dd261e514e61e4c21595c0cf2d11ee34a71b91bcae9aa4b8",
+    "manifest": "reports/evaluation/dataset_manifest.json"
+  }
+}

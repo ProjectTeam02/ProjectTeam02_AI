@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "decisionStatus": "NOT_READY",
+  "primaryModel": null,
+  "fallbackModel": null,
+  "selectionRule": {
+    "educationQualityMax": 60,
+    "operationsEfficiencyMax": 40,
+    "totalMax": 100,
+    "tiePolicy": "statistical uncertainty is a tie; do not force a winner"
+  },
+  "gates": {
+    "independentGold": false,
+    "educationScores": false,
+    "liveOperations": false,
+    "humanReview": false,
+    "contextABC": false
+  },
+  "missingEvidence": [
+    "100개 사례의 INDEPENDENT_APPROVED Gold",
+    "5개 모델 모두의 검수 Gold 기반 교육 품질 점수",
+    "5개 모델의 실제 live 비용·TTFT·p50/p95·성공률",
+    "완료 상태의 익명 사람 검토 결과",
+    "개인화 Context A/B/C 실험 결과",
+    "Context A/B/C 결과 JSONL"
+  ],
+  "models": {
+    "google/gemini-3.1-flash-lite": {
+      "comparisonCount": 100,
+      "comparisonStatusCounts": {
+        "no_evidence": 100
+      },
+      "liveCount": 0,
+      "liveSuccessCount": 0,
+      "qualityCount": 100,
+      "scoredQualityCount": 0,
+      "educationAverage": null,
+      "actualCostUsd": null,
+      "ttftAvailable": false,
+      "latencySampleCount": 0,
+      "latencyP50Ms": null,
+      "latencyP95Ms": null
+    },
+    "google/gemini-3-flash-preview": {
+      "comparisonCount": 100,
+      "comparisonStatusCounts": {
+        "no_evidence": 100
+      },
+      "liveCount": 0,
+      "liveSuccessCount": 0,
+      "qualityCount": 100,
+      "scoredQualityCount": 0,
+      "educationAverage": null,
+      "actualCostUsd": null,
+      "ttftAvailable": false,
+      "latencySampleCount": 0,
+      "latencyP50Ms": null,
+      "latencyP95Ms": null
+    },
+    "openai/gpt-5.4-mini": {
+      "comparisonCount": 100,
+      "comparisonStatusCounts": {
+        "no_evidence": 100
+      },
+      "liveCount": 0,
+      "liveSuccessCount": 0,
+      "qualityCount": 100,
+      "scoredQualityCount": 0,
+      "educationAverage": null,
+      "actualCostUsd": null,
+      "ttftAvailable": false,
+      "latencySampleCount": 0,
+      "latencyP50Ms": null,
+      "latencyP95Ms": null
+    },
+    "qwen/qwen3.5-flash-02-23": {
+      "comparisonCount": 100,
+      "comparisonStatusCounts": {
+        "no_evidence": 100
+      },
+      "liveCount": 0,
+      "liveSuccessCount": 0,
+      "qualityCount": 100,
+      "scoredQualityCount": 0,
+      "educationAverage": null,
+      "actualCostUsd": null,
+      "ttftAvailable": false,
+      "latencySampleCount": 0,
+      "latencyP50Ms": null,
+      "latencyP95Ms": null
+    },
+    "anthropic/claude-haiku-4.5": {
+      "comparisonCount": 100,
+      "comparisonStatusCounts": {
+        "no_evidence": 100
+      },
+      "liveCount": 0,
+      "liveSuccessCount": 0,
+      "qualityCount": 100,
+      "scoredQualityCount": 0,
+      "educationAverage": null,
+      "actualCostUsd": null,
+      "ttftAvailable": false,
+      "latencySampleCount": 0,
+      "latencyP50Ms": null,
+      "latencyP95Ms": null
+    }
+  },
+  "inputCounts": {
+    "dataset": 100,
+    "comparison": 500,
+    "quality": 500,
+    "humanReview": 500,
+    "contextABC": 0
+  }
+}
