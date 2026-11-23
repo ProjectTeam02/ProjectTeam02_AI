@@ -7,6 +7,7 @@ import uuid
 from fastapi.testclient import TestClient
 
 from app.api.dependencies import get_tutor_service, require_internal_api
+from app.core.exceptions import GenerationTimeoutError
 from app.db import postgres
 from app.main import app
 from app.rag.generation.answer_generator import AnswerGenerator
@@ -44,6 +45,15 @@ class FakeGenerator:
             "기준금리가 오르면 대출금리 상승 압력이 생길 수 있습니다. "
             "[출처: DOC-RATE/DOC-RATE:1]"
         )
+
+
+class TimeoutGenerator:
+    llm = object()
+    model_id = "timeout-model"
+
+    async def generate(self, query, context):
+        del query, context
+        raise GenerationTimeoutError("test timeout")
 
 
 def service(documents=None, generator=None) -> TutorService:
@@ -145,6 +155,13 @@ def test_internal_api_returns_insufficient_without_search_evidence():
     assert body["groundingStatus"] == "INSUFFICIENT"
     assert body["sources"] == []
     assert body["usage"]["retrievalStrategy"] == "NONE"
+
+
+def test_internal_api_maps_model_timeout_to_gateway_timeout():
+    response = post_with_service(payload(), service(generator=TimeoutGenerator()))
+
+    assert response.status_code == 504
+    assert response.json()["detail"] == "AI tutor request timed out"
 
 
 def test_internal_api_does_not_return_offline_answer_as_production_success():

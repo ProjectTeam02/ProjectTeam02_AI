@@ -1,4 +1,5 @@
 # 파일 역할: HTTP API 계층의 의존성 또는 라우터를 정의합니다.
+import logging
 import secrets
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from app.question_generation.jobs import (
 from app.question_generation.llm import OpenAICompatibleJsonLLM
 from app.question_generation.service import QuestionGenerationService
 from app.rag.generation.answer_generator import AnswerGenerator
+from app.rag.generation.fallback_llm import FallbackLLM
 from app.rag.grounding.citation_validator import CitationValidator
 from app.rag.indexing.llm_factory import LLMFactory
 from app.rag.ingestion.bok_terms_loader import BOKTermCatalog
@@ -39,6 +41,7 @@ from app.services.tutor_service import TutorService
 # conversation tables; Node.js supplies history and owns its ERD tables.
 _legacy_history_repository = InMemoryConversationRepository()
 _question_job_repository = InMemoryQuestionJobRepository()
+logger = logging.getLogger(__name__)
 
 
 def settings() -> Settings:
@@ -92,8 +95,10 @@ async def require_internal_api(
 async def get_tutor_service() -> TutorService:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     settings_value = get_settings()
+    tutor_settings = settings_value.for_tutor()
     try:
-        llm = LLMFactory(settings_value).create()
+        primary_llm = LLMFactory(tutor_settings).create()
+        llm = _build_tutor_llm(settings_value, tutor_settings, primary_llm)
     except ConfigurationError as exc:
         # Dependency resolution happens before the route handler's try/except.
         # Convert provider configuration failures into the same safe 503 used
@@ -118,7 +123,7 @@ async def get_tutor_service() -> TutorService:
     )
     pipeline = MultiTurnRAG(
         history_manager=history,
-        query_rewriter=QueryRewriter(llm, settings_value.llm_timeout_seconds),
+        query_rewriter=QueryRewriter(llm, tutor_settings.llm_timeout_seconds),
         retriever=Retriever(
             LlamaIndexRetriever(settings=settings_value),
             settings_value.retrieval_top_k,
@@ -140,7 +145,7 @@ async def get_tutor_service() -> TutorService:
                 max_tokens=settings_value.concept_graph_max_tokens,
             ),
         ),
-        answer_generator=AnswerGenerator(llm, settings_value),
+        answer_generator=AnswerGenerator(llm, tutor_settings),
         citation_validator=CitationValidator(
             settings_value.approved_review_status,
             settings_value.grounding_min_overlap,
@@ -151,15 +156,61 @@ async def get_tutor_service() -> TutorService:
 
 def get_question_generation_service() -> QuestionGenerationService:
     current_settings = get_settings()
+    question_settings = current_settings.for_question_generation()
     return QuestionGenerationService(
-        settings=current_settings,
-        llm=OpenAICompatibleJsonLLM(current_settings),
+        settings=question_settings,
+        llm=OpenAICompatibleJsonLLM(question_settings),
         evidence_provider=JsonlEvidenceProvider(
             current_settings.question_evidence_path,
             approval_label_path=current_settings.question_approval_label_path,
         ),
         existing_question_provider=JsonlExistingQuestionProvider(
             current_settings.question_existing_path
+        ),
+    )
+
+
+def _build_tutor_llm(settings_value: Settings, tutor_settings: Settings, primary_llm):
+    """Add an opt-in fallback while keeping the primary model authoritative."""
+
+    fallback_model = settings_value.tutor_fallback_llm_model
+    if (
+        not settings_value.tutor_fallback_enabled
+        or primary_llm is None
+        or not fallback_model
+        or fallback_model == tutor_settings.llm_model
+    ):
+        return primary_llm
+    fallback_settings = tutor_settings.model_copy(
+        update={
+            "llm_provider": (
+                settings_value.tutor_fallback_llm_provider
+                or tutor_settings.llm_provider
+            ),
+            "llm_model": fallback_model,
+        }
+    )
+    try:
+        fallback_llm = LLMFactory(fallback_settings).create()
+    except ConfigurationError as exc:
+        logger.warning(
+            "tutor_fallback_unavailable",
+            extra={
+                "fallback_model_id": fallback_settings.llm_model,
+                "error_type": type(exc).__name__,
+            },
+        )
+        return primary_llm
+    if fallback_llm is None:
+        return primary_llm
+    return FallbackLLM(
+        primary_llm,
+        fallback_llm,
+        primary_model_id=tutor_settings.llm_model,
+        fallback_model_id=fallback_settings.llm_model,
+        attempt_timeout_seconds=min(
+            tutor_settings.llm_timeout_seconds,
+            tutor_settings.internal_request_timeout_seconds / 2,
         ),
     )
 

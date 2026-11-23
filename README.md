@@ -129,6 +129,20 @@ docker compose up --build
 `configs/chapters.yaml`에서 관리합니다. 현재 설정은 production curriculum이
 없는 상태의 임시 인플레이션 rubric입니다.
 
+## 튜터 모델 선정과 운영 전환
+
+5개 후보 모델의 비교·교육 품질·운영 지표가 모두 완료되기 전에는 최종 모델을
+선정하지 않습니다. 현재 상태와 누락 증거는 다음 명령으로 확인합니다.
+
+```bash
+.venv/bin/python scripts/analyze_model_selection.py
+```
+
+튜터와 문제 생성 모델은 승인 후 별도 환경변수로 전환할 수 있으며, 기존
+`TutorService`·Multi-turn RAG·내부 DTO 계약은 유지합니다. Fallback과 Rollback
+절차는 [docs/model_selection_and_rollout.md](docs/model_selection_and_rollout.md)에
+정리되어 있습니다.
+
 원본 파일은 Git에 포함하지 않으므로, 필요한 파일명과 배치 위치는
 [`data/README.md`](data/README.md)를 먼저 확인하세요. 원본 데이터가 없으면
 파이프라인이 빈 결과를 만들지 않고 입력 누락 오류를 표시합니다.
@@ -139,6 +153,64 @@ docker compose up --build
 `라벨링.xlsx` 160건이므로 BOK 문서의 최종 성능 지표는 아직 산출하지 않습니다.
 
 provider 키와 PostgreSQL이 없으면 외부 LLM 호출과 실제 pgvector E2E는 검증할 수 없습니다. 이 경우 단위/계약 테스트와 offline/deterministic 설정을 사용하되, 운영 품질이 검증되었다고 간주하지 않습니다.
+
+### 튜터 모델 비교 실험
+
+기존 Multi-turn RAG 경로에 동일한 근거·대화·개인화 입력을 넣고 OpenRouter의
+5개 후보 모델을 비교하는 실행기는
+[`docs/model_comparison.md`](docs/model_comparison.md)에 있습니다. 기본은 Mock
+모드이며, 실제 유료 호출은 `--execute`를 명시한 경우에만 실행됩니다.
+
+### 100건 튜터 평가 시나리오
+
+고정 시드 `20261122`로 canonical KDI 2,750건과 BOK 789건에서 기관별 50건씩
+선정하여 100건의 평가 시나리오를 생성합니다. 난이도와 유형 분포, 중복·원문 ID
+계보·개인정보·검수 상태를 함께 검사합니다. 원본 데이터와 운영 DB는 수정하지
+않습니다.
+
+```bash
+.venv/bin/python scripts/build_tutor_test_dataset.py --force
+.venv/bin/python scripts/validate_tutor_test_dataset.py
+```
+
+시나리오 원문 포함 JSONL은 로컬 전용
+`data/evaluation/tutor_test_100.jsonl`에, 매니페스트와 검증 보고서는 각각
+`reports/evaluation/dataset_manifest.json`과
+`reports/evaluation/dataset_validation_report.md`에 생성됩니다. 현재 원본에는
+canonical `conceptCode`, source/license 승인 상태, 독립 Gold 검수가 없으므로
+100건 모두 `PENDING_REVIEW`이고 최종 점수화는 차단됩니다. `expected*`와
+`goldStatus`는 `public_model_input` 및 모델 비교 입력에서 제외합니다.
+
+앞 단계의 모델 비교 결과를 60점 교육 품질 Rubric으로 평가하는 Judge 하네스는
+[`docs/tutor_quality_evaluation.md`](docs/tutor_quality_evaluation.md)에 있습니다.
+기본은 외부 API를 사용하지 않는 Mock Judge이며, `INDEPENDENT_APPROVED`가 아닌
+Gold에는 최종 점수를 부여하지 않습니다.
+
+```bash
+.venv/bin/python scripts/evaluate_tutor_quality.py --force
+```
+
+### Tutor Gold 검증과 OpenRouter Smoke Test
+
+기존 100건 시나리오를 원본과 독립적으로 검사하고, 정답 초안·출처·해시·검수
+필요 사유를 별도 로컬 큐에 생성합니다. 이 명령은 `INDEPENDENT_APPROVED`를
+자동으로 부여하지 않습니다.
+
+```bash
+.venv/bin/python scripts/validate_tutor_gold.py --report-only
+```
+
+최종 비교 실행(`--execute`)은 독립 Gold가 준비되지 않으면 fail-closed로
+중단됩니다. Gold와 무관한 OpenRouter 연결 확인은 별도 명령으로 수행합니다.
+
+```bash
+OPENROUTER_API_KEY=... \
+.venv/bin/python scripts/openrouter_smoke_test.py \
+  --model openai/gpt-5.4-mini
+```
+
+Smoke 결과는 교육 품질·Gold 평가가 아니며, 응답 원문은 저장하지 않습니다.
+최종 비교 전에 반드시 독립 사람 검수와 `validate_tutor_gold.py` 통과가 필요합니다.
 
 ### 라벨 품질·메타데이터 감사
 

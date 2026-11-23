@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Leren tutor quality evaluation result",
+  "type": "object",
+  "required": [
+    "caseId",
+    "modelId",
+    "evaluationStatus",
+    "judgeModelId",
+    "judgePromptVersion",
+    "accuracyScore",
+    "groundingScore",
+    "misconceptionScore",
+    "personalizationScore",
+    "pedagogyScore",
+    "totalEducationScore",
+    "deductions",
+    "criticalErrors",
+    "needsHumanReview"
+  ],
+  "properties": {
+    "caseId": {
+      "type": "string"
+    },
+    "modelId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evaluationStatus": {
+      "type": "string"
+    },
+    "judgeModelId": {
+      "type": "string"
+    },
+    "judgePromptVersion": {
+      "type": "string"
+    },
+    "accuracyScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "groundingScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "misconceptionScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "personalizationScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "pedagogyScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "totalEducationScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 60
+    },
+    "deductions": {
+      "type": "array"
+    },
+    "criticalErrors": {
+      "type": "array"
+    },
+    "needsHumanReview": {
+      "type": "boolean"
+    }
+  }
+}

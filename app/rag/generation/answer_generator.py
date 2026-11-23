@@ -19,6 +19,7 @@ class AnswerGenerator:
         self.settings = settings or get_settings()
         self.llm = llm
         self.last_usage: dict | None = None
+        self.model_id = getattr(llm, "model_id", self.settings.llm_model)
 
     async def generate(self, query: str, context: ContextBundle | str) -> str:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
@@ -32,6 +33,11 @@ class AnswerGenerator:
                 self.llm.acomplete(prompt), timeout=self.settings.llm_timeout_seconds
             )
             self.last_usage = self._extract_usage(response)
+            self.model_id = getattr(
+                self.llm,
+                "last_model_id",
+                getattr(self.llm, "model_id", self.settings.llm_model),
+            )
             answer = getattr(response, "text", str(response)).strip()
             if not answer:
                 raise GenerationError("LLM returned an empty answer")

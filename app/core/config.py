@@ -19,6 +19,16 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     llm_provider: str = "openrouter"
     llm_model: str = "openai/gpt-5.6-sol"
+    # Tutor and question generation can be moved independently.  ``None``
+    # deliberately preserves the legacy llm_* values until an explicit
+    # experiment decision is approved.
+    tutor_llm_provider: str | None = None
+    tutor_llm_model: str | None = None
+    tutor_fallback_enabled: bool = True
+    tutor_fallback_llm_provider: str | None = None
+    tutor_fallback_llm_model: str | None = None
+    question_generation_llm_provider: str | None = None
+    question_generation_llm_model: str | None = None
     embedding_provider: str = "openrouter"
     embedding_model: str = "openai/text-embedding-3-small"
     llm_base_url: str | None = None
@@ -68,10 +78,18 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("llm_provider", "embedding_provider")
+    @field_validator(
+        "llm_provider",
+        "embedding_provider",
+        "tutor_llm_provider",
+        "tutor_fallback_llm_provider",
+        "question_generation_llm_provider",
+    )
     @classmethod
-    def normalize_provider(cls, value: str) -> str:
-        return value.strip().lower()
+    def normalize_provider(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip().lower() or None
 
     @field_validator("openrouter_api_key", "openai_api_key", mode="before")
     @classmethod
@@ -81,13 +99,45 @@ class Settings(BaseSettings):
         value = str(value).strip()
         return value or None
 
-    @field_validator("llm_model", "embedding_model")
+    @field_validator(
+        "llm_model",
+        "embedding_model",
+        "tutor_llm_model",
+        "tutor_fallback_llm_model",
+        "question_generation_llm_model",
+    )
     @classmethod
-    def validate_model_name(cls, value: str) -> str:
+    def validate_model_name(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         value = value.strip()
         if not value:
             raise ValueError("model name must not be empty")
         return value
+
+    def for_tutor(self) -> "Settings":
+        """Return a copy with the explicitly configured tutor model applied."""
+
+        return self.model_copy(
+            update={
+                "llm_provider": self.tutor_llm_provider or self.llm_provider,
+                "llm_model": self.tutor_llm_model or self.llm_model,
+            }
+        )
+
+    def for_question_generation(self) -> "Settings":
+        """Return a copy with the explicitly configured question model applied."""
+
+        return self.model_copy(
+            update={
+                "llm_provider": (
+                    self.question_generation_llm_provider or self.llm_provider
+                ),
+                "llm_model": (
+                    self.question_generation_llm_model or self.llm_model
+                ),
+            }
+        )
 
     @field_validator("vector_store_schema")
     @classmethod

@@ -51,7 +51,9 @@ class OpenRouterLLM:
     """
 
     def __new__(cls, *args, **kwargs):
+        context_window = kwargs.pop("context_window", 1_000_000)
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
+        from llama_index.core.llms import LLMMetadata, MessageRole
         from llama_index.llms.openai import OpenAI
 
         class _OpenRouterOpenAI(OpenAI):
@@ -60,6 +62,20 @@ class OpenRouterLLM:
                 # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
                 model_name = super()._get_model_name()
                 return model_name.split("/", 1)[1] if "/" in model_name else model_name
+
+            @property
+            def metadata(self) -> LLMMetadata:
+                # LlamaIndex's OpenAI registry only knows OpenAI model names.
+                # OpenRouter accepts provider-qualified IDs from many vendors,
+                # so local metadata must not reject a valid remote model.
+                return LLMMetadata(
+                    context_window=context_window,
+                    num_output=self.max_tokens or -1,
+                    is_chat_model=True,
+                    is_function_calling_model=True,
+                    model_name=self.model,
+                    system_role=MessageRole.SYSTEM,
+                )
 
         return _OpenRouterOpenAI(*args, **kwargs)
 
