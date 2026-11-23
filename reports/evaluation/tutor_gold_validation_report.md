@@ -1,6 +1,6 @@
 # Tutor Gold 검증 보고서
 
-- 검증 시각: 2026-11-23T13:34:09.960154+00:00
+- 검증 시각: 2026-11-22T14:36:29.995904+00:00
 - 입력: `/Users/a1/Desktop/산학프로젝트 /ProjectTeam02_AI/data/evaluation/tutor_test_100.jsonl`
 - 구조 검증: `PASS`
 - 최종 평가 사용 가능: `BLOCKED`
@@ -14,7 +14,6 @@
 - conceptCode 누락: 100건
 - approvedEvidence 포함 행: 0건
 - 차단 finding: 600건
-- curation 입력 상태: `BLOCKED`
 
 ## 미완료 입력
 
