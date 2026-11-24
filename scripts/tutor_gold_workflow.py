@@ -9,7 +9,7 @@ Examples:
     # Record a human review event (the evidence JSON is supplied by the reviewer)
     .venv/bin/python scripts/tutor_gold_workflow.py --record-review \
       --case-id TUTOR-001 --reviewer-id reviewer-a --status IN_REVIEW \
-      --decision IN_REVIEW --notes "개념과 근거를 확인 중"
+      --지decision IN_REVIEW --notes "개념과 근거를 확인 중"
 
     # After two independent APPROVE events, record adjudication
     .venv/bin/python scripts/tutor_gold_workflow.py --adjudicate \
