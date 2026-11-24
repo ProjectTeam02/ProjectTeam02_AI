@@ -6,7 +6,10 @@
 
 ## 후보 모델과 기능
 
-카탈로그는 2026-11-22에 OpenRouter 모델 페이지에서 확인했습니다.
+`app/model_comparison/catalog.py`의 가격과 기능은 비교 실험의 기준값입니다.
+실제 실행 시 `OpenRouterCatalogClient`가 OpenRouter `/models` 및 모델별 endpoint를
+다시 조회하고, 조회 시각·모델 ID·provider·지원 파라미터를 결과에 함께 기록합니다.
+기준값과 실측 catalog 가격은 서로 덮어쓰지 않습니다.
 
 | 모델 ID | 비교 목적 | 텍스트 | 멀티턴 | 도구/구조화 출력 |
 |---|---|---:|---:|---:|
@@ -70,11 +73,24 @@
 실제 유료 호출은 명시적으로 `--execute`를 붙인 경우에만 수행됩니다. 키는
 환경변수에서만 읽고 결과 JSONL이나 로그에 남기지 않습니다.
 
+API 키 없이 현재 모델 가용성·가격·지원 파라미터만 확인하려면 다음을 실행합니다.
+
+```bash
+.venv/bin/python scripts/refresh_openrouter_catalog.py
+```
+
 ```bash
 OPENROUTER_API_KEY=... .venv/bin/python scripts/compare_tutor_models.py \
   data/evaluation/tutor_model_cases.jsonl \
-  --output reports/model_comparison/live_results.jsonl --execute
+  --output reports/model_comparison/live_results.jsonl --execute \
+  --max-calls 10 --max-cost-usd 1.0 --max-retries 1
 ```
+
+`--max-calls`는 재시도까지 포함한 provider 시도 횟수이고, 비용 상한을 넘으면
+추가 사례는 `blocked_budget`으로 기록합니다. 평가 중 모델을 다른 모델로
+자동 교체하지 않으며, catalog에서 사용할 수 없는 모델은
+`excluded_unavailable_model`로 남깁니다. GPT-5.4 Mini처럼 `temperature`를
+지원하지 않는 모델에는 해당 파라미터를 전달하지 않습니다.
 
 프로세스가 중단되면 같은 명령을 다시 실행하면 됩니다. 성공(`ok`, `mock`,
 `no_evidence`)한 동일 모드의 `(case_id, model_id)` 행은 건너뛰고, 오류 행은

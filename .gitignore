@@ -13,6 +13,14 @@ terraform.tfstate*
 data/*
 !data/.gitkeep
 !data/README.md
+
+# Local bundled datasets and extracted data must never be committed.
+/data.zip
+/datazip
+/datazip/
+
+# Finder metadata is local-only. Existing tracked copies remain untouched.
+**/.DS_Store
 .idea/
 
 # Codex 플러그인에서 제공되는 SKILL.md는 프로젝트 소스에 포함하지 않습니다.

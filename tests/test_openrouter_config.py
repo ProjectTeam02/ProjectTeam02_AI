@@ -60,6 +60,14 @@ def test_openrouter_llm_factory_uses_openrouter_key_and_base_url():
     assert llm.metadata.context_window > 0
 
 
+def test_openrouter_llm_factory_omits_unsupported_parameters():
+    llm = LLMFactory(openrouter_settings()).create({"max_tokens"})
+
+    assert llm.max_tokens is not None
+    assert "temperature" not in llm._get_model_kwargs()
+    assert "max_tokens" in llm._get_model_kwargs()
+
+
 def test_openrouter_embedding_factory_uses_qualified_model_and_dimension():
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     embedding = EmbeddingModelFactory(openrouter_settings()).create()

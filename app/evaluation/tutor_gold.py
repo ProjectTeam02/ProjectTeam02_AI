@@ -82,8 +82,14 @@ def validate_tutor_gold(
     *,
     documents: Iterable[NormalizedDocument] = (),
     concept_map: Mapping[str, str] | None = None,
+    require_full_dataset: bool = True,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """Validate cases and return a separate human review queue."""
+    """Validate cases and return a separate human review queue.
+
+    ``require_full_dataset=False`` is reserved for an explicit Interim run.
+    It still requires every supplied case to pass the independent Gold gate;
+    it only permits the input to be a reviewed subset of the 100-case set.
+    """
 
     rows = list(rows)
     document_by_id = {item.document_id: item for item in documents}
@@ -102,7 +108,7 @@ def validate_tutor_gold(
         ).items()
         if key and count > 1
     )
-    if len(rows) != 100:
+    if require_full_dataset and len(rows) != 100:
         errors.append(
             {"code": "ROW_COUNT", "detail": f"expected 100, found {len(rows)}"}
         )
@@ -261,13 +267,17 @@ def validate_tutor_gold(
             blockers.extend({"caseId": case_id, **finding} for finding in row_findings)
 
     valid_structure = not errors
-    ready = valid_structure and len(rows) == 100 and not blockers
+    ready = valid_structure and bool(rows) and not blockers
+    if require_full_dataset:
+        ready = ready and len(rows) == 100
     result = {
         "schemaVersion": 1,
         "goldValidatorVersion": "tutor-gold-v1",
         "validStructure": valid_structure,
         "readyForScoring": ready,
         "rowCount": len(rows),
+        "fullDatasetRequired": require_full_dataset,
+        "expectedRowCount": 100,
         "errorCount": len(errors),
         "blockingFindingCount": len(blockers),
         "errors": errors,

@@ -7,6 +7,12 @@
 현재 기록에는 독립 검수 Gold, 실제 Live 비용·TTFT·p50/p95, 완료된 사람 검토,
 Context A/B/C 결과가 없으므로 `NOT_READY`이며 운영 모델은 선정하지 않는다.
 
+모델 catalog 가용성·가격·지원 파라미터는 별도 보고서
+`reports/model_comparison/openrouter_catalog.json`에 기록합니다. catalog 조회는
+모델을 자동 대체하지 않으며, catalog에 없거나 chat completions를 지원하지 않는
+후보는 해당 사유와 함께 비교에서 제외됩니다. catalog 정보만으로 교육 품질
+점수나 운영 모델을 선정하지 않습니다.
+
 ```bash
 .venv/bin/python scripts/analyze_model_selection.py
 ```
