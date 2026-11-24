@@ -131,7 +131,7 @@ class InMemoryConversationRepository:
 
 class HistoryManager:
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    def __init__(self, repository=None, max_messages: int = 12, max_tokens: int = 1200):
+    def __init__(self, repository=None, max_messages: int = 12, max_tokens: int = 800):
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         self.repository = repository or InMemoryConversationRepository()
         self.max_messages = max(2, max_messages)

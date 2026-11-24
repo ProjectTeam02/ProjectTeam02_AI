@@ -84,8 +84,8 @@ def chunk_document(
     document: NormalizedDocument,
     tokenizer: ExactTokenizer,
     dataset_version: str,
-    max_tokens: int = 700,
-    overlap_tokens: int = 100,
+    max_tokens: int = 600,
+    overlap_tokens: int = 90,
 ) -> list[Chunk]:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     if max_tokens <= 0 or overlap_tokens < 0 or overlap_tokens >= max_tokens:
@@ -140,8 +140,8 @@ def make_chunks(
     documents: list[NormalizedDocument],
     tokenizer: ExactTokenizer,
     dataset_version: str,
-    max_tokens: int = 700,
-    overlap_tokens: int = 100,
+    max_tokens: int = 600,
+    overlap_tokens: int = 90,
 ) -> list[Chunk]:
     # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
     chunks: list[Chunk] = []

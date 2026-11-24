@@ -30,7 +30,7 @@ class ConceptGraphContextBuilder:
         *,
         max_depth: int = 2,
         max_nodes: int = 20,
-        max_tokens: int = 600,
+        max_tokens: int = 400,
         approved_statuses: frozenset[str] = APPROVED_RELATION_STATUSES,
     ) -> None:
         self.max_depth = max(0, max_depth)

@@ -28,7 +28,7 @@ class ContextBuilder:
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     def __init__(
         self,
-        max_tokens: int = 3000,
+        max_tokens: int = 2800,
         concept_graph_builder: ConceptGraphContextBuilder | None = None,
     ):
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.

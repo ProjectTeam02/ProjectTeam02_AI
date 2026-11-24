@@ -267,7 +267,7 @@ def projected_bok_chunks(
             for item in items
         ]
         nodes = SentenceSplitter(
-            chunk_size=700, chunk_overlap=100
+            chunk_size=600, chunk_overlap=90
         ).get_nodes_from_documents(documents)
         per_document: Counter[str] = Counter()
         chunk_ids: list[str] = []
@@ -289,7 +289,7 @@ def projected_bok_chunks(
             "chunk_id_duplicate_count": len(chunk_ids) - len(set(chunk_ids)),
             "chunks_per_document": statistics(list(per_document.values())),
             "chunk_token_statistics": statistics(chunk_token_lengths),
-            "settings": {"chunk_size": 700, "chunk_overlap": 100},
+            "settings": {"chunk_size": 600, "chunk_overlap": 90},
             "method": (
                 "LlamaIndex SentenceSplitter with DocumentIndexer metadata shape; "
                 "no index/DB write"
@@ -301,7 +301,7 @@ def projected_bok_chunks(
             "document_count": len(approved_rows),
             "chunk_count": None,
             "error": f"{type(exc).__name__}: {exc}",
-            "settings": {"chunk_size": 700, "chunk_overlap": 100},
+            "settings": {"chunk_size": 600, "chunk_overlap": 90},
             "method": "not measured",
         }
 
@@ -755,10 +755,10 @@ def main() -> None:
     settings = {
         "llm_model": "openai/gpt-4o-mini",
         "embedding_model": "openai/text-embedding-3-small",
-        "chunk_size": 700,
-        "chunk_overlap": 100,
+        "chunk_size": 600,
+        "chunk_overlap": 90,
         "approved_review_status": "approved",
-        "retrieval_top_k": 5,
+        "retrieval_top_k": 4,
         "embedding_dimension": 1536,
     }
     statistics_payload = {
