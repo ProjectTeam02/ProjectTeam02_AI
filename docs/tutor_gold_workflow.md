@@ -110,19 +110,6 @@ OPENROUTER_API_KEY=... .venv/bin/python scripts/compare_tutor_models.py \
 Interim 품질 결과는 `SCORED_PRELIMINARY`로 기록하며 최종 모델 선정 게이트에
 사용하지 않습니다. Final 비교는 100건 전체가 독립 승인된 경우에만 실행됩니다.
 
-## 평가 결과 보고서 생성
-
-현재 데이터 상태를 반영한 최종 비교·오류·진행 보고서는 다음 명령으로
-재생성합니다. OpenRouter 모델 목록 조회만 수행하며, 채팅 호출이나 비용이
-발생하는 `--execute`는 실행하지 않습니다.
-
-```bash
-.venv/bin/python scripts/generate_model_evaluation_reports.py
-```
-
-Gold 게이트가 열리지 않은 경우 결과 파일의 상태는 `NOT_READY`로 유지되고,
-교육 품질·운영 효율·순위·기본/Fallback 모델은 `N/A` 또는 `null`로 남습니다.
-
 ## 개인화 Context A/B/C 비교
 
 동일 사례를 다음 세 변형으로 확장해 별도 결과 파일에 기록할 수 있습니다.
