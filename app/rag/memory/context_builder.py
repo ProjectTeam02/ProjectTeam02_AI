@@ -152,6 +152,8 @@ class ContextBuilder:
                 ("취약도", profile.weakness_score),
                 ("최근 학습일", profile.last_studied_at),
                 ("현재 Stage", profile.current_stage_id),
+                ("데이터 충분성", profile.data_sufficiency),
+                ("불확실성", profile.uncertainty),
             ):
                 if value is not None:
                     profile_values.append(f"{label}={value}")
@@ -159,10 +161,13 @@ class ContextBuilder:
                 lines.append("학습자 프로필: " + "; ".join(profile_values))
         if context.misconception_hypotheses:
             hypotheses = ", ".join(
-                f"{item.hypothesis_type}(상태={item.status})"
+                self._hypothesis_text(item)
                 for item in context.misconception_hypotheses
             )
             lines.append("미확정 오개념 가설: " + hypotheses)
+            for item in context.misconception_hypotheses:
+                if item.rationale:
+                    lines.append(f"가설 근거: {item.rationale}")
         if context.diagnosis_evidence:
             evidence = ", ".join(
                 f"{item.evidence_id}(검수={item.review_status or '미지정'})"
@@ -176,12 +181,43 @@ class ContextBuilder:
             )
             lines.append("최근 평가: " + assessments)
         if context.teaching_strategy:
+            strategy_instructions = {
+                "FOUNDATION_EXPLANATION_V1": (
+                    "기초 정의를 먼저 설명하고 핵심 용어를 확인한다."
+                ),
+                "RELATION_COMPARISON_V1": (
+                    "혼동하는 두 개념을 표나 대비로 비교한다."
+                ),
+                "CAUSAL_CHAIN_V1": (
+                    "원인-전달경로-결과의 인과 사슬을 단계별로 설명한다."
+                ),
+                "APPLICATION_STEPWISE_V1": (
+                    "실생활 사례를 제시한 뒤 단계별 응용을 묻는다."
+                ),
+                "DIAGNOSTIC_CHECK_V1": (
+                    "오개념을 확정하지 않고 짧은 확인 질문으로 진단한다."
+                ),
+            }
+            instruction = strategy_instructions.get(
+                context.teaching_strategy.strategy_id,
+                "근거 중심으로 설명하고 이해도를 확인한다.",
+            )
             lines.append(
                 "교수 전략 참고: "
                 f"{context.teaching_strategy.strategy_id}/"
-                f"{context.teaching_strategy.strategy_version}"
+                f"{context.teaching_strategy.strategy_version}; "
+                f"지침={instruction}"
             )
         return "\n".join(lines) if len(lines) > 1 else ""
+
+    @staticmethod
+    def _hypothesis_text(item) -> str:
+        observation = (
+            item.observation_count
+            if item.observation_count is not None
+            else "N/A"
+        )
+        return f"{item.hypothesis_type}(상태={item.status}, 관찰={observation})"
 
     def _graph_text(self, context: PersonalizedTutorContext | None) -> str:
         if context is None or context.concept_graph_context is None:

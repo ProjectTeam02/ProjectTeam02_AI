@@ -19,6 +19,7 @@ from app.schemas.tutor import (
     ConceptGraphContext,
     InternalTutorRequest,
     PersonalizedTutorContext,
+    VerifiedTutorContext,
 )
 from app.services.tutor_service import TutorService
 
@@ -325,3 +326,86 @@ def test_openapi_exposes_personalized_context_with_camel_case_alias():
     assert "PersonalizedTutorContext" in str(
         request_schema["properties"]["personalizedContext"]
     )
+
+
+def test_verified_context_is_optional_and_keeps_backend_block_reason():
+    request = InternalTutorRequest.model_validate(
+        {
+            "requestId": str(uuid.uuid4()),
+            "conversationId": str(uuid.uuid4()),
+            "userId": str(uuid.uuid4()),
+            "question": "기준금리가 뭐야?",
+            "modelTier": "BASIC",
+            "verifiedContext": {
+                "verificationStatus": "BLOCKED",
+                "conceptCode": "ECON_RATE",
+                "blockingReasons": ["LICENSE_REVIEW_NOT_APPROVED:doc-1"],
+            },
+        }
+    )
+    assert request.verified_context.verification_status == "BLOCKED"
+    assert request.verified_context.blocking_reasons
+
+
+@pytest.mark.asyncio
+async def test_verified_context_filters_retrieval_to_backend_source_ids():
+    generator = CaptureGenerator()
+    pipeline = MultiTurnRAG(
+        history_manager=HistoryManager(),
+        retriever=Retriever(
+            InMemoryRetriever(
+                [
+                    RetrievedDocument(
+                        content="승인된 기준금리 자료",
+                        source="fixture",
+                        document_id="DOC-APPROVED",
+                        chunk_id="DOC-APPROVED:1",
+                    ),
+                    RetrievedDocument(
+                        content="다른 개념 자료",
+                        source="fixture",
+                        document_id="DOC-OTHER",
+                        chunk_id="DOC-OTHER:1",
+                    ),
+                ]
+            )
+        ),
+        answer_generator=generator,
+    )
+    result = await pipeline.run_external(
+        user_id="user-a",
+        conversation_id="conversation-a",
+        message="기준금리가 뭐야?",
+        history=[],
+        verified_context=VerifiedTutorContext(
+            verificationStatus="VERIFIED",
+            conceptCode="ECON_RATE",
+            sourceDocumentIds=["DOC-APPROVED"],
+        ),
+    )
+    assert [item.document_id for item in result.retrieved_documents] == ["DOC-APPROVED"]
+    assert "DOC-OTHER" not in generator.context.text
+
+
+@pytest.mark.asyncio
+async def test_blocked_verified_context_holds_answer_without_generation():
+    generator = CaptureGenerator()
+    pipeline = MultiTurnRAG(
+        history_manager=HistoryManager(),
+        retriever=Retriever(InMemoryRetriever([])),
+        answer_generator=generator,
+    )
+    result = await pipeline.run_external(
+        user_id="user-a",
+        conversation_id="conversation-a",
+        message="기준금리가 뭐야?",
+        history=[],
+        verified_context=VerifiedTutorContext(
+            verificationStatus="BLOCKED",
+            conceptCode="ECON_RATE",
+            blockingReasons=["CONCEPT_REVIEW_HISTORY_MISSING"],
+        ),
+    )
+    assert result.grounded is False
+    assert result.citations == []
+    assert generator.context is None

@@ -140,8 +140,26 @@ class LearnerProfileContext(BaseModel):
     current_stage_id: str | None = Field(
         default=None, max_length=255, alias="currentStageId"
     )
+    data_sufficiency: str | None = Field(
+        default=None, max_length=20, alias="dataSufficiency"
+    )
+    uncertainty: float | None = Field(default=None, ge=0.0, le=1.0)
+    weakness_components: dict[str, float] = Field(
+        default_factory=dict, max_length=10, alias="weaknessComponents"
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @field_validator("weakness_components")
+    @classmethod
+    def validate_weakness_components(
+        cls, values: dict[str, float]
+    ) -> dict[str, float]:
+        if any(not key.strip() or len(key.strip()) > 40 for key in values):
+            raise ValueError("weaknessComponents keys must contain 1 to 40 characters")
+        if any(value < 0.0 or value > 1.0 for value in values.values()):
+            raise ValueError("weaknessComponents values must be between 0 and 1")
+        return values
 
 
 class ConceptGraphNode(BaseModel):
@@ -204,6 +222,11 @@ class MisconceptionHypothesisContext(BaseModel):
     evidence_ids: list[str] = Field(
         default_factory=list, max_length=20, alias="evidenceIds"
     )
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    rationale: str | None = Field(default=None, max_length=500)
+    observation_count: int | None = Field(
+        default=None, ge=0, le=10000, alias="observationCount"
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
@@ -261,6 +284,49 @@ class PersonalizedTutorContext(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
 
+class VerifiedSourceContext(BaseModel):
+    """Backend-approved source metadata; the AI server never approves it."""
+
+    document_id: str = Field(alias="documentId", min_length=1, max_length=255)
+    document_version: str | None = Field(default=None, alias="documentVersion")
+    title: str | None = Field(default=None, max_length=255)
+    review_status: str | None = Field(default=None, alias="reviewStatus")
+    license_review_status: str | None = Field(
+        default=None, alias="licenseReviewStatus"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class VerifiedTutorContext(BaseModel):
+    """Fail-closed Backend verification boundary for Tutor retrieval."""
+
+    verification_status: str = Field(
+        min_length=1, max_length=30, alias="verificationStatus"
+    )
+    concept_id: str | None = Field(default=None, alias="conceptId")
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=100, alias="conceptCode"
+    )
+    version: int | None = Field(default=None, ge=1)
+    title: str | None = Field(default=None, max_length=255)
+    short_definition: str | None = Field(
+        default=None, max_length=1000, alias="shortDefinition"
+    )
+    source_document_ids: list[str] = Field(
+        default_factory=list, max_length=100, alias="sourceDocumentIds"
+    )
+    sources: list[VerifiedSourceContext] = Field(default_factory=list, max_length=100)
+    prerequisite_concepts: list[ConceptGraphNode] = Field(
+        default_factory=list, max_length=50, alias="prerequisiteConcepts"
+    )
+    blocking_reasons: list[str] = Field(
+        default_factory=list, max_length=50, alias="blockingReasons"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
 class InternalTutorRequest(BaseModel):
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     request_id: UUID = Field(alias="requestId")
@@ -281,6 +347,9 @@ class InternalTutorRequest(BaseModel):
     )
     personalized_context: PersonalizedTutorContext | None = Field(
         default=None, alias="personalizedContext"
+    )
+    verified_context: VerifiedTutorContext | None = Field(
+        default=None, alias="verifiedContext"
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")

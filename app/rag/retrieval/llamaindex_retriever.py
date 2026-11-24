@@ -24,6 +24,7 @@ class LlamaIndexRetriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         try:
@@ -36,7 +37,9 @@ class LlamaIndexRetriever:
             index = manager.get_or_create(self.settings.vector_store_collection)
             from llama_index.core.vector_stores import MetadataFilters
 
-            filters = self._filters(concept_id, stage_id, concept_codes)
+            filters = self._filters(
+                concept_id, stage_id, concept_codes, document_ids
+            )
             llama_retriever = index.as_retriever(
                 similarity_top_k=top_k, filters=MetadataFilters(filters=filters)
             )
@@ -46,7 +49,7 @@ class LlamaIndexRetriever:
 
                 # Global Knowledge is a fallback/reference corpus. It is not
                 # concept-coded, so a scoped concept code must not hide it.
-                global_filters = self._filters(None, None, None)
+                global_filters = self._filters(None, None, None, document_ids)
                 global_filters.append(
                     MetadataFilter(key="knowledge_scope", value="global")
                 )
@@ -84,6 +87,7 @@ class LlamaIndexRetriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not terms:
@@ -103,7 +107,7 @@ class LlamaIndexRetriever:
             for term in terms:
                 # The exact catalog is Global Knowledge. Scoped concept codes
                 # select the learning corpus, not the canonical term lookup.
-                filters = self._filters(None, None, None)
+                filters = self._filters(None, None, None, document_ids)
                 filters.append(MetadataFilter(key="term", value=term))
                 filters.append(MetadataFilter(key="knowledge_scope", value="global"))
                 retriever = index.as_retriever(
@@ -124,6 +128,7 @@ class LlamaIndexRetriever:
         concept_id: str | None,
         stage_id: str | None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ):
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         from llama_index.core.vector_stores import FilterOperator, MetadataFilter
@@ -142,6 +147,14 @@ class LlamaIndexRetriever:
                 MetadataFilter(
                     key="concept_code",
                     value=concept_codes,
+                    operator=FilterOperator.IN,
+                )
+            )
+        if document_ids:
+            filters.append(
+                MetadataFilter(
+                    key="document_id",
+                    value=document_ids,
                     operator=FilterOperator.IN,
                 )
             )
