@@ -31,6 +31,7 @@ class InMemoryRetriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         query_tokens = self._tokens(query)
@@ -43,6 +44,8 @@ class InMemoryRetriever:
             if stage_id and document.stage_id != stage_id:
                 continue
             if concept_codes and document.concept_code not in concept_codes:
+                continue
+            if document_ids and document.document_id not in document_ids:
                 continue
             content_tokens = self._tokens(
                 document.content + " " + (document.title or "")
@@ -140,6 +143,7 @@ class Retriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         limit = top_k if top_k is not None else self.top_k
@@ -157,6 +161,7 @@ class Retriever:
                 concept_id,
                 stage_id,
                 concept_codes,
+                document_ids,
             )
         except RetrievalError:
             raise
@@ -174,6 +179,7 @@ class Retriever:
                     concept_id,
                     stage_id,
                     concept_codes,
+                    document_ids,
                 )
             except Exception as exc:
                 # Sparse retrieval is an optimization over the existing dense
@@ -193,6 +199,7 @@ class Retriever:
                     concept_id,
                     stage_id,
                     concept_codes,
+                    document_ids,
                 )
                 if terms
                 else []
@@ -208,6 +215,7 @@ class Retriever:
                             None,
                             None,
                             None,
+                            document_ids,
                         ),
                         limit,
                     )
@@ -251,6 +259,7 @@ class Retriever:
         concept_id: str | None,
         stage_id: str | None,
         concept_codes: list[str] | None,
+        document_ids: list[str] | None,
     ) -> tuple[list[RetrievedDocument], str | None]:
         scoped = self._approved_unique(
             await self._backend_retrieve(
@@ -260,6 +269,7 @@ class Retriever:
                 concept_id,
                 stage_id,
                 concept_codes,
+                document_ids,
             )
         )
         if not (concept_id or stage_id or concept_codes):
@@ -268,7 +278,13 @@ class Retriever:
         try:
             global_candidates = self._approved_unique(
                 await self._backend_retrieve(
-                    backend, query, max(limit, min(50, limit * 3)), None, None, None
+                    backend,
+                    query,
+                    max(limit, min(50, limit * 3)),
+                    None,
+                    None,
+                    None,
+                    document_ids,
                 )
             )
             global_documents = [
@@ -290,6 +306,7 @@ class Retriever:
         concept_id: str | None,
         stage_id: str | None,
         concept_codes: list[str] | None,
+        document_ids: list[str] | None,
     ) -> list[RetrievedDocument]:
         try:
             return await backend.retrieve(
@@ -298,14 +315,24 @@ class Retriever:
                 concept_id=concept_id,
                 stage_id=stage_id,
                 concept_codes=concept_codes,
+                document_ids=document_ids,
             )
         except TypeError:
-            return await backend.retrieve(
-                query,
-                limit,
-                concept_id=concept_id,
-                stage_id=stage_id,
-            )
+            try:
+                return await backend.retrieve(
+                    query,
+                    limit,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                )
+            except TypeError:
+                return await backend.retrieve(
+                    query,
+                    limit,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                )
 
     def _approved_unique(
         self, documents: list[RetrievedDocument]
@@ -359,6 +386,7 @@ class Retriever:
         concept_id: str | None = None,
         stage_id: str | None = None,
         concept_codes: list[str] | None = None,
+        document_ids: list[str] | None = None,
     ) -> list[RetrievedDocument]:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if not documents or self.related_term_top_k == 0:
@@ -385,6 +413,7 @@ class Retriever:
             concept_id,
             stage_id,
             concept_codes,
+            document_ids,
         )
         return self._merge(documents, related, self.last_limit)
 
@@ -396,12 +425,22 @@ class Retriever:
         concept_id: str | None,
         stage_id: str | None,
         concept_codes: list[str] | None,
+        document_ids: list[str] | None = None,
     ):
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         if concept_codes is None:
-            return await exact_retrieve(
-                terms, top_k, concept_id=concept_id, stage_id=stage_id
-            )
+            try:
+                return await exact_retrieve(
+                    terms,
+                    top_k,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    document_ids=document_ids,
+                )
+            except TypeError:
+                return await exact_retrieve(
+                    terms, top_k, concept_id=concept_id, stage_id=stage_id
+                )
         try:
             return await exact_retrieve(
                 terms,
@@ -409,11 +448,21 @@ class Retriever:
                 concept_id=concept_id,
                 stage_id=stage_id,
                 concept_codes=concept_codes,
+                document_ids=document_ids,
             )
         except TypeError:
-            return await exact_retrieve(
-                terms, top_k, concept_id=concept_id, stage_id=stage_id
-            )
+            try:
+                return await exact_retrieve(
+                    terms,
+                    top_k,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                )
+            except TypeError:
+                return await exact_retrieve(
+                    terms, top_k, concept_id=concept_id, stage_id=stage_id
+                )
 
     @staticmethod
     def _merge(

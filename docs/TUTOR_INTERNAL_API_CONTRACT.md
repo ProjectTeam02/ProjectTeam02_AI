@@ -38,7 +38,8 @@ ${INTERNAL_API_TOKEN}` 헤더를 사용한다. 토큰이 비어 있거나 일치
     "attemptId": null
   },
   "knowledgeScope": {"conceptCodes": []},
-  "personalizedContext": null
+  "personalizedContext": null,
+  "verifiedContext": null
 }
 ```
 
@@ -79,12 +80,20 @@ ${INTERNAL_API_TOKEN}` 헤더를 사용한다. 토큰이 비어 있거나 일치
 }
 ```
 
-이 확장은 기존 요청을 깨지 않도록 선택 사항이며, 누락되면 기존 Multi-turn RAG
-흐름을 사용한다. 현재 Backend `develop`의 요청 DTO는 이 필드를 아직 허용하거나
-AI로 전달하지 않으므로, 운영 연결 전 Backend DTO·Swagger·검수 상태 계약을 먼저
-업데이트해야 한다. `accuracyRate`, 숙련도 값은 0~1 정규화 값이며, Backend의
-퍼센트 값 변환 규칙이 확정되기 전에는 임의 변환하지 않는다. 개념 관계는
-`relationReviewStatus`가 승인 상태로 명시된 경우만 Context에 포함한다.
+이 확장은 기존 요청을 깨뜨리지 않도록 선택 사항이며, 누락되면 기존 Multi-turn
+RAG 흐름을 사용한다. `accuracyRate`, 숙련도, `weaknessScore`는 Backend가 사용자
+소유 학습 기록에서 0~1로 계산한다. AI 서버는 이를 저장하거나 점수·숙련도를
+확정하지 않는다. 개념 관계는 `relationReviewStatus`가 승인 상태로 명시된
+경우만 Context에 포함한다.
+
+`verifiedContext`는 Backend가 검수·라이선스·선수 관계를 확인한 결과다. 상태가
+`VERIFIED`이면 `sourceDocumentIds`에 포함된 문서만 검색하고, 그 외 상태이면
+AI는 생성하지 않고 근거 부족 응답을 반환한다. AI 서버는 이 상태를 승인으로
+승격하지 않는다.
+
+Backend는 `GET /api/v1/tutor/personalization`에서 현재 취약도, 미확정 오개념
+가설, 교수 전략, 승인된 재평가 문항 후보를 반환한다. 기존 복습 답안 API가
+재평가 결과를 저장하며, 다음 Tutor 요청에서 Context를 다시 계산한다.
 
 ## Response (`200`)
 

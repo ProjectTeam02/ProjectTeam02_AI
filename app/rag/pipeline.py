@@ -13,7 +13,7 @@ from app.rag.memory.history_manager import HistoryManager
 from app.rag.retrieval.query_rewriter import QueryRewriter
 from app.rag.retrieval.retriever import Retriever
 from app.rag.retrieval.types import RetrievedDocument
-from app.schemas.tutor import PersonalizedTutorContext
+from app.schemas.tutor import PersonalizedTutorContext, VerifiedTutorContext
 
 
 @dataclass(slots=True)
@@ -123,6 +123,7 @@ class MultiTurnRAG:
         concept_codes: list[str] | None = None,
         history_from_seq: int | None = None,
         personalized_context: PersonalizedTutorContext | None = None,
+        verified_context: VerifiedTutorContext | None = None,
     ) -> RAGResult:
         """Run with Node.js-supplied context without touching conversation tables."""
         return await self._execute(
@@ -136,6 +137,7 @@ class MultiTurnRAG:
             concept_codes=concept_codes,
             history_from_seq=history_from_seq,
             personalized_context=personalized_context,
+            verified_context=verified_context,
         )
 
     async def _execute(
@@ -151,6 +153,7 @@ class MultiTurnRAG:
         concept_codes: list[str] | None = None,
         history_from_seq: int | None = None,
         personalized_context: PersonalizedTutorContext | None = None,
+        verified_context: VerifiedTutorContext | None = None,
     ) -> RAGResult:
         # 함수 역할: 입력을 처리하고 필요한 결과를 반환합니다.
         trace: list[dict[str, object]] = []
@@ -159,28 +162,61 @@ class MultiTurnRAG:
             lambda: self.query_rewriter.rewrite(message, history),
             trace,
         )
-        documents = await self.harness.run(
-            StageContract("retrieval", "rewritten query + scope", "documents"),
-            lambda: self.retriever.retrieve(
-                rewritten_query,
-                concept_id=concept_id,
-                stage_id=stage_id,
-                concept_codes=concept_codes,
-            ),
-            trace,
+        verified_status = (
+            verified_context.verification_status.casefold()
+            if verified_context
+            else None
         )
-        documents = await self.harness.run(
-            StageContract(
-                "related_retrieval", "retrieved documents + scope", "documents"
-            ),
-            lambda: self.retriever.retrieve_related(
-                documents,
-                concept_id=concept_id,
-                stage_id=stage_id,
-                concept_codes=concept_codes,
-            ),
-            trace,
+        allowed_document_ids = (
+            list(dict.fromkeys(verified_context.source_document_ids))
+            if verified_context and verified_status == "verified"
+            else []
         )
+        if verified_context and (
+            verified_status != "verified" or not allowed_document_ids
+        ):
+            documents = []
+            trace.append(
+                {
+                    "stage": "retrieval",
+                    "status": "blocked",
+                    "reason": "backend_verification_blocked",
+                }
+            )
+        else:
+            documents = await self.harness.run(
+                StageContract("retrieval", "rewritten query + scope", "documents"),
+                lambda: self.retriever.retrieve(
+                    rewritten_query,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                    document_ids=allowed_document_ids,
+                ),
+                trace,
+            )
+            documents = await self.harness.run(
+                StageContract(
+                    "related_retrieval", "retrieved documents + scope", "documents"
+                ),
+                lambda: self.retriever.retrieve_related(
+                    documents,
+                    concept_id=concept_id,
+                    stage_id=stage_id,
+                    concept_codes=concept_codes,
+                    document_ids=allowed_document_ids,
+                ),
+                trace,
+            )
+        if verified_context:
+            allowed = set(allowed_document_ids)
+            documents = [
+                document
+                for document in documents
+                if document.document_id in allowed
+                and document.review_status
+                == get_settings().approved_review_status
+            ]
         if concept_codes:
             allowed_codes = set(concept_codes)
             documents = [

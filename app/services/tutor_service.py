@@ -124,6 +124,7 @@ class TutorService:
                     concept_codes=concept_codes or None,
                     history_from_seq=history_from_seq,
                     personalized_context=request.personalized_context,
+                    verified_context=request.verified_context,
                 ),
                 timeout=settings.internal_request_timeout_seconds,
             )
