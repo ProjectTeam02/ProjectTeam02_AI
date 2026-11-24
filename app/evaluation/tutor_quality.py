@@ -294,6 +294,7 @@ def tutor_quality_schema() -> dict[str, Any]:
             "caseId",
             "modelId",
             "evaluationStatus",
+            "evaluationStage",
             "judgeModelId",
             "judgePromptVersion",
             "accuracyScore",
@@ -309,7 +310,9 @@ def tutor_quality_schema() -> dict[str, Any]:
         "properties": {
             "caseId": {"type": "string"},
             "modelId": {"type": ["string", "null"]},
+            "contextVariant": {"type": ["string", "null"]},
             "evaluationStatus": {"type": "string"},
+            "evaluationStage": {"type": "string"},
             "judgeModelId": {"type": "string"},
             "judgePromptVersion": {"type": "string"},
             "accuracyScore": {"type": ["number", "null"], "minimum": 0},
@@ -372,9 +375,12 @@ def gold_gate(case: dict[str, Any]) -> tuple[bool, list[str]]:
     if not evidence:
         reasons.append("approvedEvidence is empty")
     for item in evidence:
-        if item.get("approvalStatus") != "approved":
+        if str(item.get("approvalStatus", "")).casefold() != "approved":
             reasons.append("evidence approvalStatus is not approved")
-        if item.get("licenseStatus") not in APPROVED_LICENSE_STATUSES:
+        if (
+            str(item.get("licenseStatus", "")).casefold()
+            not in APPROVED_LICENSE_STATUSES
+        ):
             reasons.append("evidence licenseStatus is not approved")
         if not str(item.get("content", "")).strip():
             reasons.append("approved evidence content is empty")
@@ -459,6 +465,8 @@ async def evaluate_comparison_result(
     case: dict[str, Any],
     comparison_result: dict[str, Any],
     judge: JudgeClient,
+    *,
+    evaluation_stage: str = "FINAL_MODEL_EVALUATION",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Evaluate one comparison result and return (automated result, human row)."""
 
@@ -470,10 +478,12 @@ async def evaluate_comparison_result(
         "rubricVersion": RUBRIC_VERSION,
         "caseId": case.get("caseId"),
         "modelId": model_id,
+        "contextVariant": comparison_result.get("context_variant"),
         "responseId": response_id,
         "evaluationSource": "AUTOMATED_LLM_JUDGE",
         "judgeModelId": judge.model_id,
         "judgePromptVersion": JUDGE_PROMPT_VERSION,
+        "evaluationStage": evaluation_stage,
         "goldStatus": case.get("goldStatus"),
         "evaluationStatus": "NOT_EVALUATED",
         "accuracyScore": None,
@@ -586,7 +596,11 @@ async def evaluate_comparison_result(
     base.update(
         score_values,
         totalEducationScore=round(total, 2),
-        evaluationStatus="SCORED",
+        evaluationStatus=(
+            "SCORED_PRELIMINARY"
+            if evaluation_stage == "INTERIM_MODEL_COMPARISON"
+            else "SCORED"
+        ),
         deductions=deductions,
         criticalErrors=critical_errors,
         needsHumanReview=bool(payload.needs_human_review or critical_errors),
@@ -799,7 +813,11 @@ def _grounding_validator_result(
 def deduction_report(records: list[dict[str, Any]]) -> str:
     """Render a compact analysis report without exposing evaluator prompts."""
 
-    evaluated = [item for item in records if item.get("evaluationStatus") == "SCORED"]
+    evaluated = [
+        item
+        for item in records
+        if item.get("evaluationStatus") in {"SCORED", "SCORED_PRELIMINARY"}
+    ]
     status_counts = _counts(item.get("evaluationStatus") for item in records)
     error_counts = _counts(
         error.get("code")
@@ -843,6 +861,8 @@ def deduction_report(records: list[dict[str, Any]]) -> str:
         "## 안전 정책",
         "",
         "- `INDEPENDENT_APPROVED`가 아닌 사례에는 최종 점수를 부여하지 않는다.",
+        "- Interim 점수는 `SCORED_PRELIMINARY`로 표시하며 "
+        "최종 선정 게이트에 사용하지 않는다.",
         "- Judge가 반환한 인용문은 승인 원문에 포함되는지 자동 검증한다.",
         "- 자동 Judge 결과와 익명 사람 검토 결과는 별도 파일·필드로 관리한다.",
     ]

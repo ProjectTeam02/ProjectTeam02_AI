@@ -255,7 +255,7 @@ class ModelComparisonRunner:
                 "mock"
                 if mode == "mock"
                 else "smoke_ok"
-                if mode == "smoke"
+                if mode in {"smoke", "live_smoke"}
                 else "ok"
             )
             if not rag_result.retrieved_documents:
@@ -284,6 +284,7 @@ class ModelComparisonRunner:
                     spec, usage, self.model_metadata.get(spec.model_id)
                 ),
                 model_metadata=_metadata_dict(self.model_metadata.get(spec.model_id)),
+                context_variant=case.context_variant,
             )
         except Exception as exc:
             logger.warning(
@@ -307,6 +308,7 @@ class ModelComparisonRunner:
                 error_code=_error_code(exc),
                 provider_status=_provider_status(exc),
                 model_metadata=_metadata_dict(self.model_metadata.get(spec.model_id)),
+                context_variant=case.context_variant,
             )
 
     def _build_generator(
@@ -470,6 +472,7 @@ def _error_result(
         error_code=_error_code(exc),
         provider_status=_provider_status(exc),
         model_metadata=_metadata_dict(metadata),
+        context_variant=case.context_variant,
     )
 
 

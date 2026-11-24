@@ -84,6 +84,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--stage",
+        choices=("mock", "live_smoke", "interim", "final"),
+        default=None,
+        help=(
+            "evaluation workflow stage; live_smoke is non-Gold, interim uses only "
+            "independently approved subset, final requires the complete Gold set"
+        ),
+    )
+    parser.add_argument(
         "--init-template",
         metavar="PATH",
         help="create a fillable template instead of running a batch",
@@ -109,14 +118,22 @@ async def run(args: argparse.Namespace) -> int:
         raise SystemExit("--max-retries must not be negative")
     if args.min_interval_ms < 0:
         raise SystemExit("--min-interval-ms must not be negative")
-    if args.smoke_test and not args.execute:
-        raise SystemExit("--smoke-test requires --execute for an OpenRouter smoke run")
-    if args.execute and not args.smoke_test:
-        validation, _ = validate_tutor_gold(read_jsonl(Path(args.input)))
+    if args.smoke_test and args.stage not in {None, "live_smoke"}:
+        raise SystemExit("--smoke-test and --stage cannot select different stages")
+    stage = args.stage or ("final" if args.execute else "mock")
+    if args.smoke_test:
+        stage = "live_smoke"
+    if stage in {"live_smoke", "interim", "final"} and not args.execute:
+        raise SystemExit(f"--stage {stage} requires explicit --execute")
+    if stage in {"interim", "final"}:
+        validation, _ = validate_tutor_gold(
+            read_jsonl(Path(args.input)),
+            require_full_dataset=stage == "final",
+        )
         if not validation["readyForScoring"]:
             raise SystemExit(
-                "Gold is not independent-approved; run scripts/validate_tutor_gold.py "
-                "and complete human adjudication before the final benchmark"
+                f"Gold is not ready for {stage}; run scripts/tutor_gold_workflow.py "
+                "and complete the required human adjudication"
             )
     cases = load_cases(args.input)
     specs = select_models(args.models)
@@ -148,7 +165,7 @@ async def run(args: argparse.Namespace) -> int:
             encoding="utf-8",
         )
     max_cases = args.max_cases
-    if args.smoke_test and max_cases is None:
+    if stage == "live_smoke" and max_cases is None:
         max_cases = 1
     call_limit = args.max_calls
     if call_limit is None:
@@ -168,14 +185,13 @@ async def run(args: argparse.Namespace) -> int:
         execute=args.execute,
         resume=not args.no_resume,
         max_cases=max_cases,
-        run_label="smoke" if args.smoke_test else None,
+        run_label=stage,
     )
     counts: dict[str, int] = {}
     for result in results:
         counts[result.status] = counts.get(result.status, 0) + 1
-    mode = "smoke" if args.smoke_test else ("live" if args.execute else "mock")
     print(
-        f"completed {len(results)} new {mode} result(s) for "
+        f"completed {len(results)} new {stage} result(s) for "
         f"{len(specs)} model(s); {counts or 'all rows already complete'}"
     )
     print(f"results: {Path(args.output)}")

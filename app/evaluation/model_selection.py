@@ -44,12 +44,21 @@ def _model_summary(
 ) -> dict[str, Any]:
     comparisons = [row for row in comparison_rows if row.get("model_id") == model_id]
     quality = [row for row in quality_rows if row.get("modelId") == model_id]
-    live = [row for row in comparisons if row.get("mode") == "live"]
+    live = [row for row in comparisons if row.get("mode") in {"live", "final"}]
+    interim = [row for row in comparisons if row.get("mode") == "interim"]
     successful_live = [row for row in live if row.get("status") == "ok"]
     scored = [
         row
         for row in quality
-        if row.get("evaluationStatus") == "EVALUATED"
+        if row.get("evaluationStatus") in {"EVALUATED", "SCORED"}
+        and row.get("evaluationStage", "FINAL_MODEL_EVALUATION")
+        == "FINAL_MODEL_EVALUATION"
+        and row.get("totalEducationScore") is not None
+    ]
+    preliminary = [
+        row
+        for row in quality
+        if row.get("evaluationStatus") == "SCORED_PRELIMINARY"
         and row.get("totalEducationScore") is not None
     ]
     latency = [
@@ -67,8 +76,11 @@ def _model_summary(
         "comparisonStatusCounts": _status_counts(comparisons, "status"),
         "liveCount": len(live),
         "liveSuccessCount": len(successful_live),
+        "interimCount": len(interim),
+        "interimSuccessCount": sum(row.get("status") == "ok" for row in interim),
         "qualityCount": len(quality),
         "scoredQualityCount": len(scored),
+        "preliminaryQualityCount": len(preliminary),
         "educationAverage": (
             round(
                 sum(float(row["totalEducationScore"]) for row in scored)

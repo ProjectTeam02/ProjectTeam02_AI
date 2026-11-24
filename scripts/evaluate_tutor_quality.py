@@ -59,6 +59,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument(
+        "--stage",
+        choices=(
+            "MOCK_TEST",
+            "INTERIM_MODEL_COMPARISON",
+            "FINAL_MODEL_EVALUATION",
+        ),
+        default=None,
+        help="evaluation stage; interim scores remain PRELIMINARY",
+    )
+    parser.add_argument(
         "--execute",
         action="store_true",
         help="make live OpenRouter Judge calls; disabled by default",
@@ -84,6 +94,16 @@ def read_jsonl(path: Path) -> list[dict]:
     return rows
 
 
+def _case_for_result(cases: dict[str, dict], result: dict) -> dict | None:
+    case_id = result.get("case_id")
+    case = cases.get(case_id)
+    if case is not None:
+        return case
+    if isinstance(case_id, str) and "::context-" in case_id:
+        return cases.get(case_id.split("::context-", 1)[0])
+    return None
+
+
 async def run(args: argparse.Namespace) -> int:
     for path in (args.output, args.human_review):
         if path.exists() and not args.force:
@@ -93,6 +113,14 @@ async def run(args: argparse.Namespace) -> int:
     if args.max_results is not None:
         result_rows = result_rows[: args.max_results]
     settings = Settings(_env_file=None)
+    evaluation_stage = args.stage
+    if evaluation_stage is None:
+        if result_rows and all(row.get("mode") == "mock" for row in result_rows):
+            evaluation_stage = "MOCK_TEST"
+        elif any(row.get("mode") == "interim" for row in result_rows):
+            evaluation_stage = "INTERIM_MODEL_COMPARISON"
+        else:
+            evaluation_stage = "FINAL_MODEL_EVALUATION"
     judge = (
         OpenRouterJudgeClient(args.judge_model, settings=settings)
         if args.execute
@@ -102,14 +130,16 @@ async def run(args: argparse.Namespace) -> int:
     human_rows: list[dict] = []
     for result in result_rows:
         case_id = result.get("case_id")
-        case = cases.get(case_id)
+        case = _case_for_result(cases, result)
         if case is None:
             evaluations.append(
                 {
                     "schemaVersion": 1,
                     "caseId": case_id,
                     "modelId": result.get("model_id"),
+                    "contextVariant": result.get("context_variant"),
                     "evaluationStatus": "NOT_EVALUATED_UNKNOWN_CASE",
+                    "evaluationStage": evaluation_stage,
                     "judgeModelId": judge.model_id,
                     "judgePromptVersion": "tutor-quality-judge-v1",
                     "accuracyScore": None,
@@ -130,7 +160,12 @@ async def run(args: argparse.Namespace) -> int:
                 }
             )
             continue
-        evaluation, human = await evaluate_comparison_result(case, result, judge)
+        evaluation, human = await evaluate_comparison_result(
+            case,
+            result,
+            judge,
+            evaluation_stage=evaluation_stage,
+        )
         evaluations.append(evaluation)
         human_rows.append(human)
     write_jsonl(args.output, evaluations)
@@ -151,6 +186,7 @@ async def run(args: argparse.Namespace) -> int:
             {
                 "evaluated": len(evaluations),
                 "judgeMode": "live" if args.execute else "mock",
+                "evaluationStage": evaluation_stage,
                 "judgeModelId": judge.model_id,
                 "statusCounts": counts,
                 "output": str(args.output),

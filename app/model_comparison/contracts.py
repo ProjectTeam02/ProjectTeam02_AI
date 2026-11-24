@@ -23,6 +23,7 @@ class ComparisonCase:
     concept_id: str | None = None
     concept_codes: list[str] | None = None
     personalized_context: PersonalizedTutorContext | None = None
+    context_variant: str | None = None
 
     def __post_init__(self) -> None:
         normalized_history: list[dict[str, Any]] = []
@@ -92,6 +93,10 @@ class ComparisonCase:
                 raise ValueError(f"line {line_number}: concept_codes is invalid")
             concept_codes = [value.strip() for value in concept_codes]
 
+        context_variant = _optional_string(
+            _first_value(payload, "context_variant", "contextVariant")
+        )
+
         return cls(
             case_id=case_id,
             question=question,
@@ -109,6 +114,7 @@ class ComparisonCase:
             ),
             concept_codes=concept_codes,
             personalized_context=personalized_context,
+            context_variant=context_variant,
         )
 
     def fingerprint(self) -> str:
@@ -132,6 +138,7 @@ class ComparisonCase:
             "stage_id": self.stage_id,
             "concept_id": self.concept_id,
             "concept_codes": self.concept_codes,
+            "context_variant": self.context_variant,
         }
         encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()
         return hashlib.sha256(encoded).hexdigest()
@@ -156,6 +163,7 @@ class ComparisonResult:
     error_code: str | None = None
     provider_status: int | None = None
     model_metadata: dict[str, Any] | None = None
+    context_variant: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -183,6 +191,7 @@ class ComparisonResult:
                 else None
             ),
             "model_metadata": self.model_metadata,
+            "context_variant": self.context_variant,
         }
 
 
