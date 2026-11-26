@@ -152,9 +152,7 @@ class LearnerProfileContext(BaseModel):
 
     @field_validator("weakness_components")
     @classmethod
-    def validate_weakness_components(
-        cls, values: dict[str, float]
-    ) -> dict[str, float]:
+    def validate_weakness_components(cls, values: dict[str, float]) -> dict[str, float]:
         if any(not key.strip() or len(key.strip()) > 40 for key in values):
             raise ValueError("weaknessComponents keys must contain 1 to 40 characters")
         if any(value < 0.0 or value > 1.0 for value in values.values()):
@@ -165,9 +163,7 @@ class LearnerProfileContext(BaseModel):
 class ConceptGraphNode(BaseModel):
     """A Backend-supplied graph edge target, not an AI-owned graph record."""
 
-    concept_code: str = Field(
-        min_length=1, max_length=30, alias="conceptCode"
-    )
+    concept_code: str = Field(min_length=1, max_length=30, alias="conceptCode")
     title: str | None = Field(default=None, max_length=255)
     relationship_type: str = Field(
         default="PREREQUISITE", min_length=1, max_length=40, alias="relationshipType"
@@ -291,9 +287,7 @@ class VerifiedSourceContext(BaseModel):
     document_version: str | None = Field(default=None, alias="documentVersion")
     title: str | None = Field(default=None, max_length=255)
     review_status: str | None = Field(default=None, alias="reviewStatus")
-    license_review_status: str | None = Field(
-        default=None, alias="licenseReviewStatus"
-    )
+    license_review_status: str | None = Field(default=None, alias="licenseReviewStatus")
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
@@ -327,6 +321,119 @@ class VerifiedTutorContext(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
 
+class MisconceptionType(StrEnum):
+    KNOWLEDGE_GAP = "KNOWLEDGE_GAP"
+    RELATION_ERROR = "RELATION_ERROR"
+    CAUSAL_ERROR = "CAUSAL_ERROR"
+    APPLICATION_ERROR = "APPLICATION_ERROR"
+    UNCERTAIN = "UNCERTAIN"
+
+
+class ProposedActionType(StrEnum):
+    SOLVE_QUESTION = "SOLVE_QUESTION"
+    START_STAGE = "START_STAGE"
+    REVIEW_CONCEPT = "REVIEW_CONCEPT"
+    CONTINUE_LEARNING = "CONTINUE_LEARNING"
+    NONE = "NONE"
+
+
+class ActionPriority(StrEnum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class EligibleQuestionCandidate(BaseModel):
+    """A Backend-verified question that the AI may recommend, never discover."""
+
+    question_id: str = Field(min_length=1, max_length=255, alias="questionId")
+    concept_code: str = Field(min_length=1, max_length=100, alias="conceptCode")
+    stage_id: str = Field(min_length=1, max_length=255, alias="stageId")
+    attempt_id: str = Field(min_length=1, max_length=255, alias="attemptId")
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class TutoringDiagnosis(BaseModel):
+    misconception_type: MisconceptionType = Field(alias="misconceptionType")
+    confidence: float = Field(ge=0.0, le=1.0)
+    evidence_question_ids: list[str] = Field(
+        default_factory=list, max_length=20, alias="evidenceQuestionIds"
+    )
+    needs_followup: bool = Field(alias="needsFollowup")
+    reasoning_summary: str = Field(
+        min_length=1, max_length=500, alias="reasoningSummary"
+    )
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class TutoringStrategy(BaseModel):
+    strategy_id: str = Field(min_length=1, max_length=100, alias="strategyId")
+    strategy_version: str = Field(min_length=1, max_length=50, alias="strategyVersion")
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class TutoringMeta(BaseModel):
+    schema_version: str = Field(min_length=1, max_length=20, alias="schemaVersion")
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=100, alias="conceptCode"
+    )
+    diagnosis: TutoringDiagnosis
+    strategy: TutoringStrategy
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+
+class ProposedAction(BaseModel):
+    type: ProposedActionType
+    concept_code: str | None = Field(
+        default=None, min_length=1, max_length=100, alias="conceptCode"
+    )
+    question_id: str | None = Field(
+        default=None, min_length=1, max_length=255, alias="questionId"
+    )
+    stage_id: str | None = Field(
+        default=None, min_length=1, max_length=255, alias="stageId"
+    )
+    attempt_id: str | None = Field(
+        default=None, min_length=1, max_length=255, alias="attemptId"
+    )
+    reason: str = Field(min_length=1, max_length=500)
+    priority: ActionPriority
+
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @model_validator(mode="after")
+    def validate_action_fields(self):
+        if self.type is ProposedActionType.SOLVE_QUESTION:
+            if not all((self.question_id, self.stage_id, self.attempt_id)):
+                raise ValueError(
+                    "SOLVE_QUESTION requires questionId, stageId, and attemptId"
+                )
+        elif self.type is ProposedActionType.START_STAGE:
+            if not self.stage_id or self.question_id or self.attempt_id:
+                raise ValueError(
+                    "START_STAGE requires stageId and forbids questionId/attemptId"
+                )
+        elif self.type is ProposedActionType.REVIEW_CONCEPT:
+            if not self.concept_code or self.question_id or self.attempt_id:
+                raise ValueError(
+                    "REVIEW_CONCEPT requires conceptCode and forbids "
+                    "questionId/attemptId"
+                )
+        elif self.type is ProposedActionType.CONTINUE_LEARNING:
+            if self.question_id or not (self.stage_id or self.attempt_id):
+                raise ValueError(
+                    "CONTINUE_LEARNING requires stageId or attemptId and "
+                    "forbids questionId"
+                )
+        elif any((self.question_id, self.stage_id, self.attempt_id)):
+            raise ValueError("NONE must not contain questionId, stageId, or attemptId")
+        return self
+
+
 class InternalTutorRequest(BaseModel):
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
     request_id: UUID = Field(alias="requestId")
@@ -350,6 +457,9 @@ class InternalTutorRequest(BaseModel):
     )
     verified_context: VerifiedTutorContext | None = Field(
         default=None, alias="verifiedContext"
+    )
+    eligible_question_candidates: list[EligibleQuestionCandidate] = Field(
+        default_factory=list, max_length=10, alias="eligibleQuestionCandidates"
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
@@ -380,6 +490,11 @@ class InternalTutorRequest(BaseModel):
             raise ValueError("history sequenceNo values must be unique and increasing")
         if (self.summary is None) != (self.summary_until_seq is None):
             raise ValueError("summary and summaryUntilSeq must be supplied together")
+        question_ids = [item.question_id for item in self.eligible_question_candidates]
+        if len(set(question_ids)) != len(question_ids):
+            raise ValueError(
+                "eligibleQuestionCandidates questionId values must be unique"
+            )
         return self
 
 
@@ -422,5 +537,7 @@ class InternalTutorResponse(BaseModel):
     history_from_seq: int | None = Field(default=None, alias="historyFromSeq")
     sources: list[InternalTutorSource] = Field(default_factory=list)
     usage: InternalTutorUsage
+    tutoring_meta: TutoringMeta | None = Field(default=None, alias="tutoringMeta")
+    proposed_action: ProposedAction | None = Field(default=None, alias="proposedAction")
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")

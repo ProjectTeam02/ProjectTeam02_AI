@@ -91,6 +91,23 @@ RAG 흐름을 사용한다. `accuracyRate`, 숙련도, `weaknessScore`는 Backen
 AI는 생성하지 않고 근거 부족 응답을 반환한다. AI 서버는 이 상태를 승인으로
 승격하지 않는다.
 
+`eligibleQuestionCandidates`는 Backend가 DB와 사용자 응시 상태를 검증한 선택적
+후보 목록이다. 최대 10개이며 각 항목은 `questionId`, `conceptCode`, `stageId`,
+`attemptId`를 가진다. AI 서버는 이 목록 밖의 문항 ID를 선택하지 않는다. 현재
+지원되는 후보는 진행 중인 일반 Stage의 현재 문항이며, 독립 문항 풀이 API가
+없으므로 응시하지 않은 문항은 후보로 전달하지 않는다.
+
+```json
+"eligibleQuestionCandidates": [
+  {
+    "questionId": "question-uuid",
+    "conceptCode": "ECON_RATE",
+    "stageId": "stage-uuid",
+    "attemptId": "attempt-uuid"
+  }
+]
+```
+
 Backend는 `GET /api/v1/tutor/personalization`에서 현재 취약도, 미확정 오개념
 가설, 교수 전략, 승인된 재평가 문항 후보를 반환한다. 기존 복습 답안 API가
 재평가 결과를 저장하며, 다음 Tutor 요청에서 Context를 다시 계산한다.
@@ -125,9 +142,41 @@ Backend는 `GET /api/v1/tutor/personalization`에서 현재 취약도, 미확정
     "retrievalStrategy": "HYBRID_EXACT_VECTOR",
     "estimatedCost": null,
     "currency": null
+  },
+  "tutoringMeta": {
+    "schemaVersion": "1.0",
+    "conceptCode": "ECON_RATE",
+    "diagnosis": {
+      "misconceptionType": "UNCERTAIN",
+      "confidence": 0.0,
+      "evidenceQuestionIds": [],
+      "needsFollowup": true,
+      "reasoningSummary": "확정할 수 있는 근거가 부족해 추가 확인이 필요합니다."
+    },
+    "strategy": {
+      "strategyId": "DIAGNOSTIC_CHECK_V1",
+      "strategyVersion": "1.0"
+    }
+  },
+  "proposedAction": {
+    "type": "SOLVE_QUESTION",
+    "conceptCode": "ECON_RATE",
+    "questionId": "question-uuid",
+    "stageId": "stage-uuid",
+    "attemptId": "attempt-uuid",
+    "reason": "Backend가 현재 응시 가능한 문항으로 검증한 후보입니다.",
+    "priority": "LOW"
   }
 }
 ```
+
+`tutoringMeta`와 `proposedAction`은 선택 필드다. 오개념은 확정 판정이 아니라
+가설이며, 관찰 2회 미만 또는 question-level 근거가 없으면 `UNCERTAIN`으로
+반환한다. `evidenceQuestionIds`는 Backend가 전달한 실제 근거 ID만 포함한다.
+행동 조합은 다음과 같다: `SOLVE_QUESTION`은 후보의 문항·Stage·attempt ID가
+필요하고, `START_STAGE`는 Stage ID만, `REVIEW_CONCEPT`는 개념 코드만,
+`CONTINUE_LEARNING`은 Stage 또는 attempt ID를 요구한다. `NONE`은 식별자를
+포함하지 않는다.
 
 `groundingStatus`는 `GROUNDED` 또는 `INSUFFICIENT`다. `relevanceScore`는 검색
 어댑터가 0~1 유사도 점수로 제공한 경우만 반환하며, 거리값이나 범위를 모르는 값은

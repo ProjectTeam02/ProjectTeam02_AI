@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from time import perf_counter
 
 from app.core.config import get_settings
 from app.rag.generation.answer_generator import AnswerGenerator
@@ -225,6 +226,7 @@ class MultiTurnRAG:
                 if document.concept_code in allowed_codes
                 or (document.knowledge_scope or "").casefold() == "global"
             ]
+        context_started = perf_counter()
         context = self.context_builder.build(
             history=history,
             retrieved_context=documents,
@@ -240,6 +242,7 @@ class MultiTurnRAG:
             {
                 "stage": "context",
                 "status": "ok",
+                "latency_ms": max(0, round((perf_counter() - context_started) * 1000)),
                 "document_count": len(documents),
             }
         )
@@ -257,11 +260,15 @@ class MultiTurnRAG:
                 "현재 확인된 학습자료가 없어 정확하게 설명하기 어려워요. "
                 "질문과 관련된 학습자료를 먼저 확인해 주세요."
             )
+        grounding_started = perf_counter()
         validation = self.citation_validator.validate_and_build(answer, documents)
         trace.append(
             {
                 "stage": "groundedness_validation",
                 "status": "ok" if validation.grounded else "insufficient",
+                "latency_ms": max(
+                    0, round((perf_counter() - grounding_started) * 1000)
+                ),
                 "citation_valid": validation.valid,
                 "citation_count": len(validation.citations),
             }
