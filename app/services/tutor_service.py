@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 
@@ -15,6 +16,7 @@ from app.rag.generation.answer_generator import (
     TUTOR_PROMPT_VERSION,
     AnswerGenerator,
 )
+from app.rag.harness import aggregate_stage_statuses, aggregate_stage_timings
 from app.rag.pipeline import MultiTurnRAG
 from app.schemas.tutor import (
     Citation,
@@ -26,6 +28,7 @@ from app.schemas.tutor import (
     TutorRequest,
     TutorResponse,
 )
+from app.services.tutor_recommendation import recommend
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +132,12 @@ class TutorService:
                 timeout=settings.internal_request_timeout_seconds,
             )
         except asyncio.TimeoutError as exc:
+            self._log_latency(
+                request_id=str(request.request_id),
+                status="failed",
+                end_to_end_ms=max(0, round((time.perf_counter() - started) * 1000)),
+                failure_code="TIMEOUT",
+            )
             logger.warning(
                 "tutor_workflow_failed",
                 extra={
@@ -143,8 +152,23 @@ class TutorService:
                 },
             )
             raise GenerationTimeoutError("internal tutor request timed out") from exc
+        except Exception as exc:
+            self._log_latency(
+                request_id=str(request.request_id),
+                status="failed",
+                end_to_end_ms=max(0, round((time.perf_counter() - started) * 1000)),
+                trace=getattr(exc, "trace", None),
+                failure_code=type(exc).__name__,
+            )
+            raise
 
         latency_ms = max(0, round((time.perf_counter() - started) * 1000))
+        self._log_latency(
+            request_id=str(request.request_id),
+            status="completed",
+            end_to_end_ms=latency_ms,
+            trace=result.trace,
+        )
         logger.info(
             "tutor_workflow_completed",
             extra={
@@ -168,6 +192,7 @@ class TutorService:
             retriever=self.pipeline.retriever,
             settings=settings,
         )
+        tutoring_meta, proposed_action = recommend(request)
         return InternalTutorResponse(
             requestId=request.request_id,
             answer=result.answer,
@@ -191,6 +216,38 @@ class TutorService:
                 for rank, item in enumerate(result.citations, start=1)
             ],
             usage=usage,
+            tutoringMeta=tutoring_meta,
+            proposedAction=proposed_action,
+        )
+
+    @staticmethod
+    def _log_latency(
+        *,
+        request_id: str,
+        status: str,
+        end_to_end_ms: int,
+        trace: list[dict[str, object]] | None = None,
+        failure_code: str | None = None,
+    ) -> None:
+        """Emit one safe, machine-readable latency record per internal request."""
+
+        payload: dict[str, object] = {
+            "event": "tutor_latency",
+            "request_id": request_id,
+            "status": status,
+            "end_to_end_ms": end_to_end_ms,
+            # Streaming is not part of the current internal contract.
+            "ttft_ms": None,
+            "ttft_status": "NOT_MEASURED_NON_STREAMING",
+        }
+        payload.update(aggregate_stage_timings(trace))
+        if trace:
+            payload["stage_statuses"] = aggregate_stage_statuses(trace)
+        if failure_code:
+            payload["failure_code"] = failure_code
+        logger.info(
+            "tutor_latency %s",
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
         )
 
     @staticmethod
@@ -264,9 +321,7 @@ class TutorService:
             latencyMs=latency_ms,
             cacheHit=False,
             retrievalStrategy=retrieval_strategy,
-            estimatedCost=cls._estimated_cost(
-                input_tokens, output_tokens, settings
-            ),
+            estimatedCost=cls._estimated_cost(input_tokens, output_tokens, settings),
             currency=(
                 "USD"
                 if cls._estimated_cost(input_tokens, output_tokens, settings)

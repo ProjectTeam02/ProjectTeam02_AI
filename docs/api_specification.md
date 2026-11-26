@@ -58,7 +58,8 @@ Node.js 백엔드 전용 내부 Tutor API입니다. 다음 중 하나로 인증�
   },
   "knowledgeScope": {"conceptCodes": ["ECON_RATE"]},
   "personalizedContext": null,
-  "verifiedContext": null
+  "verifiedContext": null,
+  "eligibleQuestionCandidates": []
 }
 ```
 
@@ -71,6 +72,10 @@ Node.js 백엔드 전용 내부 Tutor API입니다. 다음 중 하나로 인증�
 `sourceDocumentIds`에 있는 승인 문서만 Retrieval 대상으로 사용한다. `BLOCKED`나
 그 밖의 상태에서는 답변 생성을 보류한다. 승인 상태가 없는 개념 관계는 AI
 Context에서 제외된다.
+
+`eligibleQuestionCandidates`는 Backend가 사용자 소유의 진행 중인 일반 Stage와
+현재 문항, 공개 상태, 개념·Topic 상태, 선택지 4개·정답 1개를 재검증한 후보다.
+최대 10개이며 AI는 이 목록 안에서만 `SOLVE_QUESTION`의 문항을 선택한다.
 
 응답의 핵심 필드는 다음과 같습니다.
 
@@ -102,6 +107,27 @@ Context에서 제외된다.
     "retrievalStrategy": "HYBRID_EXACT_VECTOR",
     "estimatedCost": null,
     "currency": null
+  },
+  "tutoringMeta": {
+    "schemaVersion": "1.0",
+    "conceptCode": "ECON_RATE",
+    "diagnosis": {
+      "misconceptionType": "UNCERTAIN",
+      "confidence": 0.0,
+      "evidenceQuestionIds": [],
+      "needsFollowup": true,
+      "reasoningSummary": "확정할 수 있는 근거가 부족해 추가 확인이 필요합니다."
+    },
+    "strategy": { "strategyId": "DIAGNOSTIC_CHECK_V1", "strategyVersion": "1.0" }
+  },
+  "proposedAction": {
+    "type": "REVIEW_CONCEPT",
+    "conceptCode": "ECON_RATE",
+    "questionId": null,
+    "stageId": null,
+    "attemptId": null,
+    "reason": "추천 문항이 없어 개념 복습부터 안내합니다.",
+    "priority": "LOW"
   }
 }
 ```

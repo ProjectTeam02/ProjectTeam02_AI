@@ -205,6 +205,40 @@ def test_internal_api_openapi_exposes_contract_enums():
     response_schema = schema["components"]["schemas"]["InternalTutorResponse"]
     assert request_schema["properties"]["modelTier"]["$ref"].endswith("ModelTier")
     assert "groundingStatus" in response_schema["properties"]
+    assert "tutoringMeta" in response_schema["properties"]
+    assert "proposedAction" in response_schema["properties"]
+    assert "eligibleQuestionCandidates" in request_schema["properties"]
+
+
+def test_internal_api_returns_safe_tutoring_metadata_and_candidate_action():
+    response = post_with_service(
+        payload(
+            context={"conceptCode": "ECON_RATE"},
+            eligibleQuestionCandidates=[
+                {
+                    "questionId": "question-1",
+                    "conceptCode": "ECON_RATE",
+                    "stageId": "stage-1",
+                    "attemptId": "attempt-1",
+                }
+            ],
+        ),
+        service(),
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["tutoringMeta"]["diagnosis"]["misconceptionType"] == "UNCERTAIN"
+    assert body["tutoringMeta"]["diagnosis"]["evidenceQuestionIds"] == []
+    assert body["proposedAction"] == {
+        "type": "SOLVE_QUESTION",
+        "conceptCode": "ECON_RATE",
+        "questionId": "question-1",
+        "stageId": "stage-1",
+        "attemptId": "attempt-1",
+        "reason": "Backend가 현재 응시 가능한 문항으로 검증한 후보입니다.",
+        "priority": "LOW",
+    }
 
 
 def test_create_tables_excludes_node_owned_erd_tables(monkeypatch):
