@@ -70,3 +70,43 @@ def test_vector_store_does_not_create_tables_by_default(monkeypatch):
     )
     vector_store_module.VectorStoreFactory(local).create()
     assert captured["perform_setup"] is True
+
+
+def test_vector_store_passes_real_password_to_pgvector(monkeypatch):
+    # 함수 역할: str(URL)이 비밀번호를 ***로 가려
+    # ai_user 인증이 실패하던 회귀를 막습니다.
+    captured = {}
+
+    class FakePGVectorStore:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    import llama_index.vector_stores.postgres as postgres_module
+
+    monkeypatch.setattr(postgres_module, "PGVectorStore", FakePGVectorStore)
+    settings = Settings(
+        _env_file=None,
+        database_url="postgresql+asyncpg://ai_user:S3cr%40t%2Fx@db.example:5432/leren",
+        vector_store_schema="ai",
+    )
+    vector_store_module.VectorStoreFactory(settings).create()
+    for key in ("connection_string", "async_connection_string"):
+        assert isinstance(captured[key], str)
+        assert "***" not in captured[key]
+        assert "S3cr%40t%2Fx@db.example" in captured[key]
+    assert captured["connection_string"].startswith("postgresql+psycopg://")
+    assert captured["async_connection_string"].startswith("postgresql+asyncpg://")
+
+
+def test_vector_store_translates_ssl_option_per_driver():
+    sync_url, async_url = vector_store_module.build_connection_strings(
+        "postgresql+asyncpg://u:p@h:5432/leren?ssl=require"
+    )
+    assert sync_url.endswith("?sslmode=require")
+    assert async_url.endswith("?ssl=require")
+
+    sync_url, async_url = vector_store_module.build_connection_strings(
+        "postgresql+asyncpg://u:p@h:5432/leren?sslmode=verify-full"
+    )
+    assert "sslmode=verify-full" in sync_url
+    assert "ssl=verify-full" in async_url and "sslmode" not in async_url

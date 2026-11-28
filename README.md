@@ -111,6 +111,14 @@ docker compose up --build
 [`docs/harness_engineering.md`](docs/harness_engineering.md),
 [`docs/multiturn_evaluation.md`](docs/multiturn_evaluation.md)에 있습니다.
 
+## 운영 배포
+
+`main` 병합 → `build-ai-image.yml`(OIDC, ECR `leren-ai:<커밋 12자리>`, linux/arm64) →
+Back 레포 Actions `deploy`(`action=deploy`, `ai_tag=<12자리>`) → SSM으로 EC2 `deploy.sh` →
+`/health` 확인 순서입니다. 비밀값은 Parameter Store `/leren/prod/ai/`에서만 읽습니다.
+`infra/terraform`, `deploy/aws`의 ECS 구성은 레거시이며 사용하지 않습니다.
+확인 명령과 성공 기준은 [`docs/DEPLOY_HANDOFF.md`](docs/DEPLOY_HANDOFF.md)에 있습니다.
+
 ## 데이터셋 EDA 및 선별 파이프라인
 
 현재 `data/`의 KDI/BOK JSON·JSONL mirror를 중복 집계하지 않고, 원문을 수정하지

@@ -1,3 +1,7 @@
+> **레거시(미사용, 2026-11-28 기준)**: 운영은 EC2(t4g, ARM64) + Docker Compose + Back 소유 RDS로
+> 배포한다. 이 Terraform(ECS Fargate·ALB·x86·자체 RDS·ECR `projectteam02-ai`)은 실제 리소스와
+> 다르므로 `apply`하지 않는다. 실제 경로는 `docs/DEPLOY_HANDOFF.md` 참고.
+
 # AWS 배포
 
 이 구성은 다음 AWS 리소스를 생성합니다.
