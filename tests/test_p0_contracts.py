@@ -89,7 +89,12 @@ def test_internal_api_camel_case_contract_and_idempotency():
         assert first.status_code == 200
         assert second.status_code == 200
         body = first.json()
-        assert second.json() == body
+        replay = second.json()
+        # latencyMs is a wall-clock measurement, not part of idempotent content.
+        body_usage = {k: v for k, v in body["usage"].items() if k != "latencyMs"}
+        replay_usage = {k: v for k, v in replay["usage"].items() if k != "latencyMs"}
+        assert replay_usage == body_usage
+        assert {**replay, "usage": None} == {**body, "usage": None}
         assert body["requestId"] == payload["requestId"]
         assert body["groundingStatus"] == "GROUNDED"
         assert body["historyFromSeq"] is None
@@ -101,6 +106,8 @@ def test_internal_api_camel_case_contract_and_idempotency():
             "conceptCode": None,
             "rank": 1,
             "relevanceScore": body["sources"][0]["relevanceScore"],
+            "reviewStatus": "approved",
+            "licenseReviewStatus": None,
         }
         assert 0.0 <= body["sources"][0]["relevanceScore"] <= 1.0
         assert body["usage"]["inputTokens"] == 12

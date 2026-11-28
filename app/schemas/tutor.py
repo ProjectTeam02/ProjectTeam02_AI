@@ -1,6 +1,7 @@
 # 파일 역할: API 요청·응답의 데이터 구조와 입력 검증 규칙을 정의합니다.
 from datetime import datetime
 from enum import StrEnum
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import (
@@ -8,9 +9,16 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    StringConstraints,
     field_validator,
     model_validator,
 )
+
+# Backend(tutorMetadata.dto.js / aiInternalResponse.dto.js) 계약 상수.
+# 값을 바꾸면 docs/contract.md와 docs/contracts/*.schema.json 스냅샷도 함께 갱신한다.
+TUTOR_CONTRACT_SCHEMA_VERSION = "1.0"
+UUID_PATTERN = r"^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"
+CONCEPT_CODE_MAX = 30
 
 
 class TutorRequest(BaseModel):
@@ -346,10 +354,12 @@ class ActionPriority(StrEnum):
 class EligibleQuestionCandidate(BaseModel):
     """A Backend-verified question that the AI may recommend, never discover."""
 
-    question_id: str = Field(min_length=1, max_length=255, alias="questionId")
-    concept_code: str = Field(min_length=1, max_length=100, alias="conceptCode")
-    stage_id: str = Field(min_length=1, max_length=255, alias="stageId")
-    attempt_id: str = Field(min_length=1, max_length=255, alias="attemptId")
+    question_id: str = Field(pattern=UUID_PATTERN, alias="questionId")
+    concept_code: str = Field(
+        min_length=1, max_length=CONCEPT_CODE_MAX, alias="conceptCode"
+    )
+    stage_id: str = Field(pattern=UUID_PATTERN, alias="stageId")
+    attempt_id: str = Field(pattern=UUID_PATTERN, alias="attemptId")
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
@@ -357,8 +367,13 @@ class EligibleQuestionCandidate(BaseModel):
 class TutoringDiagnosis(BaseModel):
     misconception_type: MisconceptionType = Field(alias="misconceptionType")
     confidence: float = Field(ge=0.0, le=1.0)
-    evidence_question_ids: list[str] = Field(
-        default_factory=list, max_length=20, alias="evidenceQuestionIds"
+    evidence_question_ids: list[
+        Annotated[str, StringConstraints(pattern=UUID_PATTERN)]
+    ] = Field(
+        default_factory=list,
+        max_length=20,
+        alias="evidenceQuestionIds",
+        description="본인이 제출한 오답 문항 UUID. 근거가 없으면 []",
     )
     needs_followup: bool = Field(alias="needsFollowup")
     reasoning_summary: str = Field(
@@ -366,6 +381,13 @@ class TutoringDiagnosis(BaseModel):
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @field_validator("evidence_question_ids")
+    @classmethod
+    def unique_evidence(cls, value: list[str]) -> list[str]:
+        if len({item.lower() for item in value}) != len(value):
+            raise ValueError("evidenceQuestionIds must be unique")
+        return value
 
 
 class TutoringStrategy(BaseModel):
@@ -376,9 +398,14 @@ class TutoringStrategy(BaseModel):
 
 
 class TutoringMeta(BaseModel):
-    schema_version: str = Field(min_length=1, max_length=20, alias="schemaVersion")
+    """Client-safe diagnosis summary. Backend rejects unknown keys (strict)."""
+
+    schema_version: Literal["1.0"] = Field(
+        alias="schemaVersion",
+        description="계약 버전. Backend는 정확히 '1.0'만 허용",
+    )
     concept_code: str | None = Field(
-        default=None, min_length=1, max_length=100, alias="conceptCode"
+        default=None, min_length=1, max_length=CONCEPT_CODE_MAX, alias="conceptCode"
     )
     diagnosis: TutoringDiagnosis
     strategy: TutoringStrategy
@@ -387,18 +414,18 @@ class TutoringMeta(BaseModel):
 
 
 class ProposedAction(BaseModel):
+    """Next learning action. Backend re-validates every identifier before saving."""
+
     type: ProposedActionType
     concept_code: str | None = Field(
-        default=None, min_length=1, max_length=100, alias="conceptCode"
+        default=None, min_length=1, max_length=CONCEPT_CODE_MAX, alias="conceptCode"
     )
     question_id: str | None = Field(
-        default=None, min_length=1, max_length=255, alias="questionId"
+        default=None, pattern=UUID_PATTERN, alias="questionId"
     )
-    stage_id: str | None = Field(
-        default=None, min_length=1, max_length=255, alias="stageId"
-    )
+    stage_id: str | None = Field(default=None, pattern=UUID_PATTERN, alias="stageId")
     attempt_id: str | None = Field(
-        default=None, min_length=1, max_length=255, alias="attemptId"
+        default=None, pattern=UUID_PATTERN, alias="attemptId"
     )
     reason: str = Field(min_length=1, max_length=500)
     priority: ActionPriority
@@ -408,9 +435,12 @@ class ProposedAction(BaseModel):
     @model_validator(mode="after")
     def validate_action_fields(self):
         if self.type is ProposedActionType.SOLVE_QUESTION:
-            if not all((self.question_id, self.stage_id, self.attempt_id)):
+            if not all(
+                (self.question_id, self.stage_id, self.attempt_id, self.concept_code)
+            ):
                 raise ValueError(
-                    "SOLVE_QUESTION requires questionId, stageId, and attemptId"
+                    "SOLVE_QUESTION requires questionId, stageId, attemptId, "
+                    "and conceptCode"
                 )
         elif self.type is ProposedActionType.START_STAGE:
             if not self.stage_id or self.question_id or self.attempt_id:
@@ -499,15 +529,39 @@ class InternalTutorRequest(BaseModel):
 
 
 class InternalTutorSource(BaseModel):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    document_id: str = Field(alias="documentId")
-    document_version: str | None = Field(default=None, alias="documentVersion")
-    chunk_id: str = Field(alias="chunkId")
-    title_snapshot: str | None = Field(default=None, alias="titleSnapshot")
-    concept_code: str | None = Field(default=None, alias="conceptCode")
-    rank: int = Field(ge=1)
+    """Citation persisted by Backend into tutor.ai_message_sources.
+
+    Lengths mirror Backend SOURCE_LIMITS. ``reviewStatus``/``licenseReviewStatus``
+    are AI-side trace snapshots only; Backend ignores them and re-checks
+    ``ai.rag_documents.review_status`` itself.
+    """
+
+    document_id: str = Field(min_length=1, max_length=255, alias="documentId")
+    document_version: str | None = Field(
+        default=None, max_length=100, alias="documentVersion"
+    )
+    chunk_id: str = Field(min_length=1, max_length=255, alias="chunkId")
+    title_snapshot: str | None = Field(
+        default=None, max_length=500, alias="titleSnapshot"
+    )
+    concept_code: str | None = Field(
+        default=None, max_length=CONCEPT_CODE_MAX, alias="conceptCode"
+    )
+    rank: int = Field(ge=1, le=32767)
     relevance_score: float | None = Field(
         default=None, ge=0.0, le=1.0, alias="relevanceScore"
+    )
+    review_status: str | None = Field(
+        default=None,
+        max_length=30,
+        alias="reviewStatus",
+        description="검색 시점 문서 내용 검수 상태 스냅샷(정보용, 권한 판단 아님)",
+    )
+    license_review_status: str | None = Field(
+        default=None,
+        max_length=30,
+        alias="licenseReviewStatus",
+        description="Backend verifiedContext가 준 라이선스 검수 상태. 없으면 null",
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
@@ -515,13 +569,17 @@ class InternalTutorSource(BaseModel):
 
 class InternalTutorUsage(BaseModel):
     # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    model_id: str | None = Field(default=None, alias="modelId")
-    embedding_model_id: str | None = Field(default=None, alias="embeddingModelId")
+    model_id: str | None = Field(default=None, max_length=100, alias="modelId")
+    embedding_model_id: str | None = Field(
+        default=None, max_length=100, alias="embeddingModelId"
+    )
     input_tokens: int | None = Field(default=None, ge=0, alias="inputTokens")
     output_tokens: int | None = Field(default=None, ge=0, alias="outputTokens")
     latency_ms: int = Field(ge=0, alias="latencyMs")
     cache_hit: bool = Field(alias="cacheHit")
-    retrieval_strategy: str = Field(min_length=1, alias="retrievalStrategy")
+    retrieval_strategy: str = Field(
+        min_length=1, max_length=50, alias="retrievalStrategy"
+    )
     estimated_cost: float | None = Field(default=None, ge=0, alias="estimatedCost")
     currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
 
@@ -529,15 +587,40 @@ class InternalTutorUsage(BaseModel):
 
 
 class InternalTutorResponse(BaseModel):
-    # 클래스 역할: 관련 상태와 동작을 하나의 객체로 묶습니다.
-    request_id: UUID = Field(alias="requestId")
-    answer: str
+    """FastAPI -> Backend tutor answer. Contract: docs/contract.md (v1.0)."""
+
+    request_id: UUID = Field(
+        alias="requestId", description="요청의 requestId와 반드시 같다"
+    )
+    answer: str = Field(min_length=1)
     rewritten_query: str = Field(alias="rewrittenQuery")
-    grounding_status: GroundingStatus = Field(alias="groundingStatus")
-    history_from_seq: int | None = Field(default=None, alias="historyFromSeq")
-    sources: list[InternalTutorSource] = Field(default_factory=list)
+    grounding_status: GroundingStatus = Field(
+        alias="groundingStatus",
+        description="GROUNDED: 승인 근거로 답변. INSUFFICIENT: 근거 부족(Fail-Closed)",
+    )
+    history_from_seq: int | None = Field(
+        default=None, ge=1, alias="historyFromSeq"
+    )
+    sources: list[InternalTutorSource] = Field(
+        default_factory=list, description="rank는 1부터 고유"
+    )
     usage: InternalTutorUsage
-    tutoring_meta: TutoringMeta | None = Field(default=None, alias="tutoringMeta")
-    proposed_action: ProposedAction | None = Field(default=None, alias="proposedAction")
+    tutoring_meta: TutoringMeta | None = Field(
+        default=None,
+        alias="tutoringMeta",
+        description="TUTOR_METADATA_ENABLED=true일 때만 Backend가 저장·노출",
+    )
+    proposed_action: ProposedAction | None = Field(
+        default=None,
+        alias="proposedAction",
+        description="Backend가 후보·소유권을 재검증한 뒤에만 저장",
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
+
+    @model_validator(mode="after")
+    def unique_source_ranks(self):
+        ranks = [item.rank for item in self.sources]
+        if len(set(ranks)) != len(ranks):
+            raise ValueError("sources rank values must be unique")
+        return self

@@ -203,22 +203,45 @@ class TutorService:
                 else GroundingStatus.INSUFFICIENT
             ),
             historyFromSeq=result.history_from_seq,
-            sources=[
-                InternalTutorSource(
-                    documentId=item.document_id,
-                    documentVersion=item.version,
-                    chunkId=item.chunk_id,
-                    titleSnapshot=item.title,
-                    conceptCode=item.concept_code,
-                    rank=rank,
-                    relevanceScore=self._safe_score(item.score),
-                )
-                for rank, item in enumerate(result.citations, start=1)
-            ],
+            sources=self._internal_sources(request, result.citations),
             usage=usage,
             tutoringMeta=tutoring_meta,
             proposedAction=proposed_action,
         )
+
+    @staticmethod
+    def _internal_sources(request, citations) -> list[InternalTutorSource]:
+        """Map citations to the Backend source contract (docs/contract.md §4)."""
+        license_by_document: dict[str, str | None] = {}
+        if request.verified_context:
+            license_by_document = {
+                item.document_id: item.license_review_status
+                for item in request.verified_context.sources
+            }
+
+        def clip(value: str | None, limit: int) -> str | None:
+            return value[:limit] if value else value
+
+        return [
+            InternalTutorSource(
+                documentId=item.document_id,
+                documentVersion=clip(item.version, 100),
+                chunkId=item.chunk_id,
+                titleSnapshot=clip(item.title, 500),
+                conceptCode=(
+                    item.concept_code
+                    if item.concept_code and len(item.concept_code) <= 30
+                    else None
+                ),
+                rank=rank,
+                relevanceScore=TutorService._safe_score(item.score),
+                reviewStatus=clip(item.review_status or None, 30),
+                licenseReviewStatus=clip(
+                    license_by_document.get(item.document_id), 30
+                ),
+            )
+            for rank, item in enumerate(citations, start=1)
+        ]
 
     @staticmethod
     def _log_latency(

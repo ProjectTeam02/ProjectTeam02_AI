@@ -28,16 +28,16 @@ def test_recommendation_selects_only_backend_candidate():
             context={"conceptCode": "ECON_RATE"},
             eligibleQuestionCandidates=[
                 {
-                    "questionId": "q-1",
+                    "questionId": "0b5e6a10-0000-4000-8000-000000000001",
                     "conceptCode": "OTHER",
-                    "stageId": "stage-1",
-                    "attemptId": "attempt-1",
+                    "stageId": "0b5e6a10-0000-4000-8000-0000000000a1",
+                    "attemptId": "0b5e6a10-0000-4000-8000-0000000000b1",
                 },
                 {
-                    "questionId": "q-2",
+                    "questionId": "0b5e6a10-0000-4000-8000-000000000002",
                     "conceptCode": "ECON_RATE",
-                    "stageId": "stage-1",
-                    "attemptId": "attempt-1",
+                    "stageId": "0b5e6a10-0000-4000-8000-0000000000a1",
+                    "attemptId": "0b5e6a10-0000-4000-8000-0000000000b1",
                 },
             ],
         )
@@ -46,7 +46,7 @@ def test_recommendation_selects_only_backend_candidate():
     _, action = recommend(request)
 
     assert action.type == "SOLVE_QUESTION"
-    assert action.question_id == "q-2"
+    assert action.question_id == "0b5e6a10-0000-4000-8000-000000000002"
     assert action.question_id in {
         item.question_id for item in request.eligible_question_candidates
     }
@@ -102,7 +102,7 @@ def test_invalid_action_combinations_are_rejected():
 
         ProposedAction(
             type="SOLVE_QUESTION",
-            questionId="q-1",
+            questionId="0b5e6a10-0000-4000-8000-000000000001",
             stageId=None,
             attemptId=None,
             reason="bad",
@@ -112,10 +112,10 @@ def test_invalid_action_combinations_are_rejected():
 
 def test_candidate_limit_and_duplicate_question_ids_are_rejected():
     candidate = {
-        "questionId": "q-1",
+        "questionId": "0b5e6a10-0000-4000-8000-000000000001",
         "conceptCode": "ECON_RATE",
-        "stageId": "stage-1",
-        "attemptId": "attempt-1",
+        "stageId": "0b5e6a10-0000-4000-8000-0000000000a1",
+        "attemptId": "0b5e6a10-0000-4000-8000-0000000000b1",
     }
     with pytest.raises(ValidationError):
         InternalTutorRequest.model_validate(

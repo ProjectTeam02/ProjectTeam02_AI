@@ -216,10 +216,10 @@ def test_internal_api_returns_safe_tutoring_metadata_and_candidate_action():
             context={"conceptCode": "ECON_RATE"},
             eligibleQuestionCandidates=[
                 {
-                    "questionId": "question-1",
+                    "questionId": "0b5e6a10-0000-4000-8000-000000000001",
                     "conceptCode": "ECON_RATE",
-                    "stageId": "stage-1",
-                    "attemptId": "attempt-1",
+                    "stageId": "0b5e6a10-0000-4000-8000-0000000000a1",
+                    "attemptId": "0b5e6a10-0000-4000-8000-0000000000b1",
                 }
             ],
         ),
@@ -233,9 +233,9 @@ def test_internal_api_returns_safe_tutoring_metadata_and_candidate_action():
     assert body["proposedAction"] == {
         "type": "SOLVE_QUESTION",
         "conceptCode": "ECON_RATE",
-        "questionId": "question-1",
-        "stageId": "stage-1",
-        "attemptId": "attempt-1",
+        "questionId": "0b5e6a10-0000-4000-8000-000000000001",
+        "stageId": "0b5e6a10-0000-4000-8000-0000000000a1",
+        "attemptId": "0b5e6a10-0000-4000-8000-0000000000b1",
         "reason": "Backend가 현재 응시 가능한 문항으로 검증한 후보입니다.",
         "priority": "LOW",
     }

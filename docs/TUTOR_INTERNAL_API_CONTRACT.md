@@ -192,6 +192,9 @@ Backend는 `GET /api/v1/tutor/personalization`에서 현재 취약도, 미확정
 | 503 | LLM 설정, pgvector 검색, 생성 실패 |
 | 504 | 내부 요청 또는 LLM timeout |
 
+필드별 길이·UUID·상태값 규칙, 출처 검수상태(`reviewStatus`/`licenseReviewStatus`)
+적용 기준, Backend 오류 매핑과 버전 정책은 [contract.md](contract.md)(v1.0)가 기준이다.
+
 오류 응답에는 사용자 질문이나 내부 토큰을 포함하지 않는다. `requestId`는 유효한
 요청 DTO까지 파싱된 경우에만 애플리케이션 로그의 추적 키로 사용한다.
 

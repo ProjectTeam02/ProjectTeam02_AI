@@ -1,0 +1,43 @@
+{
+  "requestId": "7f3c2a10-1b2c-4d3e-8f40-000000000001",
+  "answer": "승인된 학습 자료에서 근거를 찾지 못해 답변을 제공할 수 없습니다.",
+  "rewrittenQuery": "양적완화 효과",
+  "groundingStatus": "INSUFFICIENT",
+  "historyFromSeq": null,
+  "sources": [],
+  "usage": {
+    "modelId": "openai/gpt-4o-mini",
+    "embeddingModelId": "text-embedding-3-small",
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": 410,
+    "cacheHit": false,
+    "retrievalStrategy": "HYBRID",
+    "estimatedCost": null,
+    "currency": null
+  },
+  "tutoringMeta": {
+    "schemaVersion": "1.0",
+    "conceptCode": null,
+    "diagnosis": {
+      "misconceptionType": "UNCERTAIN",
+      "confidence": 0.0,
+      "evidenceQuestionIds": [],
+      "needsFollowup": true,
+      "reasoningSummary": "확정할 수 있는 근거가 부족해 추가 확인이 필요합니다."
+    },
+    "strategy": {
+      "strategyId": "DIAGNOSTIC_CHECK_V1",
+      "strategyVersion": "1.0"
+    }
+  },
+  "proposedAction": {
+    "type": "NONE",
+    "conceptCode": null,
+    "questionId": null,
+    "stageId": null,
+    "attemptId": null,
+    "reason": "현재 확인된 학습 문맥으로는 안전한 다음 행동을 정할 수 없습니다.",
+    "priority": "LOW"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "requestId": "7f3c2a10-1b2c-4d3e-8f40-000000000001",
+  "answer": "기준금리는 한국은행이 정하는 정책금리입니다. [출처: BOK-TERM-0123/BOK-TERM-0123:1]",
+  "rewrittenQuery": "기준금리의 의미",
+  "groundingStatus": "GROUNDED",
+  "historyFromSeq": null,
+  "sources": [
+    {
+      "documentId": "BOK-TERM-0123",
+      "documentVersion": "2026-01",
+      "chunkId": "BOK-TERM-0123:1",
+      "titleSnapshot": "기준금리",
+      "conceptCode": "ECON_RATE",
+      "rank": 1,
+      "relevanceScore": 0.82,
+      "reviewStatus": "approved",
+      "licenseReviewStatus": "PENDING"
+    },
+    {
+      "documentId": "BOK-TERM-0123",
+      "documentVersion": "2026-01",
+      "chunkId": "BOK-TERM-0123:2",
+      "titleSnapshot": "기준금리",
+      "conceptCode": "ECON_RATE",
+      "rank": 1,
+      "relevanceScore": 0.82,
+      "reviewStatus": "approved",
+      "licenseReviewStatus": "PENDING"
+    }
+  ],
+  "usage": {
+    "modelId": "openai/gpt-4o-mini",
+    "embeddingModelId": "text-embedding-3-small",
+    "inputTokens": 812,
+    "outputTokens": 164,
+    "latencyMs": 2380,
+    "cacheHit": false,
+    "retrievalStrategy": "HYBRID",
+    "estimatedCost": 0.00022,
+    "currency": "USD"
+  },
+  "tutoringMeta": {
+    "schemaVersion": "1.0",
+    "conceptCode": "ECON_RATE",
+    "diagnosis": {
+      "misconceptionType": "UNCERTAIN",
+      "confidence": 0.0,
+      "evidenceQuestionIds": [],
+      "needsFollowup": true,
+      "reasoningSummary": "확정할 수 있는 근거가 부족해 추가 확인이 필요합니다."
+    },
+    "strategy": {
+      "strategyId": "DIAGNOSTIC_CHECK_V1",
+      "strategyVersion": "1.0"
+    }
+  },
+  "proposedAction": {
+    "type": "SOLVE_QUESTION",
+    "conceptCode": "ECON_RATE",
+    "questionId": "de110001-9bca-4000-8000-000000000006",
+    "stageId": "de110001-9bca-4000-8000-000000000005",
+    "attemptId": "de110001-9bca-4000-8000-000000000004",
+    "reason": "Backend가 현재 응시 가능한 문항으로 검증한 후보입니다.",
+    "priority": "LOW"
+  }
+}

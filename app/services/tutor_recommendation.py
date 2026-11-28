@@ -7,7 +7,12 @@ question from the Backend-provided candidate list.
 
 from __future__ import annotations
 
+import re
+
 from app.schemas.tutor import (
+    CONCEPT_CODE_MAX,
+    TUTOR_CONTRACT_SCHEMA_VERSION,
+    UUID_PATTERN,
     ActionPriority,
     InternalTutorRequest,
     MisconceptionType,
@@ -37,7 +42,23 @@ _REASONS = {
 }
 
 
+_UUID = re.compile(UUID_PATTERN)
+
+
+def _uuid_or_none(value: str | None) -> str | None:
+    """Backend persists only UUID identifiers; anything else is dropped."""
+    return value if value and _UUID.fullmatch(value) else None
+
+
+def _code_or_none(value: str | None) -> str | None:
+    return value if value and len(value) <= CONCEPT_CODE_MAX else None
+
+
 def _concept_code(request: InternalTutorRequest) -> str | None:
+    return _code_or_none(_raw_concept_code(request))
+
+
+def _raw_concept_code(request: InternalTutorRequest) -> str | None:
     if request.context and request.context.concept_code:
         return request.context.concept_code
     profile = (
@@ -61,11 +82,13 @@ def _evidence_question_ids(request: InternalTutorRequest) -> list[str]:
     if context is None:
         return []
     values = [
-        item.question_id for item in context.diagnosis_evidence if item.question_id
+        item.question_id
+        for item in context.diagnosis_evidence
+        if _uuid_or_none(item.question_id)
     ]
     result: list[str] = []
     for value in values:
-        if value not in result:
+        if value.lower() not in {existing.lower() for existing in result}:
             result.append(value)
     return result[:20]
 
@@ -122,7 +145,7 @@ def build_tutoring_meta(request: InternalTutorRequest) -> TutoringMeta:
         ),
     )
     return TutoringMeta(
-        schemaVersion="1.0",
+        schemaVersion=TUTOR_CONTRACT_SCHEMA_VERSION,
         conceptCode=_concept_code(request),
         diagnosis=diagnosis,
         strategy=strategy,
@@ -175,9 +198,11 @@ def build_proposed_action(
         if request.personalized_context
         else None
     )
-    stage_id = context.stage_id if context else None
-    attempt_id = context.attempt_id if context else None
-    stage_id = stage_id or (profile.current_stage_id if profile else None)
+    stage_id = _uuid_or_none(context.stage_id if context else None)
+    attempt_id = _uuid_or_none(context.attempt_id if context else None)
+    stage_id = stage_id or _uuid_or_none(
+        profile.current_stage_id if profile else None
+    )
     if stage_id and attempt_id:
         return ProposedAction(
             type=ProposedActionType.CONTINUE_LEARNING,

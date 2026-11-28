@@ -1,0 +1,1069 @@
+{
+  "$defs": {
+    "ConceptGraphContext": {
+      "additionalProperties": false,
+      "properties": {
+        "currentConceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currentconceptcode"
+        },
+        "learnerConceptMastery": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 50,
+          "title": "Learnerconceptmastery",
+          "type": "object"
+        },
+        "prerequisiteConcepts": {
+          "items": {
+            "$ref": "#/$defs/ConceptGraphNode"
+          },
+          "maxItems": 50,
+          "title": "Prerequisiteconcepts",
+          "type": "array"
+        },
+        "relatedConcepts": {
+          "items": {
+            "$ref": "#/$defs/ConceptGraphNode"
+          },
+          "maxItems": 50,
+          "title": "Relatedconcepts",
+          "type": "array"
+        }
+      },
+      "title": "ConceptGraphContext",
+      "type": "object"
+    },
+    "ConceptGraphNode": {
+      "additionalProperties": false,
+      "description": "A Backend-supplied graph edge target, not an AI-owned graph record.",
+      "properties": {
+        "conceptCode": {
+          "maxLength": 30,
+          "minLength": 1,
+          "title": "Conceptcode",
+          "type": "string"
+        },
+        "depth": {
+          "default": 1,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Depth",
+          "type": "integer"
+        },
+        "learnerConceptMastery": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Learnerconceptmastery"
+        },
+        "relationReviewStatus": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relationreviewstatus"
+        },
+        "relationshipType": {
+          "default": "PREREQUISITE",
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Relationshiptype",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "required": [
+        "conceptCode"
+      ],
+      "title": "ConceptGraphNode",
+      "type": "object"
+    },
+    "DiagnosisEvidenceContext": {
+      "additionalProperties": false,
+      "properties": {
+        "chunkId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chunkid"
+        },
+        "documentId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Documentid"
+        },
+        "evidenceId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Evidenceid",
+          "type": "string"
+        },
+        "evidenceType": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "questionId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Questionid"
+        },
+        "reviewStatus": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewstatus"
+        }
+      },
+      "required": [
+        "evidenceId",
+        "evidenceType"
+      ],
+      "title": "DiagnosisEvidenceContext",
+      "type": "object"
+    },
+    "EligibleQuestionCandidate": {
+      "additionalProperties": false,
+      "description": "A Backend-verified question that the AI may recommend, never discover.",
+      "properties": {
+        "attemptId": {
+          "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+          "title": "Attemptid",
+          "type": "string"
+        },
+        "conceptCode": {
+          "maxLength": 30,
+          "minLength": 1,
+          "title": "Conceptcode",
+          "type": "string"
+        },
+        "questionId": {
+          "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+          "title": "Questionid",
+          "type": "string"
+        },
+        "stageId": {
+          "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+          "title": "Stageid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "questionId",
+        "conceptCode",
+        "stageId",
+        "attemptId"
+      ],
+      "title": "EligibleQuestionCandidate",
+      "type": "object"
+    },
+    "HistoryRole": {
+      "enum": [
+        "USER",
+        "ASSISTANT"
+      ],
+      "title": "HistoryRole",
+      "type": "string"
+    },
+    "LearnerProfileContext": {
+      "additionalProperties": false,
+      "description": "Backend-provided learner signals used only as personalization hints.\n\nScores are deliberately optional and normalized to the inclusive 0..1 range.\nThe Backend contract must define the conversion from percentage values before\nthis field is enabled in production.",
+      "properties": {
+        "accuracyRate": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accuracyrate"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "currentStageId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currentstageid"
+        },
+        "dataSufficiency": {
+          "anyOf": [
+            {
+              "maxLength": 20,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Datasufficiency"
+        },
+        "estimatedMastery": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedmastery"
+        },
+        "lastStudiedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Laststudiedat"
+        },
+        "recentIncorrectCount": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recentincorrectcount"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uncertainty"
+        },
+        "weaknessComponents": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "maxProperties": 10,
+          "title": "Weaknesscomponents",
+          "type": "object"
+        },
+        "weaknessScore": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weaknessscore"
+        }
+      },
+      "title": "LearnerProfileContext",
+      "type": "object"
+    },
+    "MisconceptionHypothesisContext": {
+      "additionalProperties": false,
+      "description": "Unconfirmed diagnosis data reserved for the later diagnosis contract.",
+      "properties": {
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "evidenceIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Evidenceids",
+          "type": "array"
+        },
+        "hypothesisType": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Hypothesistype",
+          "type": "string"
+        },
+        "observationCount": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observationcount"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "status": {
+          "default": "UNCONFIRMED",
+          "maxLength": 30,
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hypothesisType"
+      ],
+      "title": "MisconceptionHypothesisContext",
+      "type": "object"
+    },
+    "ModelTier": {
+      "enum": [
+        "BASIC",
+        "ADVANCED"
+      ],
+      "title": "ModelTier",
+      "type": "string"
+    },
+    "PersonalizedTutorContext": {
+      "additionalProperties": false,
+      "properties": {
+        "conceptGraphContext": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConceptGraphContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "diagnosisEvidence": {
+          "items": {
+            "$ref": "#/$defs/DiagnosisEvidenceContext"
+          },
+          "maxItems": 20,
+          "title": "Diagnosisevidence",
+          "type": "array"
+        },
+        "learnerProfile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LearnerProfileContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "misconceptionHypotheses": {
+          "items": {
+            "$ref": "#/$defs/MisconceptionHypothesisContext"
+          },
+          "maxItems": 10,
+          "title": "Misconceptionhypotheses",
+          "type": "array"
+        },
+        "recentAssessments": {
+          "items": {
+            "$ref": "#/$defs/RecentAssessmentContext"
+          },
+          "maxItems": 10,
+          "title": "Recentassessments",
+          "type": "array"
+        },
+        "teachingStrategy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TeachingStrategyContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "PersonalizedTutorContext",
+      "type": "object"
+    },
+    "RecentAssessmentContext": {
+      "additionalProperties": false,
+      "properties": {
+        "assessedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assessedat"
+        },
+        "assessmentId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Assessmentid",
+          "type": "string"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "isCorrect": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Iscorrect"
+        },
+        "questionId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Questionid"
+        }
+      },
+      "required": [
+        "assessmentId"
+      ],
+      "title": "RecentAssessmentContext",
+      "type": "object"
+    },
+    "TeachingStrategyContext": {
+      "additionalProperties": false,
+      "properties": {
+        "strategyId": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Strategyid",
+          "type": "string"
+        },
+        "strategyVersion": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Strategyversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategyId",
+        "strategyVersion"
+      ],
+      "title": "TeachingStrategyContext",
+      "type": "object"
+    },
+    "TutorHistoryItem": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Content",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/HistoryRole"
+        },
+        "sequenceNo": {
+          "minimum": 1,
+          "title": "Sequenceno",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sequenceNo",
+        "role",
+        "content"
+      ],
+      "title": "TutorHistoryItem",
+      "type": "object"
+    },
+    "TutorKnowledgeScope": {
+      "additionalProperties": false,
+      "properties": {
+        "conceptCodes": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Conceptcodes",
+          "type": "array"
+        }
+      },
+      "title": "TutorKnowledgeScope",
+      "type": "object"
+    },
+    "TutorLearningContext": {
+      "additionalProperties": false,
+      "properties": {
+        "attemptId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attemptid"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "conceptId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptid"
+        },
+        "entryPoint": {
+          "anyOf": [
+            {
+              "maxLength": 50,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entrypoint"
+        },
+        "questionId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Questionid"
+        },
+        "stageId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stageid"
+        },
+        "topicId": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topicid"
+        }
+      },
+      "title": "TutorLearningContext",
+      "type": "object"
+    },
+    "VerifiedSourceContext": {
+      "additionalProperties": false,
+      "description": "Backend-approved source metadata; the AI server never approves it.",
+      "properties": {
+        "documentId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Documentid",
+          "type": "string"
+        },
+        "documentVersion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Documentversion"
+        },
+        "licenseReviewStatus": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Licensereviewstatus"
+        },
+        "reviewStatus": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewstatus"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "required": [
+        "documentId"
+      ],
+      "title": "VerifiedSourceContext",
+      "type": "object"
+    },
+    "VerifiedTutorContext": {
+      "additionalProperties": false,
+      "description": "Fail-closed Backend verification boundary for Tutor retrieval.",
+      "properties": {
+        "blockingReasons": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Blockingreasons",
+          "type": "array"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "conceptId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptid"
+        },
+        "prerequisiteConcepts": {
+          "items": {
+            "$ref": "#/$defs/ConceptGraphNode"
+          },
+          "maxItems": 50,
+          "title": "Prerequisiteconcepts",
+          "type": "array"
+        },
+        "shortDefinition": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shortdefinition"
+        },
+        "sourceDocumentIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Sourcedocumentids",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/VerifiedSourceContext"
+          },
+          "maxItems": 100,
+          "title": "Sources",
+          "type": "array"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "verificationStatus": {
+          "maxLength": 30,
+          "minLength": 1,
+          "title": "Verificationstatus",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "verificationStatus"
+      ],
+      "title": "VerifiedTutorContext",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TutorLearningContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "conversationId": {
+      "format": "uuid",
+      "title": "Conversationid",
+      "type": "string"
+    },
+    "eligibleQuestionCandidates": {
+      "items": {
+        "$ref": "#/$defs/EligibleQuestionCandidate"
+      },
+      "maxItems": 10,
+      "title": "Eligiblequestioncandidates",
+      "type": "array"
+    },
+    "history": {
+      "items": {
+        "$ref": "#/$defs/TutorHistoryItem"
+      },
+      "maxItems": 50,
+      "title": "History",
+      "type": "array"
+    },
+    "knowledgeScope": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TutorKnowledgeScope"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "modelTier": {
+      "$ref": "#/$defs/ModelTier"
+    },
+    "personalizedContext": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PersonalizedTutorContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "question": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Question",
+      "type": "string"
+    },
+    "requestId": {
+      "format": "uuid",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "maxLength": 12000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Summary"
+    },
+    "summaryUntilSeq": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Summaryuntilseq"
+    },
+    "userId": {
+      "format": "uuid",
+      "title": "Userid",
+      "type": "string"
+    },
+    "verifiedContext": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/VerifiedTutorContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "requestId",
+    "conversationId",
+    "userId",
+    "question",
+    "modelTier"
+  ],
+  "title": "InternalTutorRequest",
+  "type": "object"
+}

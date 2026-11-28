@@ -1,0 +1,522 @@
+{
+  "$defs": {
+    "ActionPriority": {
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "title": "ActionPriority",
+      "type": "string"
+    },
+    "GroundingStatus": {
+      "enum": [
+        "GROUNDED",
+        "INSUFFICIENT"
+      ],
+      "title": "GroundingStatus",
+      "type": "string"
+    },
+    "InternalTutorSource": {
+      "additionalProperties": false,
+      "description": "Citation persisted by Backend into tutor.ai_message_sources.\n\nLengths mirror Backend SOURCE_LIMITS. ``reviewStatus``/``licenseReviewStatus``\nare AI-side trace snapshots only; Backend ignores them and re-checks\n``ai.rag_documents.review_status`` itself.",
+      "properties": {
+        "chunkId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Chunkid",
+          "type": "string"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "documentId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Documentid",
+          "type": "string"
+        },
+        "documentVersion": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Documentversion"
+        },
+        "licenseReviewStatus": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backend verifiedContext가 준 라이선스 검수 상태. 없으면 null",
+          "title": "Licensereviewstatus"
+        },
+        "rank": {
+          "maximum": 32767,
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "relevanceScore": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relevancescore"
+        },
+        "reviewStatus": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "검색 시점 문서 내용 검수 상태 스냅샷(정보용, 권한 판단 아님)",
+          "title": "Reviewstatus"
+        },
+        "titleSnapshot": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Titlesnapshot"
+        }
+      },
+      "required": [
+        "documentId",
+        "chunkId",
+        "rank"
+      ],
+      "title": "InternalTutorSource",
+      "type": "object"
+    },
+    "InternalTutorUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cacheHit": {
+          "title": "Cachehit",
+          "type": "boolean"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "embeddingModelId": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Embeddingmodelid"
+        },
+        "estimatedCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedcost"
+        },
+        "inputTokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputtokens"
+        },
+        "latencyMs": {
+          "minimum": 0,
+          "title": "Latencyms",
+          "type": "integer"
+        },
+        "modelId": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modelid"
+        },
+        "outputTokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputtokens"
+        },
+        "retrievalStrategy": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Retrievalstrategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "latencyMs",
+        "cacheHit",
+        "retrievalStrategy"
+      ],
+      "title": "InternalTutorUsage",
+      "type": "object"
+    },
+    "MisconceptionType": {
+      "enum": [
+        "KNOWLEDGE_GAP",
+        "RELATION_ERROR",
+        "CAUSAL_ERROR",
+        "APPLICATION_ERROR",
+        "UNCERTAIN"
+      ],
+      "title": "MisconceptionType",
+      "type": "string"
+    },
+    "ProposedAction": {
+      "additionalProperties": false,
+      "description": "Next learning action. Backend re-validates every identifier before saving.",
+      "properties": {
+        "attemptId": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attemptid"
+        },
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "priority": {
+          "$ref": "#/$defs/ActionPriority"
+        },
+        "questionId": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Questionid"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "stageId": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stageid"
+        },
+        "type": {
+          "$ref": "#/$defs/ProposedActionType"
+        }
+      },
+      "required": [
+        "type",
+        "reason",
+        "priority"
+      ],
+      "title": "ProposedAction",
+      "type": "object"
+    },
+    "ProposedActionType": {
+      "enum": [
+        "SOLVE_QUESTION",
+        "START_STAGE",
+        "REVIEW_CONCEPT",
+        "CONTINUE_LEARNING",
+        "NONE"
+      ],
+      "title": "ProposedActionType",
+      "type": "string"
+    },
+    "TutoringDiagnosis": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidenceQuestionIds": {
+          "description": "본인이 제출한 오답 문항 UUID. 근거가 없으면 []",
+          "items": {
+            "pattern": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Evidencequestionids",
+          "type": "array"
+        },
+        "misconceptionType": {
+          "$ref": "#/$defs/MisconceptionType"
+        },
+        "needsFollowup": {
+          "title": "Needsfollowup",
+          "type": "boolean"
+        },
+        "reasoningSummary": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reasoningsummary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "misconceptionType",
+        "confidence",
+        "needsFollowup",
+        "reasoningSummary"
+      ],
+      "title": "TutoringDiagnosis",
+      "type": "object"
+    },
+    "TutoringMeta": {
+      "additionalProperties": false,
+      "description": "Client-safe diagnosis summary. Backend rejects unknown keys (strict).",
+      "properties": {
+        "conceptCode": {
+          "anyOf": [
+            {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conceptcode"
+        },
+        "diagnosis": {
+          "$ref": "#/$defs/TutoringDiagnosis"
+        },
+        "schemaVersion": {
+          "const": "1.0",
+          "description": "계약 버전. Backend는 정확히 '1.0'만 허용",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/TutoringStrategy"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "diagnosis",
+        "strategy"
+      ],
+      "title": "TutoringMeta",
+      "type": "object"
+    },
+    "TutoringStrategy": {
+      "additionalProperties": false,
+      "properties": {
+        "strategyId": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Strategyid",
+          "type": "string"
+        },
+        "strategyVersion": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Strategyversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategyId",
+        "strategyVersion"
+      ],
+      "title": "TutoringStrategy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "FastAPI -> Backend tutor answer. Contract: docs/contract.md (v1.0).",
+  "properties": {
+    "answer": {
+      "minLength": 1,
+      "title": "Answer",
+      "type": "string"
+    },
+    "groundingStatus": {
+      "$ref": "#/$defs/GroundingStatus",
+      "description": "GROUNDED: 승인 근거로 답변. INSUFFICIENT: 근거 부족(Fail-Closed)"
+    },
+    "historyFromSeq": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Historyfromseq"
+    },
+    "proposedAction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProposedAction"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Backend가 후보·소유권을 재검증한 뒤에만 저장"
+    },
+    "requestId": {
+      "description": "요청의 requestId와 반드시 같다",
+      "format": "uuid",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "rewrittenQuery": {
+      "title": "Rewrittenquery",
+      "type": "string"
+    },
+    "sources": {
+      "description": "rank는 1부터 고유",
+      "items": {
+        "$ref": "#/$defs/InternalTutorSource"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "tutoringMeta": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TutoringMeta"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "TUTOR_METADATA_ENABLED=true일 때만 Backend가 저장·노출"
+    },
+    "usage": {
+      "$ref": "#/$defs/InternalTutorUsage"
+    }
+  },
+  "required": [
+    "requestId",
+    "answer",
+    "rewrittenQuery",
+    "groundingStatus",
+    "usage"
+  ],
+  "title": "InternalTutorResponse",
+  "type": "object"
+}
